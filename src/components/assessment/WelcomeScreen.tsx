@@ -1,4 +1,5 @@
 import { Shield } from 'lucide-react';
+import profitLogo from '@/assets/profit-logo.png';
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -8,10 +9,11 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   return (
     <div className="animate-fade-in text-center max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold mb-2">
-          <span className="text-gradient">Profit</span>
-          <span className="text-foreground">+</span>
-        </h1>
+        <img 
+          src={profitLogo} 
+          alt="Profit+" 
+          className="h-16 md:h-20 mx-auto mb-3"
+        />
         <p className="text-muted-foreground text-lg">منصة التقييم المؤسسي</p>
       </div>
 
