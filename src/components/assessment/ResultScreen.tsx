@@ -2,6 +2,7 @@ import { AssessmentResult } from '@/types/assessment';
 import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import profitLogo from '@/assets/profit-logo.png';
+import { assessmentQuestions } from '@/data/questions';
 
 interface ResultScreenProps {
   result: AssessmentResult;
@@ -45,6 +46,52 @@ export function ResultScreen({ result, analysisText, isLoading }: ResultScreenPr
           </p>
         </div>
 
+        {/* Score Breakdown */}
+        <div className="bg-secondary/50 rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4 text-right">تفصيل الدرجات</h3>
+          <div className="space-y-3">
+            {result.answers.map((answer) => {
+              const question = assessmentQuestions.find(q => q.id === answer.questionId);
+              if (!question) return null;
+              const maxQuestionScore = question.weight;
+              const percentage = (answer.score / maxQuestionScore) * 100;
+              
+              return (
+                <div key={answer.questionId} className="text-right">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-medium text-foreground">
+                      {answer.score.toFixed(1)} / {maxQuestionScore}
+                    </span>
+                    <span className="text-sm text-muted-foreground truncate max-w-[70%]">
+                      {question.text}
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                    <div 
+                      className={cn(
+                        "h-full rounded-full transition-all duration-500",
+                        percentage >= 70 ? "bg-success" : percentage >= 40 ? "bg-primary" : "bg-muted-foreground"
+                      )}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Total Score */}
+          <div className="mt-4 pt-4 border-t border-border">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-bold text-primary">
+                {result.totalScore.toFixed(1)} / {result.maxScore}
+              </span>
+              <span className="text-sm font-semibold text-foreground">المجموع الكلي</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Analysis */}
         <div className="bg-secondary/50 rounded-xl p-6 mb-8">
           {isLoading ? (
             <div className="flex items-center justify-center gap-3">
