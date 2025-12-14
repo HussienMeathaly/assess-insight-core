@@ -1,6 +1,7 @@
 import { AssessmentResult } from '@/types/assessment';
 import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import profitLogo from '@/assets/profit-logo.png';
 
 interface ResultScreenProps {
   result: AssessmentResult;
@@ -14,10 +15,11 @@ export function ResultScreen({ result, analysisText, isLoading }: ResultScreenPr
   return (
     <div className="animate-scale-in text-center max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">
-          <span className="text-gradient">Profit</span>
-          <span className="text-foreground">+</span>
-        </h1>
+        <img 
+          src={profitLogo} 
+          alt="Profit+" 
+          className="h-14 md:h-16 mx-auto"
+        />
       </div>
 
       <div className="card-elevated rounded-2xl p-8 md:p-12">
