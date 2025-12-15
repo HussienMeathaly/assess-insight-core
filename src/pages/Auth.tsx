@@ -54,15 +54,22 @@ export default function Auth() {
 
       if (error) {
         let errorMessage = 'حدث خطأ غير متوقع';
+        const msg = error.message.toLowerCase();
         
-        if (error.message.includes('Invalid login credentials')) {
+        if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
           errorMessage = 'بيانات تسجيل الدخول غير صحيحة';
-        } else if (error.message.includes('User already registered')) {
+        } else if (msg.includes('user already registered') || msg.includes('already registered')) {
           errorMessage = 'البريد الإلكتروني مسجل مسبقاً';
-        } else if (error.message.includes('Email not confirmed')) {
+        } else if (msg.includes('email not confirmed')) {
           errorMessage = 'يرجى تأكيد البريد الإلكتروني';
-        } else if (error.message.includes('Password should be at least')) {
+        } else if (msg.includes('password should be at least') || msg.includes('password')) {
           errorMessage = 'كلمة المرور ضعيفة جداً';
+        } else if (msg.includes('rate limit') || msg.includes('too many requests')) {
+          errorMessage = 'محاولات كثيرة، يرجى الانتظار قليلاً';
+        } else if (msg.includes('network') || msg.includes('fetch')) {
+          errorMessage = 'خطأ في الاتصال بالخادم';
+        } else if (msg.includes('session') || msg.includes('refresh')) {
+          errorMessage = 'انتهت الجلسة، يرجى المحاولة مرة أخرى';
         }
         
         setErrors({ general: errorMessage });
