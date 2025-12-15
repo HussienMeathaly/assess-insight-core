@@ -397,13 +397,13 @@ export default function AdminDashboard() {
 
         {/* Data Tables */}
         <Tabs defaultValue="assessments" className="space-y-4" dir="rtl">
-          <TabsList className="flex justify-end">
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="assessments">التقييمات</TabsTrigger>
+            <TabsTrigger value="organizations">المنظمات</TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-1">
               <UserCog className="h-4 w-4" />
               إدارة المستخدمين
             </TabsTrigger>
-            <TabsTrigger value="organizations">المنظمات</TabsTrigger>
-            <TabsTrigger value="assessments">التقييمات</TabsTrigger>
           </TabsList>
 
           <TabsContent value="assessments">
@@ -416,17 +416,34 @@ export default function AdminDashboard() {
                   <Table dir="rtl">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-right">الإجراءات</TableHead>
-                        <TableHead className="text-right">التاريخ</TableHead>
-                        <TableHead className="text-right">الحالة</TableHead>
-                        <TableHead className="text-right">النتيجة</TableHead>
-                        <TableHead className="text-right">المسؤول</TableHead>
                         <TableHead className="text-right">المنظمة</TableHead>
+                        <TableHead className="text-right">المسؤول</TableHead>
+                        <TableHead className="text-right">النتيجة</TableHead>
+                        <TableHead className="text-right">الحالة</TableHead>
+                        <TableHead className="text-right">التاريخ</TableHead>
+                        <TableHead className="text-right">الإجراءات</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {assessments.map((assessment) => (
                         <TableRow key={assessment.id}>
+                          <TableCell className="font-medium">
+                            {assessment.organization?.name || 'غير معروف'}
+                          </TableCell>
+                          <TableCell>
+                            {assessment.organization?.contact_person || '-'}
+                          </TableCell>
+                          <TableCell>
+                            {assessment.total_score} / {assessment.max_score}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={assessment.is_qualified ? 'default' : 'secondary'}>
+                              {assessment.is_qualified ? 'مؤهل' : 'غير مؤهل'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(assessment.completed_at).toLocaleDateString('ar-SA')}
+                          </TableCell>
                           <TableCell>
                             <Button
                               variant="ghost"
@@ -436,23 +453,6 @@ export default function AdminDashboard() {
                               <Eye className="h-4 w-4 ml-1" />
                               التفاصيل
                             </Button>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(assessment.completed_at).toLocaleDateString('ar-SA')}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={assessment.is_qualified ? 'default' : 'secondary'}>
-                              {assessment.is_qualified ? 'مؤهل' : 'غير مؤهل'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {assessment.total_score} / {assessment.max_score}
-                          </TableCell>
-                          <TableCell>
-                            {assessment.organization?.contact_person || '-'}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {assessment.organization?.name || 'غير معروف'}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -480,23 +480,23 @@ export default function AdminDashboard() {
                   <Table dir="rtl">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-right">تاريخ التسجيل</TableHead>
-                        <TableHead className="text-right">الهاتف</TableHead>
-                        <TableHead className="text-right">البريد الإلكتروني</TableHead>
-                        <TableHead className="text-right">المسؤول</TableHead>
                         <TableHead className="text-right">اسم المنظمة</TableHead>
+                        <TableHead className="text-right">المسؤول</TableHead>
+                        <TableHead className="text-right">البريد الإلكتروني</TableHead>
+                        <TableHead className="text-right">الهاتف</TableHead>
+                        <TableHead className="text-right">تاريخ التسجيل</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {organizations.map((org) => (
                         <TableRow key={org.id}>
+                          <TableCell className="font-medium">{org.name}</TableCell>
+                          <TableCell>{org.contact_person}</TableCell>
+                          <TableCell dir="ltr" className="text-right">{org.email}</TableCell>
+                          <TableCell dir="ltr" className="text-right">{org.phone}</TableCell>
                           <TableCell>
                             {new Date(org.created_at).toLocaleDateString('ar-SA')}
                           </TableCell>
-                          <TableCell dir="ltr" className="text-right">{org.phone}</TableCell>
-                          <TableCell dir="ltr" className="text-right">{org.email}</TableCell>
-                          <TableCell>{org.contact_person}</TableCell>
-                          <TableCell className="font-medium">{org.name}</TableCell>
                         </TableRow>
                       ))}
                       {organizations.length === 0 && (
@@ -530,33 +530,25 @@ export default function AdminDashboard() {
                   <Table dir="rtl">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-right">الإجراءات</TableHead>
-                        <TableHead className="text-right">تغيير الصلاحية</TableHead>
-                        <TableHead className="text-right">الصلاحية الحالية</TableHead>
                         <TableHead className="text-right">البريد الإلكتروني</TableHead>
+                        <TableHead className="text-right">الصلاحية الحالية</TableHead>
+                        <TableHead className="text-right">تغيير الصلاحية</TableHead>
+                        <TableHead className="text-right">الإجراءات</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {users.map((u) => (
                         <TableRow key={u.id}>
-                          <TableCell>
-                            {u.id === user?.id ? (
-                              <span className="text-muted-foreground text-sm">-</span>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                onClick={() => handleDeleteUser(u.id)}
-                                disabled={deletingUser === u.id}
-                              >
-                                {deletingUser === u.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-4 w-4" />
-                                )}
-                              </Button>
+                          <TableCell className="font-medium" dir="ltr">
+                            {u.email}
+                            {u.id === user?.id && (
+                              <Badge variant="outline" className="mr-2">أنت</Badge>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={u.role === 'admin' ? 'default' : 'secondary'}>
+                              {u.role === 'admin' ? 'مدير' : u.role === 'user' ? 'مستخدم' : 'بدون صلاحية'}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             {u.id === user?.id ? (
@@ -579,14 +571,22 @@ export default function AdminDashboard() {
                             )}
                           </TableCell>
                           <TableCell>
-                            <Badge variant={u.role === 'admin' ? 'default' : 'secondary'}>
-                              {u.role === 'admin' ? 'مدير' : u.role === 'user' ? 'مستخدم' : 'بدون صلاحية'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium" dir="ltr">
-                            {u.email}
-                            {u.id === user?.id && (
-                              <Badge variant="outline" className="mr-2">أنت</Badge>
+                            {u.id === user?.id ? (
+                              <span className="text-muted-foreground text-sm">-</span>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => handleDeleteUser(u.id)}
+                                disabled={deletingUser === u.id}
+                              >
+                                {deletingUser === u.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </Button>
                             )}
                           </TableCell>
                         </TableRow>
