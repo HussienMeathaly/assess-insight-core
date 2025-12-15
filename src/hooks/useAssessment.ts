@@ -3,8 +3,10 @@ import { assessmentQuestions, MAX_SCORE, QUALIFICATION_THRESHOLD } from '@/data/
 import { Answer, AssessmentResult, QuestionOption } from '@/types/assessment';
 import { RegistrationData } from '@/components/assessment/RegistrationForm';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
 
 export function useAssessment() {
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState<'welcome' | 'registration' | 'questions' | 'result'>('welcome');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
@@ -24,6 +26,11 @@ export function useAssessment() {
   }, []);
 
   const handleRegistration = useCallback(async (data: RegistrationData) => {
+    if (!user) {
+      console.error('User not authenticated');
+      return;
+    }
+
     try {
       const { data: org, error } = await supabase
         .from('organizations')
@@ -32,6 +39,7 @@ export function useAssessment() {
           contact_person: data.contactPerson,
           phone: data.phone,
           email: data.email,
+          user_id: user.id,
         })
         .select()
         .single();
@@ -44,7 +52,7 @@ export function useAssessment() {
     } catch (error) {
       console.error('Error saving organization:', error);
     }
-  }, []);
+  }, [user]);
 
   const handleBackToWelcome = useCallback(() => {
     setCurrentStep('welcome');
