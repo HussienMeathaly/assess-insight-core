@@ -21,7 +21,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Building2, ClipboardCheck, Users, LogOut, Eye, ChevronLeft } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Building2, ClipboardCheck, Users, LogOut, Eye, ChevronLeft, Shield, UserCog } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Organization {
   id: string;
@@ -60,16 +68,25 @@ interface AssessmentAnswer {
   } | null;
 }
 
+interface UserWithRole {
+  id: string;
+  email: string;
+  created_at: string;
+  role: 'admin' | 'user' | null;
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { user, signOut, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading } = useRole();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [loadingAnswers, setLoadingAnswers] = useState(false);
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -87,23 +104,57 @@ export default function AdminDashboard() {
     async function fetchData() {
       if (!isAdmin) return;
 
-      const [orgsResult, assessmentsResult] = await Promise.all([
+      const [orgsResult, assessmentsResult, rolesResult] = await Promise.all([
         supabase.from('organizations').select('*').order('created_at', { ascending: false }),
         supabase.from('assessments').select(`
           *,
           organization:organizations(name, contact_person, email, phone)
         `).order('completed_at', { ascending: false }),
+        supabase.from('user_roles').select('user_id, role'),
       ]);
 
       if (orgsResult.data) setOrganizations(orgsResult.data);
       if (assessmentsResult.data) setAssessments(assessmentsResult.data as Assessment[]);
+      
+      // Fetch users from auth (we'll get them from organizations for now)
+      const uniqueUserIds = new Set<string>();
+      const usersWithRoles: UserWithRole[] = [];
+      
+      // Get users from organizations
+      if (orgsResult.data) {
+        for (const org of orgsResult.data) {
+          if (org.user_id && !uniqueUserIds.has(org.user_id)) {
+            uniqueUserIds.add(org.user_id);
+            const userRole = rolesResult.data?.find(r => r.user_id === org.user_id);
+            usersWithRoles.push({
+              id: org.user_id,
+              email: org.email,
+              created_at: org.created_at,
+              role: userRole?.role || null,
+            });
+          }
+        }
+      }
+
+      // Also check if current admin is in the list
+      if (user && !uniqueUserIds.has(user.id)) {
+        const userRole = rolesResult.data?.find(r => r.user_id === user.id);
+        usersWithRoles.unshift({
+          id: user.id,
+          email: user.email || '',
+          created_at: new Date().toISOString(),
+          role: userRole?.role || null,
+        });
+      }
+      
+      setUsers(usersWithRoles);
       setLoadingData(false);
     }
 
     if (isAdmin) {
       fetchData();
     }
-  }, [isAdmin]);
+  }, [isAdmin, user]);
 
   const handleViewDetails = async (assessment: Assessment) => {
     setSelectedAssessment(assessment);
@@ -128,6 +179,44 @@ export default function AdminDashboard() {
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
+  };
+
+  const handleRoleChange = async (userId: string, newRole: 'admin' | 'user' | 'none') => {
+    if (userId === user?.id) {
+      toast.error('لا يمكنك تغيير صلاحياتك الخاصة');
+      return;
+    }
+
+    setUpdatingRole(userId);
+
+    try {
+      // First, delete existing role
+      await supabase.from('user_roles').delete().eq('user_id', userId);
+
+      // If new role is not 'none', insert the new role
+      if (newRole !== 'none') {
+        const { error } = await supabase.from('user_roles').insert({
+          user_id: userId,
+          role: newRole,
+        });
+
+        if (error) throw error;
+      }
+
+      // Update local state
+      setUsers(prev =>
+        prev.map(u =>
+          u.id === userId ? { ...u, role: newRole === 'none' ? null : newRole } : u
+        )
+      );
+
+      toast.success('تم تحديث الصلاحية بنجاح');
+    } catch (error) {
+      console.error('Error updating role:', error);
+      toast.error('حدث خطأ أثناء تحديث الصلاحية');
+    } finally {
+      setUpdatingRole(null);
+    }
   };
 
   if (authLoading || roleLoading || loadingData) {
@@ -217,6 +306,10 @@ export default function AdminDashboard() {
           <TabsList>
             <TabsTrigger value="assessments">التقييمات</TabsTrigger>
             <TabsTrigger value="organizations">المنظمات</TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-1">
+              <UserCog className="h-4 w-4" />
+              إدارة المستخدمين
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="assessments">
@@ -313,6 +406,72 @@ export default function AdminDashboard() {
                       <TableRow>
                         <TableCell colSpan={5} className="text-center text-muted-foreground">
                           لا توجد منظمات بعد
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  إدارة صلاحيات المستخدمين
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-right">البريد الإلكتروني</TableHead>
+                      <TableHead className="text-right">الصلاحية الحالية</TableHead>
+                      <TableHead className="text-right">تغيير الصلاحية</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((u) => (
+                      <TableRow key={u.id}>
+                        <TableCell className="font-medium" dir="ltr">
+                          {u.email}
+                          {u.id === user?.id && (
+                            <Badge variant="outline" className="mr-2">أنت</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={u.role === 'admin' ? 'default' : 'secondary'}>
+                            {u.role === 'admin' ? 'مدير' : u.role === 'user' ? 'مستخدم' : 'بدون صلاحية'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {u.id === user?.id ? (
+                            <span className="text-muted-foreground text-sm">غير متاح</span>
+                          ) : (
+                            <Select
+                              value={u.role || 'none'}
+                              onValueChange={(value) => handleRoleChange(u.id, value as 'admin' | 'user' | 'none')}
+                              disabled={updatingRole === u.id}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="admin">مدير</SelectItem>
+                                <SelectItem value="user">مستخدم</SelectItem>
+                                <SelectItem value="none">بدون صلاحية</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {users.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center text-muted-foreground">
+                          لا يوجد مستخدمين
                         </TableCell>
                       </TableRow>
                     )}
