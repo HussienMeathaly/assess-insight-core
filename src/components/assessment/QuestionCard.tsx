@@ -1,13 +1,15 @@
 import { Question, QuestionOption } from '@/types/assessment';
 import { cn } from '@/lib/utils';
+import { ChevronRight } from 'lucide-react';
 
 interface QuestionCardProps {
   question: Question;
   selectedOptionId: string | null;
   onSelect: (option: QuestionOption) => void;
+  onPrevious?: () => void;
 }
 
-export function QuestionCard({ question, selectedOptionId, onSelect }: QuestionCardProps) {
+export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious }: QuestionCardProps) {
   return (
     <div className="animate-slide-up">
       <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-10 leading-relaxed text-center">
@@ -58,6 +60,19 @@ export function QuestionCard({ question, selectedOptionId, onSelect }: QuestionC
           </button>
         ))}
       </div>
+
+      {onPrevious && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={onPrevious}
+            className="flex items-center gap-2 px-6 py-3 text-muted-foreground hover:text-foreground 
+                       transition-colors duration-200 rounded-lg hover:bg-secondary/50"
+          >
+            <ChevronRight className="w-5 h-5" />
+            <span>السؤال السابق</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

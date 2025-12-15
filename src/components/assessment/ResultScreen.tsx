@@ -1,5 +1,5 @@
 import { AssessmentResult } from '@/types/assessment';
-import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, AlertCircle, ArrowLeft, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import profitLogo from '@/assets/profit-logo.png';
 import { assessmentQuestions } from '@/data/questions';
@@ -9,11 +9,12 @@ interface ResultScreenProps {
   result: AssessmentResult;
   analysisText: string;
   isLoading: boolean;
+  onRetake?: () => void;
 }
 
 const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
-export function ResultScreen({ result, analysisText, isLoading }: ResultScreenProps) {
+export function ResultScreen({ result, analysisText, isLoading, onRetake }: ResultScreenProps) {
   const { isQualified } = result;
 
   const pieData = result.answers.map((answer, index) => {
@@ -151,15 +152,29 @@ export function ResultScreen({ result, analysisText, isLoading }: ResultScreenPr
           )}
         </div>
 
-        <button
-          className="w-full px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg 
-                     transition-all duration-300 hover:opacity-90 hover:scale-[1.01] 
-                     focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background
-                     glow-accent flex items-center justify-center gap-3"
-        >
-          <span>الانتقال إلى التقييم الشامل</span>
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+        <div className="flex gap-3">
+          {onRetake && (
+            <button
+              onClick={onRetake}
+              className="flex-1 px-6 py-4 bg-secondary text-foreground font-semibold rounded-lg 
+                         transition-all duration-300 hover:bg-secondary/80
+                         focus:outline-none focus:ring-2 focus:ring-secondary/50
+                         flex items-center justify-center gap-2"
+            >
+              <RotateCcw className="w-5 h-5" />
+              <span>إعادة التقييم</span>
+            </button>
+          )}
+          <button
+            className="flex-1 px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg 
+                       transition-all duration-300 hover:opacity-90 hover:scale-[1.01] 
+                       focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background
+                       glow-accent flex items-center justify-center gap-3"
+          >
+            <span>الانتقال إلى التقييم الشامل</span>
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        </div>
 
         {!isQualified && (
           <p className="text-muted-foreground text-sm mt-4">
