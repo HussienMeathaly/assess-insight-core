@@ -3,29 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import profitLogo from '@/assets/profit-logo.png';
-import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2, MailCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const loginSchema = z.object({
+const authSchema = z.object({
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-});
-
-const signupSchema = z.object({
-  email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
-  confirmEmail: z.string().trim().email('البريد الإلكتروني غير صحيح'),
-  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-}).refine((data) => data.email === data.confirmEmail, {
-  message: 'البريد الإلكتروني غير متطابق',
-  path: ['confirmEmail'],
 });
 
 export default function Auth() {
   const navigate = useNavigate();
   const { signIn, signUp, isAuthenticated, loading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ email: '', confirmEmail: '', password: '' });
-  const [errors, setErrors] = useState<{ email?: string; confirmEmail?: string; password?: string; general?: string }>({});
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -36,18 +28,10 @@ export default function Auth() {
     }
   }, [isAuthenticated, loading, navigate]);
 
-  const handleChange = (field: 'email' | 'confirmEmail' | 'password', value: string) => {
+  const handleChange = (field: 'email' | 'password', value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
-    // Clear confirmEmail error when emails match
-    if ((field === 'email' || field === 'confirmEmail') && errors.confirmEmail) {
-      const newEmail = field === 'email' ? value : formData.email;
-      const newConfirmEmail = field === 'confirmEmail' ? value : formData.confirmEmail;
-      if (newEmail === newConfirmEmail) {
-        setErrors(prev => ({ ...prev, confirmEmail: undefined }));
-      }
     }
   };
 
@@ -71,17 +55,11 @@ export default function Auth() {
     e.preventDefault();
     setErrors({});
     
-    const schema = isLogin ? loginSchema : signupSchema;
-    const dataToValidate = isLogin 
-      ? { email: formData.email, password: formData.password }
-      : formData;
-    
-    const result = schema.safeParse(dataToValidate);
+    const result = authSchema.safeParse(formData);
     if (!result.success) {
-      const fieldErrors: { email?: string; confirmEmail?: string; password?: string } = {};
+      const fieldErrors: { email?: string; password?: string } = {};
       result.error.errors.forEach(err => {
         if (err.path[0] === 'email') fieldErrors.email = err.message;
-        if (err.path[0] === 'confirmEmail') fieldErrors.confirmEmail = err.message;
         if (err.path[0] === 'password') fieldErrors.password = err.message;
       });
       setErrors(fieldErrors);
@@ -104,7 +82,7 @@ export default function Auth() {
         } else if (msg.includes('user already registered') || msg.includes('already registered')) {
           errorMessage = 'البريد الإلكتروني مسجل مسبقاً';
         } else if (msg.includes('email not confirmed')) {
-          errorMessage = 'يرجى تأكيد البريد الإلكتروني';
+          errorMessage = 'يرجى تأكيد البريد الإلكتروني أولاً';
         } else if (msg.includes('password should be at least') || msg.includes('password')) {
           errorMessage = 'كلمة المرور ضعيفة جداً';
         } else if (msg.includes('rate limit') || msg.includes('too many requests')) {
@@ -117,7 +95,8 @@ export default function Auth() {
         
         setErrors({ general: errorMessage });
       } else if (!isLogin) {
-        navigate('/');
+        // Show confirmation message after successful signup
+        setShowConfirmation(true);
       }
     } catch {
       setErrors({ general: 'حدث خطأ في الاتصال' });
@@ -129,7 +108,8 @@ export default function Auth() {
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setErrors({});
-    setFormData({ email: '', confirmEmail: '', password: '' });
+    setFormData({ email: '', password: '' });
+    setShowConfirmation(false);
   };
 
   if (loading) {
@@ -138,6 +118,61 @@ export default function Auth() {
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-primary animate-spin" />
           <p className="text-muted-foreground">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show email confirmation message
+  if (showConfirmation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          {/* Logo Section */}
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="relative inline-block">
+              <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
+              <img 
+                src={profitLogo} 
+                alt="Profit+" 
+                className="h-20 md:h-24 mx-auto mb-4 relative z-10"
+              />
+            </div>
+          </div>
+
+          {/* Confirmation Card */}
+          <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden text-center">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent" />
+            
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/10 mb-6">
+              <MailCheck className="w-10 h-10 text-green-500" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-foreground mb-4">
+              تم إرسال رابط التأكيد
+            </h2>
+            
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              تم إرسال رسالة تأكيد إلى بريدك الإلكتروني
+              <br />
+              <span className="text-foreground font-medium">{formData.email}</span>
+              <br />
+              يرجى فتح الرابط في الرسالة لتفعيل حسابك
+            </p>
+
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-6">
+              <p className="text-amber-600 text-sm">
+                💡 تحقق من مجلد البريد المزعج (Spam) إذا لم تجد الرسالة
+              </p>
+            </div>
+            
+            <button
+              onClick={toggleMode}
+              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
+            >
+              العودة لتسجيل الدخول
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -225,53 +260,15 @@ export default function Auth() {
                   {errors.email}
                 </p>
               )}
+              
+              {/* Email verification notice for signup */}
+              {!isLogin && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Mail className="w-3 h-3" />
+                  سيتم إرسال رابط تأكيد إلى هذا البريد
+                </p>
+              )}
             </div>
-
-            {/* Confirm Email Field (Signup only) */}
-            {!isLogin && (
-              <div className="space-y-2 animate-fade-in">
-                <label className="block text-sm font-medium text-foreground">
-                  تأكيد البريد الإلكتروني
-                </label>
-                <div className="relative">
-                  <div className={cn(
-                    "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-                    focusedField === 'confirmEmail' ? "text-primary" : "text-muted-foreground"
-                  )}>
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <input
-                    type="email"
-                    value={formData.confirmEmail}
-                    onChange={(e) => handleChange('confirmEmail', e.target.value)}
-                    onFocus={() => setFocusedField('confirmEmail')}
-                    onBlur={() => setFocusedField(null)}
-                    className={cn(
-                      "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
-                      "focus:outline-none focus:bg-secondary transition-all duration-300",
-                      errors.confirmEmail 
-                        ? "border-destructive focus:border-destructive" 
-                        : formData.confirmEmail && formData.email === formData.confirmEmail
-                          ? "border-green-500 focus:border-green-500"
-                          : "border-border focus:border-primary"
-                    )}
-                    placeholder="أعد كتابة البريد الإلكتروني"
-                    dir="ltr"
-                  />
-                  {formData.confirmEmail && formData.email === formData.confirmEmail && !errors.confirmEmail && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
-                      <CheckCircle2 className="w-5 h-5" />
-                    </div>
-                  )}
-                </div>
-                {errors.confirmEmail && (
-                  <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.confirmEmail}
-                  </p>
-                )}
-              </div>
-            )}
 
             {/* Password Field */}
             <div className="space-y-2">
