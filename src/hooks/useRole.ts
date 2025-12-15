@@ -1,33 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
 export function useRole() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function checkRole() {
-      if (!user) {
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
+  const checkRole = useCallback(async () => {
+    if (!user) {
+      setIsAdmin(false);
+      setLoading(false);
+      return;
+    }
 
+    try {
       const { data, error } = await supabase
         .rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
-      if (!error && data) {
+      if (!error && data === true) {
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
       }
-      setLoading(false);
+    } catch {
+      setIsAdmin(false);
     }
-
-    checkRole();
+    setLoading(false);
   }, [user]);
 
-  return { isAdmin, loading };
+  useEffect(() => {
+    if (!authLoading) {
+      checkRole();
+    }
+  }, [user, authLoading, checkRole]);
+
+  return { isAdmin, loading, refetch: checkRole };
 }
