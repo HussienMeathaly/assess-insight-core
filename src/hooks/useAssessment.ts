@@ -4,6 +4,7 @@ import { Answer, AssessmentResult, QuestionOption } from '@/types/assessment';
 import { RegistrationData } from '@/components/assessment/RegistrationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { logError } from '@/lib/logger';
 
 export function useAssessment() {
   const { user } = useAuth();
@@ -27,7 +28,7 @@ export function useAssessment() {
 
   const handleRegistration = useCallback(async (data: RegistrationData) => {
     if (!user) {
-      console.error('User not authenticated');
+      logError('User not authenticated');
       return;
     }
 
@@ -50,7 +51,7 @@ export function useAssessment() {
       setRegistrationData(data);
       setCurrentStep('questions');
     } catch (error) {
-      console.error('Error saving organization:', error);
+      logError('Error saving organization', error);
     }
   }, [user]);
 
@@ -155,7 +156,7 @@ export function useAssessment() {
         if (answersError) throw answersError;
       }
     } catch (error) {
-      console.error('Error saving assessment:', error);
+      logError('Error saving assessment', error);
     }
   }, [organizationId, getResult]);
 
