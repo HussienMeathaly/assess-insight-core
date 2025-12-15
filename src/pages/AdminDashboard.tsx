@@ -396,74 +396,76 @@ export default function AdminDashboard() {
         </div>
 
         {/* Data Tables */}
-        <Tabs defaultValue="assessments" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="assessments">التقييمات</TabsTrigger>
-            <TabsTrigger value="organizations">المنظمات</TabsTrigger>
+        <Tabs defaultValue="assessments" className="space-y-4" dir="rtl">
+          <TabsList className="flex justify-end">
             <TabsTrigger value="users" className="flex items-center gap-1">
               <UserCog className="h-4 w-4" />
               إدارة المستخدمين
             </TabsTrigger>
+            <TabsTrigger value="organizations">المنظمات</TabsTrigger>
+            <TabsTrigger value="assessments">التقييمات</TabsTrigger>
           </TabsList>
 
           <TabsContent value="assessments">
             <Card>
               <CardHeader>
-                <CardTitle>جميع التقييمات</CardTitle>
+                <CardTitle className="text-right">جميع التقييمات</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-right">المنظمة</TableHead>
-                      <TableHead className="text-right">المسؤول</TableHead>
-                      <TableHead className="text-right">النتيجة</TableHead>
-                      <TableHead className="text-right">الحالة</TableHead>
-                      <TableHead className="text-right">التاريخ</TableHead>
-                      <TableHead className="text-right">الإجراءات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {assessments.map((assessment) => (
-                      <TableRow key={assessment.id}>
-                        <TableCell className="font-medium">
-                          {assessment.organization?.name || 'غير معروف'}
-                        </TableCell>
-                        <TableCell>
-                          {assessment.organization?.contact_person || '-'}
-                        </TableCell>
-                        <TableCell>
-                          {assessment.total_score} / {assessment.max_score}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={assessment.is_qualified ? 'default' : 'secondary'}>
-                            {assessment.is_qualified ? 'مؤهل' : 'غير مؤهل'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(assessment.completed_at).toLocaleDateString('ar-SA')}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(assessment)}
-                          >
-                            <Eye className="h-4 w-4 ml-1" />
-                            التفاصيل
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {assessments.length === 0 && (
+                <div className="overflow-x-auto">
+                  <Table dir="rtl">
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground">
-                          لا توجد تقييمات بعد
-                        </TableCell>
+                        <TableHead className="text-right">الإجراءات</TableHead>
+                        <TableHead className="text-right">التاريخ</TableHead>
+                        <TableHead className="text-right">الحالة</TableHead>
+                        <TableHead className="text-right">النتيجة</TableHead>
+                        <TableHead className="text-right">المسؤول</TableHead>
+                        <TableHead className="text-right">المنظمة</TableHead>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {assessments.map((assessment) => (
+                        <TableRow key={assessment.id}>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewDetails(assessment)}
+                            >
+                              <Eye className="h-4 w-4 ml-1" />
+                              التفاصيل
+                            </Button>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(assessment.completed_at).toLocaleDateString('ar-SA')}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={assessment.is_qualified ? 'default' : 'secondary'}>
+                              {assessment.is_qualified ? 'مؤهل' : 'غير مؤهل'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {assessment.total_score} / {assessment.max_score}
+                          </TableCell>
+                          <TableCell>
+                            {assessment.organization?.contact_person || '-'}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {assessment.organization?.name || 'غير معروف'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {assessments.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center text-muted-foreground">
+                            لا توجد تقييمات بعد
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -471,47 +473,49 @@ export default function AdminDashboard() {
           <TabsContent value="organizations">
             <Card>
               <CardHeader>
-                <CardTitle>جميع المنظمات</CardTitle>
+                <CardTitle className="text-right">جميع المنظمات</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-right">اسم المنظمة</TableHead>
-                      <TableHead className="text-right">المسؤول</TableHead>
-                      <TableHead className="text-right">البريد الإلكتروني</TableHead>
-                      <TableHead className="text-right">الهاتف</TableHead>
-                      <TableHead className="text-right">تاريخ التسجيل</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {organizations.map((org) => (
-                      <TableRow key={org.id}>
-                        <TableCell className="font-medium">{org.name}</TableCell>
-                        <TableCell>{org.contact_person}</TableCell>
-                        <TableCell dir="ltr" className="text-right">{org.email}</TableCell>
-                        <TableCell dir="ltr" className="text-right">{org.phone}</TableCell>
-                        <TableCell>
-                          {new Date(org.created_at).toLocaleDateString('ar-SA')}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {organizations.length === 0 && (
+                <div className="overflow-x-auto">
+                  <Table dir="rtl">
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground">
-                          لا توجد منظمات بعد
-                        </TableCell>
+                        <TableHead className="text-right">تاريخ التسجيل</TableHead>
+                        <TableHead className="text-right">الهاتف</TableHead>
+                        <TableHead className="text-right">البريد الإلكتروني</TableHead>
+                        <TableHead className="text-right">المسؤول</TableHead>
+                        <TableHead className="text-right">اسم المنظمة</TableHead>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {organizations.map((org) => (
+                        <TableRow key={org.id}>
+                          <TableCell>
+                            {new Date(org.created_at).toLocaleDateString('ar-SA')}
+                          </TableCell>
+                          <TableCell dir="ltr" className="text-right">{org.phone}</TableCell>
+                          <TableCell dir="ltr" className="text-right">{org.email}</TableCell>
+                          <TableCell>{org.contact_person}</TableCell>
+                          <TableCell className="font-medium">{org.name}</TableCell>
+                        </TableRow>
+                      ))}
+                      {organizations.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground">
+                            لا توجد منظمات بعد
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="users">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-row-reverse items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="h-5 w-5" />
                   إدارة المستخدمين والصلاحيات
@@ -522,79 +526,81 @@ export default function AdminDashboard() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-right">البريد الإلكتروني</TableHead>
-                      <TableHead className="text-right">الصلاحية الحالية</TableHead>
-                      <TableHead className="text-right">تغيير الصلاحية</TableHead>
-                      <TableHead className="text-right">الإجراءات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((u) => (
-                      <TableRow key={u.id}>
-                        <TableCell className="font-medium" dir="ltr">
-                          {u.email}
-                          {u.id === user?.id && (
-                            <Badge variant="outline" className="mr-2">أنت</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={u.role === 'admin' ? 'default' : 'secondary'}>
-                            {u.role === 'admin' ? 'مدير' : u.role === 'user' ? 'مستخدم' : 'بدون صلاحية'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {u.id === user?.id ? (
-                            <span className="text-muted-foreground text-sm">غير متاح</span>
-                          ) : (
-                            <Select
-                              value={u.role || 'none'}
-                              onValueChange={(value) => handleRoleChange(u.id, value as 'admin' | 'user' | 'none')}
-                              disabled={updatingRole === u.id}
-                            >
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="admin">مدير</SelectItem>
-                                <SelectItem value="user">مستخدم</SelectItem>
-                                <SelectItem value="none">بدون صلاحية</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {u.id === user?.id ? (
-                            <span className="text-muted-foreground text-sm">-</span>
-                          ) : (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => handleDeleteUser(u.id)}
-                              disabled={deletingUser === u.id}
-                            >
-                              {deletingUser === u.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4" />
-                              )}
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {users.length === 0 && (
+                <div className="overflow-x-auto">
+                  <Table dir="rtl">
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center text-muted-foreground">
-                          لا يوجد مستخدمين
-                        </TableCell>
+                        <TableHead className="text-right">الإجراءات</TableHead>
+                        <TableHead className="text-right">تغيير الصلاحية</TableHead>
+                        <TableHead className="text-right">الصلاحية الحالية</TableHead>
+                        <TableHead className="text-right">البريد الإلكتروني</TableHead>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {users.map((u) => (
+                        <TableRow key={u.id}>
+                          <TableCell>
+                            {u.id === user?.id ? (
+                              <span className="text-muted-foreground text-sm">-</span>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => handleDeleteUser(u.id)}
+                                disabled={deletingUser === u.id}
+                              >
+                                {deletingUser === u.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </Button>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {u.id === user?.id ? (
+                              <span className="text-muted-foreground text-sm">غير متاح</span>
+                            ) : (
+                              <Select
+                                value={u.role || 'none'}
+                                onValueChange={(value) => handleRoleChange(u.id, value as 'admin' | 'user' | 'none')}
+                                disabled={updatingRole === u.id}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="admin">مدير</SelectItem>
+                                  <SelectItem value="user">مستخدم</SelectItem>
+                                  <SelectItem value="none">بدون صلاحية</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={u.role === 'admin' ? 'default' : 'secondary'}>
+                              {u.role === 'admin' ? 'مدير' : u.role === 'user' ? 'مستخدم' : 'بدون صلاحية'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium" dir="ltr">
+                            {u.email}
+                            {u.id === user?.id && (
+                              <Badge variant="outline" className="mr-2">أنت</Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {users.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center text-muted-foreground">
+                            لا يوجد مستخدمين
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
