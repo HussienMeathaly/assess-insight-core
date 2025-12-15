@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import profitLogo from '@/assets/profit-logo.png';
+import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const authSchema = z.object({
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
@@ -16,6 +18,8 @@ export default function Auth() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated && !loading) {
@@ -29,6 +33,22 @@ export default function Auth() {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
+
+  const getPasswordStrength = (password: string) => {
+    if (!password) return { strength: 0, label: '', color: '' };
+    let strength = 0;
+    if (password.length >= 6) strength++;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    if (strength <= 2) return { strength, label: 'ضعيفة', color: 'bg-red-500' };
+    if (strength <= 3) return { strength, label: 'متوسطة', color: 'bg-yellow-500' };
+    return { strength, label: 'قوية', color: 'bg-green-500' };
+  };
+
+  const passwordStrength = getPasswordStrength(formData.password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +94,6 @@ export default function Auth() {
         
         setErrors({ general: errorMessage });
       } else if (!isLogin) {
-        // For signup, auto-login will happen via auth state change
         navigate('/');
       }
     } catch {
@@ -84,101 +103,226 @@ export default function Auth() {
     }
   };
 
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setErrors({});
+    setFormData({ email: '', password: '' });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <p className="text-muted-foreground">جاري التحميل...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-md animate-fade-in">
-        <div className="text-center mb-8">
-          <img 
-            src={profitLogo} 
-            alt="Profit+" 
-            className="h-16 md:h-20 mx-auto mb-3"
-          />
-          <p className="text-muted-foreground text-lg">منصة التقييم المؤسسي</p>
+      <div className="w-full max-w-md">
+        {/* Logo Section */}
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="relative inline-block">
+            <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
+            <img 
+              src={profitLogo} 
+              alt="Profit+" 
+              className="h-20 md:h-24 mx-auto mb-4 relative z-10"
+            />
+          </div>
+          <p className="text-muted-foreground text-lg font-medium">منصة التقييم المؤسسي</p>
         </div>
 
-        <div className="card-elevated rounded-2xl p-8">
-          <h2 className="text-2xl font-semibold text-foreground mb-6 text-center">
-            {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
-          </h2>
+        {/* Form Card */}
+        <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden">
+          {/* Decorative gradient */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+          
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className={cn(
+              "inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 transition-all duration-500",
+              isLogin ? "bg-primary/10" : "bg-accent/10"
+            )}>
+              {isLogin ? (
+                <LogIn className="w-8 h-8 text-primary" />
+              ) : (
+                <UserPlus className="w-8 h-8 text-accent" />
+              )}
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+              {isLogin ? 'مرحباً بعودتك' : 'إنشاء حساب جديد'}
+            </h2>
+            <p className="text-muted-foreground mt-2">
+              {isLogin ? 'سجل دخولك للمتابعة' : 'أنشئ حسابك للبدء في التقييم'}
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5 text-right">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">
                 البريد الإلكتروني
               </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground
-                           focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
-                           transition-all duration-200"
-                placeholder="example@domain.com"
-                dir="ltr"
-              />
+              <div className="relative">
+                <div className={cn(
+                  "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                  focusedField === 'email' ? "text-primary" : "text-muted-foreground"
+                )}>
+                  <Mail className="w-5 h-5" />
+                </div>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField(null)}
+                  className={cn(
+                    "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                    "focus:outline-none focus:bg-secondary transition-all duration-300",
+                    errors.email 
+                      ? "border-destructive focus:border-destructive" 
+                      : "border-border focus:border-primary"
+                  )}
+                  placeholder="example@domain.com"
+                  dir="ltr"
+                />
+                {formData.email && !errors.email && (
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                )}
+              </div>
               {errors.email && (
-                <p className="text-destructive text-sm mt-1">{errors.email}</p>
+                <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.email}
+                </p>
               )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">
                 كلمة المرور
               </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground
-                           focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
-                           transition-all duration-200"
-                placeholder="••••••••"
-                dir="ltr"
-              />
+              <div className="relative">
+                <div className={cn(
+                  "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                  focusedField === 'password' ? "text-primary" : "text-muted-foreground"
+                )}>
+                  <Lock className="w-5 h-5" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField(null)}
+                  className={cn(
+                    "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                    "focus:outline-none focus:bg-secondary transition-all duration-300",
+                    errors.password 
+                      ? "border-destructive focus:border-destructive" 
+                      : "border-border focus:border-primary"
+                  )}
+                  placeholder="••••••••"
+                  dir="ltr"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              
+              {/* Password Strength Indicator (only for signup) */}
+              {!isLogin && formData.password && (
+                <div className="space-y-2 animate-fade-in">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "h-1.5 flex-1 rounded-full transition-all duration-300",
+                          i <= passwordStrength.strength ? passwordStrength.color : "bg-muted"
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <p className={cn(
+                    "text-xs",
+                    passwordStrength.strength <= 2 ? "text-red-500" : 
+                    passwordStrength.strength <= 3 ? "text-yellow-500" : "text-green-500"
+                  )}>
+                    قوة كلمة المرور: {passwordStrength.label}
+                  </p>
+                </div>
+              )}
+              
               {errors.password && (
-                <p className="text-destructive text-sm mt-1">{errors.password}</p>
+                <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                  <AlertCircle className="w-4 h-4" />
+                  {errors.password}
+                </p>
               )}
             </div>
 
+            {/* Error Message */}
             {errors.general && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <p className="text-destructive text-sm text-center">{errors.general}</p>
+              <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
+                <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+                <p className="text-destructive text-sm">{errors.general}</p>
               </div>
             )}
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full px-6 py-4 bg-primary text-primary-foreground font-semibold rounded-lg 
-                         transition-all duration-300 hover:opacity-90 hover:scale-[1.02] 
-                         focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background
-                         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-                         glow-accent"
+              className={cn(
+                "w-full py-4 font-bold rounded-xl transition-all duration-300",
+                "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+                "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+                "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
+                "flex items-center justify-center gap-3"
+              )}
             >
-              {isSubmitting ? 'جاري المعالجة...' : (isLogin ? 'دخول' : 'إنشاء حساب')}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>جاري المعالجة...</span>
+                </>
+              ) : (
+                <>
+                  {isLogin ? <LogIn className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
+                  <span>{isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'}</span>
+                </>
+              )}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          {/* Toggle Mode */}
+          <div className="mt-8 pt-6 border-t border-border/50">
             <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setErrors({});
-              }}
-              className="text-primary hover:underline text-sm"
+              onClick={toggleMode}
+              className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
             >
-              {isLogin ? 'ليس لديك حساب؟ سجل الآن' : 'لديك حساب؟ سجل الدخول'}
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+              <span>{isLogin ? 'ليس لديك حساب؟ سجل الآن' : 'لديك حساب؟ سجل الدخول'}</span>
             </button>
           </div>
         </div>
+
+        {/* Footer */}
+        <p className="text-center text-muted-foreground text-sm mt-6 animate-fade-in">
+          بالتسجيل، أنت توافق على شروط الاستخدام وسياسة الخصوصية
+        </p>
       </div>
     </div>
   );
