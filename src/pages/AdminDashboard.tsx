@@ -28,8 +28,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Building2, ClipboardCheck, Users, LogOut, Eye, ChevronLeft, Shield, UserCog } from 'lucide-react';
+import { Building2, ClipboardCheck, Users, LogOut, Eye, ChevronLeft, Shield, UserCog, UserPlus, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface Organization {
   id: string;
@@ -87,6 +89,12 @@ export default function AdminDashboard() {
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+  const [showAddUserDialog, setShowAddUserDialog] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserRole, setNewUserRole] = useState<'admin' | 'user' | 'none'>('user');
+  const [addingUser, setAddingUser] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -216,6 +224,92 @@ export default function AdminDashboard() {
       toast.error('حدث خطأ أثناء تحديث الصلاحية');
     } finally {
       setUpdatingRole(null);
+    }
+  };
+
+  const handleAddUser = async () => {
+    if (!newUserEmail || !newUserPassword) {
+      toast.error('يرجى إدخال البريد الإلكتروني وكلمة المرور');
+      return;
+    }
+
+    if (newUserPassword.length < 6) {
+      toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+
+    setAddingUser(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: {
+          action: 'create',
+          email: newUserEmail,
+          password: newUserPassword,
+          role: newUserRole === 'none' ? undefined : newUserRole,
+        },
+      });
+
+      if (error) throw error;
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      // Add to local state
+      setUsers(prev => [
+        {
+          id: data.user.id,
+          email: data.user.email,
+          created_at: new Date().toISOString(),
+          role: data.user.role,
+        },
+        ...prev,
+      ]);
+
+      toast.success('تم إضافة المستخدم بنجاح');
+      setShowAddUserDialog(false);
+      setNewUserEmail('');
+      setNewUserPassword('');
+      setNewUserRole('user');
+    } catch (error) {
+      console.error('Error adding user:', error);
+      toast.error('حدث خطأ أثناء إضافة المستخدم');
+    } finally {
+      setAddingUser(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (userId === user?.id) {
+      toast.error('لا يمكنك حذف حسابك الخاص');
+      return;
+    }
+
+    setDeletingUser(userId);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: {
+          action: 'delete',
+          userId,
+        },
+      });
+
+      if (error) throw error;
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      // Remove from local state
+      setUsers(prev => prev.filter(u => u.id !== userId));
+      toast.success('تم حذف المستخدم بنجاح');
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('حدث خطأ أثناء حذف المستخدم');
+    } finally {
+      setDeletingUser(null);
     }
   };
 
@@ -417,11 +511,15 @@ export default function AdminDashboard() {
 
           <TabsContent value="users">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="h-5 w-5" />
-                  إدارة صلاحيات المستخدمين
+                  إدارة المستخدمين والصلاحيات
                 </CardTitle>
+                <Button onClick={() => setShowAddUserDialog(true)} className="flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  إضافة مستخدم
+                </Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -430,6 +528,7 @@ export default function AdminDashboard() {
                       <TableHead className="text-right">البريد الإلكتروني</TableHead>
                       <TableHead className="text-right">الصلاحية الحالية</TableHead>
                       <TableHead className="text-right">تغيير الصلاحية</TableHead>
+                      <TableHead className="text-right">الإجراءات</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -466,11 +565,30 @@ export default function AdminDashboard() {
                             </Select>
                           )}
                         </TableCell>
+                        <TableCell>
+                          {u.id === user?.id ? (
+                            <span className="text-muted-foreground text-sm">-</span>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleDeleteUser(u.id)}
+                              disabled={deletingUser === u.id}
+                            >
+                              {deletingUser === u.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))}
                     {users.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={3} className="text-center text-muted-foreground">
+                        <TableCell colSpan={4} className="text-center text-muted-foreground">
                           لا يوجد مستخدمين
                         </TableCell>
                       </TableRow>
@@ -569,6 +687,83 @@ export default function AdminDashboard() {
               </Card>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
+        <DialogContent className="max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-right flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              إضافة مستخدم جديد
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="example@domain.com"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                dir="ltr"
+                className="text-left"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">كلمة المرور</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={newUserPassword}
+                onChange={(e) => setNewUserPassword(e.target.value)}
+                dir="ltr"
+                className="text-left"
+              />
+              <p className="text-xs text-muted-foreground">6 أحرف على الأقل</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>الصلاحية</Label>
+              <Select
+                value={newUserRole}
+                onValueChange={(value) => setNewUserRole(value as 'admin' | 'user' | 'none')}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">مدير</SelectItem>
+                  <SelectItem value="user">مستخدم</SelectItem>
+                  <SelectItem value="none">بدون صلاحية</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setShowAddUserDialog(false)}>
+              إلغاء
+            </Button>
+            <Button onClick={handleAddUser} disabled={addingUser}>
+              {addingUser ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                  جاري الإضافة...
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 ml-2" />
+                  إضافة المستخدم
+                </>
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
