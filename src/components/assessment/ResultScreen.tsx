@@ -3,6 +3,7 @@ import { CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import profitLogo from '@/assets/profit-logo.png';
 import { assessmentQuestions } from '@/data/questions';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface ResultScreenProps {
   result: AssessmentResult;
@@ -10,8 +11,20 @@ interface ResultScreenProps {
   isLoading: boolean;
 }
 
+const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+
 export function ResultScreen({ result, analysisText, isLoading }: ResultScreenProps) {
   const { isQualified } = result;
+
+  const pieData = result.answers.map((answer, index) => {
+    const question = assessmentQuestions.find(q => q.id === answer.questionId);
+    return {
+      name: `س${index + 1}`,
+      fullName: question?.text || '',
+      value: answer.score,
+      maxValue: question?.weight || 0,
+    };
+  });
 
   return (
     <div className="animate-scale-in text-center max-w-2xl mx-auto">
@@ -49,6 +62,39 @@ export function ResultScreen({ result, analysisText, isLoading }: ResultScreenPr
         {/* Score Breakdown */}
         <div className="bg-secondary/50 rounded-xl p-6 mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-4 text-right">تفصيل الدرجات</h3>
+          
+          {/* Pie Chart */}
+          <div className="h-48 mb-6">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={70}
+                  paddingAngle={2}
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${value.toFixed(1)}`}
+                  labelLine={false}
+                >
+                  {pieData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  formatter={(value: number, _, props) => [`${value.toFixed(1)} / ${props.payload.maxValue}`, props.payload.fullName]}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    direction: 'rtl'
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
           <div className="space-y-3">
             {result.answers.map((answer) => {
               const question = assessmentQuestions.find(q => q.id === answer.questionId);
