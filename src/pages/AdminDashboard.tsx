@@ -515,8 +515,8 @@ export default function AdminDashboard() {
 
           <TabsContent value="users">
             <Card>
-              <CardHeader className="flex flex-row-reverse items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-right">
                   <Shield className="h-5 w-5" />
                   إدارة المستخدمين والصلاحيات
                 </CardTitle>
@@ -539,11 +539,13 @@ export default function AdminDashboard() {
                     <TableBody>
                       {users.map((u) => (
                         <TableRow key={u.id}>
-                          <TableCell className="font-medium" dir="ltr">
-                            {u.email}
-                            {u.id === user?.id && (
-                              <Badge variant="outline" className="mr-2">أنت</Badge>
-                            )}
+                          <TableCell className="font-medium text-right">
+                            <span dir="ltr" className="inline-flex items-center gap-2">
+                              {u.id === user?.id && (
+                                <Badge variant="outline">أنت</Badge>
+                              )}
+                              {u.email}
+                            </span>
                           </TableCell>
                           <TableCell>
                             <Badge variant={u.role === 'admin' ? 'default' : 'secondary'}>
