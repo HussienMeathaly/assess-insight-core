@@ -16,7 +16,7 @@ export default function Auth() {
   const { signIn, signUp, isAuthenticated, loading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string; emailConfirmationHint?: boolean }>({});
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -75,14 +75,22 @@ export default function Auth() {
 
       if (error) {
         let errorMessage = 'حدث خطأ غير متوقع';
+        let isEmailConfirmationHint = false;
         const msg = error.message.toLowerCase();
         
         if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
-          errorMessage = 'بيانات تسجيل الدخول غير صحيحة';
+          // Could be wrong password OR unconfirmed email - Supabase returns same error for both
+          if (isLogin) {
+            errorMessage = 'بيانات تسجيل الدخول غير صحيحة، أو لم يتم تأكيد البريد الإلكتروني بعد';
+            isEmailConfirmationHint = true;
+          } else {
+            errorMessage = 'بيانات تسجيل الدخول غير صحيحة';
+          }
         } else if (msg.includes('user already registered') || msg.includes('already registered')) {
           errorMessage = 'البريد الإلكتروني مسجل مسبقاً';
         } else if (msg.includes('email not confirmed')) {
           errorMessage = 'يرجى تأكيد البريد الإلكتروني أولاً';
+          isEmailConfirmationHint = true;
         } else if (msg.includes('password should be at least') || msg.includes('password')) {
           errorMessage = 'كلمة المرور ضعيفة جداً';
         } else if (msg.includes('rate limit') || msg.includes('too many requests')) {
@@ -93,7 +101,7 @@ export default function Auth() {
           errorMessage = 'انتهت الجلسة، يرجى المحاولة مرة أخرى';
         }
         
-        setErrors({ general: errorMessage });
+        setErrors({ general: errorMessage, emailConfirmationHint: isEmailConfirmationHint } as typeof errors);
       } else if (!isLogin) {
         // Show confirmation message after successful signup
         setShowConfirmation(true);
@@ -341,9 +349,19 @@ export default function Auth() {
 
             {/* Error Message */}
             {errors.general && (
-              <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
-                <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
-                <p className="text-destructive text-sm">{errors.general}</p>
+              <div className="space-y-3 animate-scale-in">
+                <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+                  <p className="text-destructive text-sm">{errors.general}</p>
+                </div>
+                {errors.emailConfirmationHint && (
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                    <p className="text-amber-600 text-sm flex items-center gap-2">
+                      <Mail className="w-4 h-4 flex-shrink-0" />
+                      إذا كنت قد سجلت مسبقاً، تحقق من بريدك الإلكتروني وافتح رابط التأكيد
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
