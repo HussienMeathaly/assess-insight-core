@@ -15,7 +15,13 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Building2, ClipboardCheck, Users, LogOut } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Building2, ClipboardCheck, Users, LogOut, Eye, ChevronLeft } from 'lucide-react';
 
 interface Organization {
   id: string;
@@ -35,6 +41,22 @@ interface Assessment {
   organization: {
     name: string;
     contact_person: string;
+    email: string;
+    phone: string;
+  } | null;
+}
+
+interface AssessmentAnswer {
+  id: string;
+  question_id: number;
+  score: number;
+  question: {
+    text: string;
+    weight: number;
+  } | null;
+  option: {
+    label: string;
+    score_percentage: number;
   } | null;
 }
 
@@ -45,6 +67,9 @@ export default function AdminDashboard() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
+  const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
+  const [loadingAnswers, setLoadingAnswers] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -66,7 +91,7 @@ export default function AdminDashboard() {
         supabase.from('organizations').select('*').order('created_at', { ascending: false }),
         supabase.from('assessments').select(`
           *,
-          organization:organizations(name, contact_person)
+          organization:organizations(name, contact_person, email, phone)
         `).order('completed_at', { ascending: false }),
       ]);
 
@@ -79,6 +104,26 @@ export default function AdminDashboard() {
       fetchData();
     }
   }, [isAdmin]);
+
+  const handleViewDetails = async (assessment: Assessment) => {
+    setSelectedAssessment(assessment);
+    setLoadingAnswers(true);
+
+    const { data } = await supabase
+      .from('assessment_answers')
+      .select(`
+        *,
+        question:questions(text, weight),
+        option:question_options!assessment_answers_selected_option_id_fkey(label, score_percentage)
+      `)
+      .eq('assessment_id', assessment.id)
+      .order('question_id');
+
+    if (data) {
+      setAssessmentAnswers(data as AssessmentAnswer[]);
+    }
+    setLoadingAnswers(false);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -106,7 +151,13 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background" dir="rtl">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-foreground">لوحة تحكم المدير</h1>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+              <ChevronLeft className="h-4 w-4 ml-1" />
+              الرئيسية
+            </Button>
+            <h1 className="text-xl font-bold text-foreground">لوحة تحكم المدير</h1>
+          </div>
           <Button variant="ghost" size="sm" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 ml-2" />
             تسجيل الخروج
@@ -182,6 +233,7 @@ export default function AdminDashboard() {
                       <TableHead className="text-right">النتيجة</TableHead>
                       <TableHead className="text-right">الحالة</TableHead>
                       <TableHead className="text-right">التاريخ</TableHead>
+                      <TableHead className="text-right">الإجراءات</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -204,11 +256,21 @@ export default function AdminDashboard() {
                         <TableCell>
                           {new Date(assessment.completed_at).toLocaleDateString('ar-SA')}
                         </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewDetails(assessment)}
+                          >
+                            <Eye className="h-4 w-4 ml-1" />
+                            التفاصيل
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                     {assessments.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        <TableCell colSpan={6} className="text-center text-muted-foreground">
                           لا توجد تقييمات بعد
                         </TableCell>
                       </TableRow>
@@ -261,6 +323,95 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Assessment Details Dialog */}
+      <Dialog open={!!selectedAssessment} onOpenChange={() => setSelectedAssessment(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-right">
+              تفاصيل التقييم - {selectedAssessment?.organization?.name}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedAssessment && (
+            <div className="space-y-6">
+              {/* Organization Info */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">معلومات المنظمة</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">الاسم:</span>
+                    <span className="mr-2 font-medium">{selectedAssessment.organization?.name}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">المسؤول:</span>
+                    <span className="mr-2 font-medium">{selectedAssessment.organization?.contact_person}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">البريد:</span>
+                    <span className="mr-2 font-medium" dir="ltr">{selectedAssessment.organization?.email}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">الهاتف:</span>
+                    <span className="mr-2 font-medium" dir="ltr">{selectedAssessment.organization?.phone}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Score Summary */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">ملخص النتيجة</CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center gap-6">
+                  <div className="text-3xl font-bold text-primary">
+                    {selectedAssessment.total_score} / {selectedAssessment.max_score}
+                  </div>
+                  <Badge variant={selectedAssessment.is_qualified ? 'default' : 'secondary'} className="text-sm">
+                    {selectedAssessment.is_qualified ? 'مؤهل للتقييم الشامل' : 'غير مؤهل'}
+                  </Badge>
+                </CardContent>
+              </Card>
+
+              {/* Answers */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">الإجابات التفصيلية</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingAnswers ? (
+                    <div className="text-center text-muted-foreground py-4">جاري التحميل...</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {assessmentAnswers.map((answer, index) => (
+                        <div key={answer.id} className="border-b border-border pb-4 last:border-0">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <p className="font-medium text-sm mb-1">
+                                {index + 1}. {answer.question?.text}
+                              </p>
+                              <p className="text-muted-foreground text-sm">
+                                الإجابة: <span className="text-foreground">{answer.option?.label}</span>
+                              </p>
+                            </div>
+                            <div className="text-left">
+                              <Badge variant="outline">
+                                {answer.score.toFixed(2)} / {answer.question?.weight}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
