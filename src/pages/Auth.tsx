@@ -6,17 +6,26 @@ import profitLogo from '@/assets/profit-logo.png';
 import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const authSchema = z.object({
+const loginSchema = z.object({
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+});
+
+const signupSchema = z.object({
+  email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
+  confirmEmail: z.string().trim().email('البريد الإلكتروني غير صحيح'),
+  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+}).refine((data) => data.email === data.confirmEmail, {
+  message: 'البريد الإلكتروني غير متطابق',
+  path: ['confirmEmail'],
 });
 
 export default function Auth() {
   const navigate = useNavigate();
   const { signIn, signUp, isAuthenticated, loading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [formData, setFormData] = useState({ email: '', confirmEmail: '', password: '' });
+  const [errors, setErrors] = useState<{ email?: string; confirmEmail?: string; password?: string; general?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -27,10 +36,18 @@ export default function Auth() {
     }
   }, [isAuthenticated, loading, navigate]);
 
-  const handleChange = (field: 'email' | 'password', value: string) => {
+  const handleChange = (field: 'email' | 'confirmEmail' | 'password', value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+    // Clear confirmEmail error when emails match
+    if ((field === 'email' || field === 'confirmEmail') && errors.confirmEmail) {
+      const newEmail = field === 'email' ? value : formData.email;
+      const newConfirmEmail = field === 'confirmEmail' ? value : formData.confirmEmail;
+      if (newEmail === newConfirmEmail) {
+        setErrors(prev => ({ ...prev, confirmEmail: undefined }));
+      }
     }
   };
 
@@ -54,11 +71,17 @@ export default function Auth() {
     e.preventDefault();
     setErrors({});
     
-    const result = authSchema.safeParse(formData);
+    const schema = isLogin ? loginSchema : signupSchema;
+    const dataToValidate = isLogin 
+      ? { email: formData.email, password: formData.password }
+      : formData;
+    
+    const result = schema.safeParse(dataToValidate);
     if (!result.success) {
-      const fieldErrors: { email?: string; password?: string } = {};
+      const fieldErrors: { email?: string; confirmEmail?: string; password?: string } = {};
       result.error.errors.forEach(err => {
         if (err.path[0] === 'email') fieldErrors.email = err.message;
+        if (err.path[0] === 'confirmEmail') fieldErrors.confirmEmail = err.message;
         if (err.path[0] === 'password') fieldErrors.password = err.message;
       });
       setErrors(fieldErrors);
@@ -106,7 +129,7 @@ export default function Auth() {
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setErrors({});
-    setFormData({ email: '', password: '' });
+    setFormData({ email: '', confirmEmail: '', password: '' });
   };
 
   if (loading) {
@@ -203,6 +226,52 @@ export default function Auth() {
                 </p>
               )}
             </div>
+
+            {/* Confirm Email Field (Signup only) */}
+            {!isLogin && (
+              <div className="space-y-2 animate-fade-in">
+                <label className="block text-sm font-medium text-foreground">
+                  تأكيد البريد الإلكتروني
+                </label>
+                <div className="relative">
+                  <div className={cn(
+                    "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                    focusedField === 'confirmEmail' ? "text-primary" : "text-muted-foreground"
+                  )}>
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <input
+                    type="email"
+                    value={formData.confirmEmail}
+                    onChange={(e) => handleChange('confirmEmail', e.target.value)}
+                    onFocus={() => setFocusedField('confirmEmail')}
+                    onBlur={() => setFocusedField(null)}
+                    className={cn(
+                      "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                      "focus:outline-none focus:bg-secondary transition-all duration-300",
+                      errors.confirmEmail 
+                        ? "border-destructive focus:border-destructive" 
+                        : formData.confirmEmail && formData.email === formData.confirmEmail
+                          ? "border-green-500 focus:border-green-500"
+                          : "border-border focus:border-primary"
+                    )}
+                    placeholder="أعد كتابة البريد الإلكتروني"
+                    dir="ltr"
+                  />
+                  {formData.confirmEmail && formData.email === formData.confirmEmail && !errors.confirmEmail && (
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                      <CheckCircle2 className="w-5 h-5" />
+                    </div>
+                  )}
+                </div>
+                {errors.confirmEmail && (
+                  <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.confirmEmail}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Password Field */}
             <div className="space-y-2">
