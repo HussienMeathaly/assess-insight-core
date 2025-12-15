@@ -1,12 +1,16 @@
 import { useState, useCallback } from 'react';
 import { assessmentQuestions, MAX_SCORE, QUALIFICATION_THRESHOLD } from '@/data/questions';
 import { Answer, AssessmentResult, QuestionOption } from '@/types/assessment';
+import { RegistrationData } from '@/components/assessment/RegistrationForm';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useAssessment() {
-  const [currentStep, setCurrentStep] = useState<'welcome' | 'questions' | 'result'>('welcome');
+  const [currentStep, setCurrentStep] = useState<'welcome' | 'registration' | 'questions' | 'result'>('welcome');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [registrationData, setRegistrationData] = useState<RegistrationData | null>(null);
 
   const currentQuestion = assessmentQuestions[currentQuestionIndex];
   const totalQuestions = assessmentQuestions.length;
@@ -16,13 +20,39 @@ export function useAssessment() {
   }, []);
 
   const handleStart = useCallback(() => {
-    setCurrentStep('questions');
+    setCurrentStep('registration');
+  }, []);
+
+  const handleRegistration = useCallback(async (data: RegistrationData) => {
+    try {
+      const { data: org, error } = await supabase
+        .from('organizations')
+        .insert({
+          name: data.organizationName,
+          contact_person: data.contactPerson,
+          phone: data.phone,
+          email: data.email,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setOrganizationId(org.id);
+      setRegistrationData(data);
+      setCurrentStep('questions');
+    } catch (error) {
+      console.error('Error saving organization:', error);
+    }
+  }, []);
+
+  const handleBackToWelcome = useCallback(() => {
+    setCurrentStep('welcome');
   }, []);
 
   const handleSelectOption = useCallback((option: QuestionOption) => {
     setSelectedOption(option.id);
 
-    // Auto-advance after selection with a small delay
     setTimeout(() => {
       const score = calculateScore(option, currentQuestion.weight);
       const newAnswer: Answer = {
@@ -31,7 +61,16 @@ export function useAssessment() {
         score,
       };
 
-      const updatedAnswers = [...answers, newAnswer];
+      const existingAnswerIndex = answers.findIndex(a => a.questionId === currentQuestion.id);
+      let updatedAnswers: Answer[];
+      
+      if (existingAnswerIndex >= 0) {
+        updatedAnswers = [...answers];
+        updatedAnswers[existingAnswerIndex] = newAnswer;
+      } else {
+        updatedAnswers = [...answers, newAnswer];
+      }
+      
       setAnswers(updatedAnswers);
       setSelectedOption(null);
 
@@ -43,6 +82,14 @@ export function useAssessment() {
     }, 400);
   }, [answers, calculateScore, currentQuestion, currentQuestionIndex, totalQuestions]);
 
+  const handlePreviousQuestion = useCallback(() => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+      const previousAnswer = answers.find(a => a.questionId === assessmentQuestions[currentQuestionIndex - 1].id);
+      setSelectedOption(previousAnswer?.selectedOptionId || null);
+    }
+  }, [currentQuestionIndex, answers]);
+
   const getResult = useCallback((): AssessmentResult => {
     const totalScore = answers.reduce((sum, answer) => sum + answer.score, 0);
     return {
@@ -53,8 +100,68 @@ export function useAssessment() {
     };
   }, [answers]);
 
+  const saveAssessmentToDatabase = useCallback(async () => {
+    if (!organizationId) return;
+
+    try {
+      const result = getResult();
+      
+      const { data: assessment, error: assessmentError } = await supabase
+        .from('assessments')
+        .insert({
+          organization_id: organizationId,
+          total_score: result.totalScore,
+          max_score: result.maxScore,
+          is_qualified: result.isQualified,
+        })
+        .select()
+        .single();
+
+      if (assessmentError) throw assessmentError;
+
+      // Get question options from database to map local IDs
+      const { data: dbOptions } = await supabase
+        .from('question_options')
+        .select('id, question_id, label');
+
+      if (dbOptions) {
+        const answersToInsert = result.answers.map(answer => {
+          const question = assessmentQuestions.find(q => q.id === answer.questionId);
+          const localOption = question?.options.find(o => o.id === answer.selectedOptionId);
+          const dbOption = dbOptions.find(
+            o => o.question_id === answer.questionId && o.label === localOption?.label
+          );
+
+          return {
+            assessment_id: assessment.id,
+            question_id: answer.questionId,
+            selected_option_id: dbOption?.id,
+            score: answer.score,
+          };
+        });
+
+        const { error: answersError } = await supabase
+          .from('assessment_answers')
+          .insert(answersToInsert);
+
+        if (answersError) throw answersError;
+      }
+    } catch (error) {
+      console.error('Error saving assessment:', error);
+    }
+  }, [organizationId, getResult]);
+
   const resetAssessment = useCallback(() => {
     setCurrentStep('welcome');
+    setCurrentQuestionIndex(0);
+    setAnswers([]);
+    setSelectedOption(null);
+    setOrganizationId(null);
+    setRegistrationData(null);
+  }, []);
+
+  const retakeAssessment = useCallback(() => {
+    setCurrentStep('questions');
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setSelectedOption(null);
@@ -66,9 +173,15 @@ export function useAssessment() {
     currentQuestionIndex,
     totalQuestions,
     selectedOption,
+    registrationData,
     handleStart,
+    handleRegistration,
+    handleBackToWelcome,
     handleSelectOption,
+    handlePreviousQuestion,
     getResult,
+    saveAssessmentToDatabase,
     resetAssessment,
+    retakeAssessment,
   };
 }

@@ -14,7 +14,176 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assessment_answers: {
+        Row: {
+          assessment_id: string | null
+          id: string
+          question_id: number | null
+          score: number
+          selected_option_id: string | null
+        }
+        Insert: {
+          assessment_id?: string | null
+          id?: string
+          question_id?: number | null
+          score: number
+          selected_option_id?: string | null
+        }
+        Update: {
+          assessment_id?: string | null
+          id?: string
+          question_id?: number | null
+          score?: number
+          selected_option_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_answers_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_answers_selected_option_id_fkey"
+            columns: ["selected_option_id"]
+            isOneToOne: false
+            referencedRelation: "question_options"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessments: {
+        Row: {
+          completed_at: string | null
+          id: string
+          is_qualified: boolean
+          max_score: number
+          organization_id: string | null
+          total_score: number
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          is_qualified: boolean
+          max_score: number
+          organization_id?: string | null
+          total_score: number
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          is_qualified?: boolean
+          max_score?: number
+          organization_id?: string | null
+          total_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          contact_person: string
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          phone: string
+        }
+        Insert: {
+          contact_person: string
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          phone: string
+        }
+        Update: {
+          contact_person?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      question_options: {
+        Row: {
+          display_order: number
+          id: string
+          label: string
+          question_id: number | null
+          score_percentage: number
+        }
+        Insert: {
+          display_order: number
+          id?: string
+          label: string
+          question_id?: number | null
+          score_percentage: number
+        }
+        Update: {
+          display_order?: number
+          id?: string
+          label?: string
+          question_id?: number | null
+          score_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          id: number
+          is_active: boolean | null
+          text: string
+          type: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string | null
+          display_order: number
+          id?: number
+          is_active?: boolean | null
+          text: string
+          type: string
+          weight: number
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          id?: number
+          is_active?: boolean | null
+          text?: string
+          type?: string
+          weight?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
