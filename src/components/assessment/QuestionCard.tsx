@@ -1,6 +1,6 @@
-import { Question, QuestionOption } from '@/types/assessment';
-import { cn } from '@/lib/utils';
-import { ChevronRight } from 'lucide-react';
+import { Question, QuestionOption } from "@/types/assessment";
+import { cn } from "@/lib/utils";
+import { ChevronRight } from "lucide-react";
 
 interface QuestionCardProps {
   question: Question;
@@ -12,18 +12,20 @@ interface QuestionCardProps {
 export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious }: QuestionCardProps) {
   return (
     <div className="animate-slide-up">
-      <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-10 leading-relaxed text-center">
+      <h2 className="text-2xl md:text-2xl font-semibold text-foreground mb-10 leading-relaxed text-center">
         {question.text}
       </h2>
 
-      <div className={cn(
-        "grid gap-4",
-        question.options.length <= 2 ? "grid-cols-2 max-w-md mx-auto" : "grid-cols-1 max-w-lg mx-auto"
-      )}>
+      <div
+        className={cn(
+          "grid gap-4",
+          question.options.length <= 2 ? "grid-cols-2 max-w-md mx-auto" : "grid-cols-1 max-w-lg mx-auto",
+        )}
+      >
         {question.options.map((option) => {
-          const isYes = option.label === 'نعم' || option.label.includes('نعم');
-          const isNo = option.label === 'لا' || option.label.includes('لا');
-          
+          const isYes = option.label === "نعم" || option.label.includes("نعم");
+          const isNo = option.label === "لا" || option.label.includes("لا");
+
           return (
             <button
               key={option.id}
@@ -31,25 +33,28 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
               className={cn(
                 "group relative p-5 rounded-lg border-2 transition-all duration-300",
                 "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background",
-                selectedOptionId === option.id
-                  ? "border-primary bg-primary/10 glow-accent"
-                  : "border-border bg-card",
+                selectedOptionId === option.id ? "border-primary bg-primary/10 glow-accent" : "border-border bg-card",
                 // Hover colors based on answer type
-                selectedOptionId !== option.id && isYes && "hover:border-green-500/50 hover:bg-green-500/10 focus:ring-green-500/30",
-                selectedOptionId !== option.id && isNo && "hover:border-red-500/50 hover:bg-red-500/10 focus:ring-red-500/30",
-                selectedOptionId !== option.id && !isYes && !isNo && "hover:border-primary/50 hover:bg-secondary/50 focus:ring-primary/30"
+                selectedOptionId !== option.id &&
+                  isYes &&
+                  "hover:border-green-500/50 hover:bg-green-500/10 focus:ring-green-500/30",
+                selectedOptionId !== option.id &&
+                  isNo &&
+                  "hover:border-red-500/50 hover:bg-red-500/10 focus:ring-red-500/30",
+                selectedOptionId !== option.id &&
+                  !isYes &&
+                  !isNo &&
+                  "hover:border-primary/50 hover:bg-secondary/50 focus:ring-primary/30",
               )}
             >
               <div className="flex items-center gap-4">
                 <div
                   className={cn(
                     "w-5 h-5 rounded-full border-2 transition-all duration-300 flex-shrink-0",
-                    selectedOptionId === option.id
-                      ? "border-primary bg-primary"
-                      : "border-muted-foreground",
+                    selectedOptionId === option.id ? "border-primary bg-primary" : "border-muted-foreground",
                     selectedOptionId !== option.id && isYes && "group-hover:border-green-500",
                     selectedOptionId !== option.id && isNo && "group-hover:border-red-500",
-                    selectedOptionId !== option.id && !isYes && !isNo && "group-hover:border-primary/50"
+                    selectedOptionId !== option.id && !isYes && !isNo && "group-hover:border-primary/50",
                   )}
                 >
                   {selectedOptionId === option.id && (
@@ -63,7 +68,7 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
                     "text-lg font-medium transition-colors",
                     selectedOptionId === option.id ? "text-primary" : "text-foreground",
                     selectedOptionId !== option.id && isYes && "group-hover:text-green-500",
-                    selectedOptionId !== option.id && isNo && "group-hover:text-red-500"
+                    selectedOptionId !== option.id && isNo && "group-hover:text-red-500",
                   )}
                 >
                   {option.label}

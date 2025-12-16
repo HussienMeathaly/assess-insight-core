@@ -1,9 +1,9 @@
-import { Assessment } from '@/components/assessment/Assessment';
-import { Helmet } from 'react-helmet-async';
-import { useAuth } from '@/hooks/useAuth';
-import { useRole } from '@/hooks/useRole';
-import { LogOut, Settings } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Assessment } from "@/components/assessment/Assessment";
+import { Helmet } from "react-helmet-async";
+import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
+import { LogOut, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const { signOut, user } = useAuth();
@@ -11,16 +11,16 @@ const Index = () => {
 
   const handleLogout = async () => {
     await signOut();
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   return (
     <>
       <Helmet>
-        <title>Profit+ | التقييم الأولي للجاهزية المؤسسية</title>
+        <title>Profit+ | التقييم الأولي للجاهزية </title>
         <meta name="description" content="منصة Profit+ للتقييم المؤسسي - قياس الجاهزية المبدئية للمنشآت والشركات" />
       </Helmet>
-      
+
       {user && (
         <div className="fixed top-4 left-4 z-50 flex items-center gap-2">
           {isAdmin && (
@@ -43,7 +43,7 @@ const Index = () => {
           </button>
         </div>
       )}
-      
+
       <Assessment />
     </>
   );
