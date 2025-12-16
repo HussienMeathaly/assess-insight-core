@@ -278,7 +278,7 @@ export default function Auth() {
               )}
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-              {isLogin ? 'مرحباً بعودتك' : 'إنشاء حساب جديد'}
+              {isLogin ? 'مرحباً بك' : 'إنشاء حساب جديد'}
             </h2>
             <p className="text-muted-foreground mt-2">
               {isLogin ? 'سجل دخولك للمتابعة' : 'أدخل بياناتك للبدء في التقييم'}
