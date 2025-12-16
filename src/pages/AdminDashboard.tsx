@@ -1,37 +1,31 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useRole } from '@/hooks/useRole';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Building2, ClipboardCheck, Users, LogOut, Eye, ChevronLeft, Shield, UserCog, UserPlus, Trash2, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+  Building2,
+  ClipboardCheck,
+  Users,
+  LogOut,
+  Eye,
+  ChevronLeft,
+  Shield,
+  UserCog,
+  UserPlus,
+  Trash2,
+  Loader2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Organization {
   id: string;
@@ -74,7 +68,7 @@ interface UserWithRole {
   id: string;
   email: string;
   created_at: string;
-  role: 'admin' | 'user' | null;
+  role: "admin" | "user" | null;
 }
 
 export default function AdminDashboard() {
@@ -90,21 +84,21 @@ export default function AdminDashboard() {
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserPassword, setNewUserPassword] = useState('');
-  const [newUserRole, setNewUserRole] = useState<'admin' | 'user' | 'none'>('user');
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserRole, setNewUserRole] = useState<"admin" | "user" | "none">("user");
   const [addingUser, setAddingUser] = useState(false);
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      navigate("/auth");
     }
   }, [authLoading, user, navigate]);
 
   useEffect(() => {
     if (!roleLoading && !isAdmin && user) {
-      navigate('/');
+      navigate("/");
     }
   }, [roleLoading, isAdmin, user, navigate]);
 
@@ -113,27 +107,32 @@ export default function AdminDashboard() {
       if (!isAdmin) return;
 
       const [orgsResult, assessmentsResult, rolesResult] = await Promise.all([
-        supabase.from('organizations').select('*').order('created_at', { ascending: false }),
-        supabase.from('assessments').select(`
+        supabase.from("organizations").select("*").order("created_at", { ascending: false }),
+        supabase
+          .from("assessments")
+          .select(
+            `
           *,
           organization:organizations(name, contact_person, email, phone)
-        `).order('completed_at', { ascending: false }),
-        supabase.from('user_roles').select('user_id, role'),
+        `,
+          )
+          .order("completed_at", { ascending: false }),
+        supabase.from("user_roles").select("user_id, role"),
       ]);
 
       if (orgsResult.data) setOrganizations(orgsResult.data);
       if (assessmentsResult.data) setAssessments(assessmentsResult.data as Assessment[]);
-      
+
       // Fetch users from auth (we'll get them from organizations for now)
       const uniqueUserIds = new Set<string>();
       const usersWithRoles: UserWithRole[] = [];
-      
+
       // Get users from organizations
       if (orgsResult.data) {
         for (const org of orgsResult.data) {
           if (org.user_id && !uniqueUserIds.has(org.user_id)) {
             uniqueUserIds.add(org.user_id);
-            const userRole = rolesResult.data?.find(r => r.user_id === org.user_id);
+            const userRole = rolesResult.data?.find((r) => r.user_id === org.user_id);
             usersWithRoles.push({
               id: org.user_id,
               email: org.email,
@@ -146,15 +145,15 @@ export default function AdminDashboard() {
 
       // Also check if current admin is in the list
       if (user && !uniqueUserIds.has(user.id)) {
-        const userRole = rolesResult.data?.find(r => r.user_id === user.id);
+        const userRole = rolesResult.data?.find((r) => r.user_id === user.id);
         usersWithRoles.unshift({
           id: user.id,
-          email: user.email || '',
+          email: user.email || "",
           created_at: new Date().toISOString(),
           role: userRole?.role || null,
         });
       }
-      
+
       setUsers(usersWithRoles);
       setLoadingData(false);
     }
@@ -169,14 +168,16 @@ export default function AdminDashboard() {
     setLoadingAnswers(true);
 
     const { data } = await supabase
-      .from('assessment_answers')
-      .select(`
+      .from("assessment_answers")
+      .select(
+        `
         *,
         question:questions(text, weight),
         option:question_options!assessment_answers_selected_option_id_fkey(label, score_percentage)
-      `)
-      .eq('assessment_id', assessment.id)
-      .order('question_id');
+      `,
+      )
+      .eq("assessment_id", assessment.id)
+      .order("question_id");
 
     if (data) {
       setAssessmentAnswers(data as AssessmentAnswer[]);
@@ -186,12 +187,12 @@ export default function AdminDashboard() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
+    navigate("/auth");
   };
 
-  const handleRoleChange = async (userId: string, newRole: 'admin' | 'user' | 'none') => {
+  const handleRoleChange = async (userId: string, newRole: "admin" | "user" | "none") => {
     if (userId === user?.id) {
-      toast.error('لا يمكنك تغيير صلاحياتك الخاصة');
+      toast.error("لا يمكنك تغيير صلاحياتك الخاصة");
       return;
     }
 
@@ -199,11 +200,11 @@ export default function AdminDashboard() {
 
     try {
       // First, delete existing role
-      await supabase.from('user_roles').delete().eq('user_id', userId);
+      await supabase.from("user_roles").delete().eq("user_id", userId);
 
       // If new role is not 'none', insert the new role
-      if (newRole !== 'none') {
-        const { error } = await supabase.from('user_roles').insert({
+      if (newRole !== "none") {
+        const { error } = await supabase.from("user_roles").insert({
           user_id: userId,
           role: newRole,
         });
@@ -212,16 +213,12 @@ export default function AdminDashboard() {
       }
 
       // Update local state
-      setUsers(prev =>
-        prev.map(u =>
-          u.id === userId ? { ...u, role: newRole === 'none' ? null : newRole } : u
-        )
-      );
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole === "none" ? null : newRole } : u)));
 
-      toast.success('تم تحديث الصلاحية بنجاح');
+      toast.success("تم تحديث الصلاحية بنجاح");
     } catch (error) {
-      console.error('Error updating role:', error);
-      toast.error('حدث خطأ أثناء تحديث الصلاحية');
+      console.error("Error updating role:", error);
+      toast.error("حدث خطأ أثناء تحديث الصلاحية");
     } finally {
       setUpdatingRole(null);
     }
@@ -229,24 +226,24 @@ export default function AdminDashboard() {
 
   const handleAddUser = async () => {
     if (!newUserEmail || !newUserPassword) {
-      toast.error('يرجى إدخال البريد الإلكتروني وكلمة المرور');
+      toast.error("يرجى إدخال البريد الإلكتروني وكلمة المرور");
       return;
     }
 
     if (newUserPassword.length < 6) {
-      toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      toast.error("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
       return;
     }
 
     setAddingUser(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('manage-users', {
+      const { data, error } = await supabase.functions.invoke("manage-users", {
         body: {
-          action: 'create',
+          action: "create",
           email: newUserEmail,
           password: newUserPassword,
-          role: newUserRole === 'none' ? undefined : newUserRole,
+          role: newUserRole === "none" ? undefined : newUserRole,
         },
       });
 
@@ -257,7 +254,7 @@ export default function AdminDashboard() {
       }
 
       // Add to local state
-      setUsers(prev => [
+      setUsers((prev) => [
         {
           id: data.user.id,
           email: data.user.email,
@@ -267,14 +264,14 @@ export default function AdminDashboard() {
         ...prev,
       ]);
 
-      toast.success('تم إضافة المستخدم بنجاح');
+      toast.success("تم إضافة المستخدم بنجاح");
       setShowAddUserDialog(false);
-      setNewUserEmail('');
-      setNewUserPassword('');
-      setNewUserRole('user');
+      setNewUserEmail("");
+      setNewUserPassword("");
+      setNewUserRole("user");
     } catch (error) {
-      console.error('Error adding user:', error);
-      toast.error('حدث خطأ أثناء إضافة المستخدم');
+      console.error("Error adding user:", error);
+      toast.error("حدث خطأ أثناء إضافة المستخدم");
     } finally {
       setAddingUser(false);
     }
@@ -282,16 +279,16 @@ export default function AdminDashboard() {
 
   const handleDeleteUser = async (userId: string) => {
     if (userId === user?.id) {
-      toast.error('لا يمكنك حذف حسابك الخاص');
+      toast.error("لا يمكنك حذف حسابك الخاص");
       return;
     }
 
     setDeletingUser(userId);
 
     try {
-      const { data, error } = await supabase.functions.invoke('manage-users', {
+      const { data, error } = await supabase.functions.invoke("manage-users", {
         body: {
-          action: 'delete',
+          action: "delete",
           userId,
         },
       });
@@ -303,11 +300,11 @@ export default function AdminDashboard() {
       }
 
       // Remove from local state
-      setUsers(prev => prev.filter(u => u.id !== userId));
-      toast.success('تم حذف المستخدم بنجاح');
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      toast.success("تم حذف المستخدم بنجاح");
     } catch (error) {
-      console.error('Error deleting user:', error);
-      toast.error('حدث خطأ أثناء حذف المستخدم');
+      console.error("Error deleting user:", error);
+      toast.error("حدث خطأ أثناء حذف المستخدم");
     } finally {
       setDeletingUser(null);
     }
@@ -325,21 +322,22 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const qualifiedCount = assessments.filter(a => a.is_qualified).length;
-  const avgScore = assessments.length > 0
-    ? (assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length).toFixed(1)
-    : 0;
+  const qualifiedCount = assessments.filter((a) => a.is_qualified).length;
+  const avgScore =
+    assessments.length > 0
+      ? (assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length).toFixed(1)
+      : 0;
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
               <ChevronLeft className="h-4 w-4 ml-1" />
               الرئيسية
             </Button>
-            <h1 className="text-xl font-bold text-foreground">لوحة تحكم المدير</h1>
+            <h1 className="text-xl font-bold text-foreground">لوحة التحكم</h1>
           </div>
           <Button variant="ghost" size="sm" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 ml-2" />
@@ -353,9 +351,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                إجمالي المنظمات
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -365,9 +361,7 @@ export default function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                إجمالي التقييمات
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">إجمالي التقييمات</CardTitle>
               <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -380,16 +374,12 @@ export default function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                معدل التأهيل
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">معدل التأهيل</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {assessments.length > 0
-                  ? Math.round((qualifiedCount / assessments.length) * 100)
-                  : 0}%
+                {assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%
               </div>
             </CardContent>
           </Card>
@@ -399,7 +389,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="assessments" className="space-y-4" dir="rtl">
           <TabsList className="w-full justify-start">
             <TabsTrigger value="assessments">التقييمات</TabsTrigger>
-            <TabsTrigger value="organizations">المنظمات</TabsTrigger>
+            <TabsTrigger value="organizations">الجهات</TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-1">
               <UserCog className="h-4 w-4" />
               إدارة المستخدمين
@@ -427,29 +417,19 @@ export default function AdminDashboard() {
                     <TableBody>
                       {assessments.map((assessment) => (
                         <TableRow key={assessment.id}>
-                          <TableCell className="font-medium">
-                            {assessment.organization?.name || 'غير معروف'}
-                          </TableCell>
-                          <TableCell>
-                            {assessment.organization?.contact_person || '-'}
-                          </TableCell>
+                          <TableCell className="font-medium">{assessment.organization?.name || "غير معروف"}</TableCell>
+                          <TableCell>{assessment.organization?.contact_person || "-"}</TableCell>
                           <TableCell>
                             {assessment.total_score} / {assessment.max_score}
                           </TableCell>
                           <TableCell>
-                            <Badge variant={assessment.is_qualified ? 'default' : 'secondary'}>
-                              {assessment.is_qualified ? 'مؤهل' : 'غير مؤهل'}
+                            <Badge variant={assessment.is_qualified ? "default" : "secondary"}>
+                              {assessment.is_qualified ? "مؤهل" : "غير مؤهل"}
                             </Badge>
                           </TableCell>
+                          <TableCell>{new Date(assessment.completed_at).toLocaleDateString("ar-EG")}</TableCell>
                           <TableCell>
-                            {new Date(assessment.completed_at).toLocaleDateString('ar-SA')}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleViewDetails(assessment)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => handleViewDetails(assessment)}>
                               <Eye className="h-4 w-4 ml-1" />
                               التفاصيل
                             </Button>
@@ -492,11 +472,13 @@ export default function AdminDashboard() {
                         <TableRow key={org.id}>
                           <TableCell className="font-medium">{org.name}</TableCell>
                           <TableCell>{org.contact_person}</TableCell>
-                          <TableCell dir="ltr" className="text-right">{org.email}</TableCell>
-                          <TableCell dir="ltr" className="text-right">{org.phone}</TableCell>
-                          <TableCell>
-                            {new Date(org.created_at).toLocaleDateString('ar-SA')}
+                          <TableCell dir="ltr" className="text-right">
+                            {org.email}
                           </TableCell>
+                          <TableCell dir="ltr" className="text-right">
+                            {org.phone}
+                          </TableCell>
+                          <TableCell>{new Date(org.created_at).toLocaleDateString("ar-SA")}</TableCell>
                         </TableRow>
                       ))}
                       {organizations.length === 0 && (
@@ -541,15 +523,13 @@ export default function AdminDashboard() {
                         <TableRow key={u.id}>
                           <TableCell className="font-medium text-right">
                             <span dir="ltr" className="inline-flex items-center gap-2">
-                              {u.id === user?.id && (
-                                <Badge variant="outline">أنت</Badge>
-                              )}
+                              {u.id === user?.id && <Badge variant="outline">أنت</Badge>}
                               {u.email}
                             </span>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={u.role === 'admin' ? 'default' : 'secondary'}>
-                              {u.role === 'admin' ? 'مدير' : u.role === 'user' ? 'مستخدم' : 'بدون صلاحية'}
+                            <Badge variant={u.role === "admin" ? "default" : "secondary"}>
+                              {u.role === "admin" ? "مدير" : u.role === "user" ? "مستخدم" : "بدون صلاحية"}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -557,8 +537,8 @@ export default function AdminDashboard() {
                               <span className="text-muted-foreground text-sm">غير متاح</span>
                             ) : (
                               <Select
-                                value={u.role || 'none'}
-                                onValueChange={(value) => handleRoleChange(u.id, value as 'admin' | 'user' | 'none')}
+                                value={u.role || "none"}
+                                onValueChange={(value) => handleRoleChange(u.id, value as "admin" | "user" | "none")}
                                 disabled={updatingRole === u.id}
                               >
                                 <SelectTrigger className="w-32">
@@ -613,9 +593,7 @@ export default function AdminDashboard() {
       <Dialog open={!!selectedAssessment} onOpenChange={() => setSelectedAssessment(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
-            <DialogTitle className="text-right">
-              تفاصيل التقييم - {selectedAssessment?.organization?.name}
-            </DialogTitle>
+            <DialogTitle className="text-right">تفاصيل التقييم - {selectedAssessment?.organization?.name}</DialogTitle>
           </DialogHeader>
 
           {selectedAssessment && (
@@ -636,11 +614,15 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <span className="text-muted-foreground">البريد:</span>
-                    <span className="mr-2 font-medium" dir="ltr">{selectedAssessment.organization?.email}</span>
+                    <span className="mr-2 font-medium" dir="ltr">
+                      {selectedAssessment.organization?.email}
+                    </span>
                   </div>
                   <div>
                     <span className="text-muted-foreground">الهاتف:</span>
-                    <span className="mr-2 font-medium" dir="ltr">{selectedAssessment.organization?.phone}</span>
+                    <span className="mr-2 font-medium" dir="ltr">
+                      {selectedAssessment.organization?.phone}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -654,8 +636,8 @@ export default function AdminDashboard() {
                   <div className="text-3xl font-bold text-primary">
                     {selectedAssessment.total_score} / {selectedAssessment.max_score}
                   </div>
-                  <Badge variant={selectedAssessment.is_qualified ? 'default' : 'secondary'} className="text-sm">
-                    {selectedAssessment.is_qualified ? 'مؤهل للتقييم الشامل' : 'غير مؤهل'}
+                  <Badge variant={selectedAssessment.is_qualified ? "default" : "secondary"} className="text-sm">
+                    {selectedAssessment.is_qualified ? "مؤهل للتقييم الشامل" : "غير مؤهل"}
                   </Badge>
                 </CardContent>
               </Card>
@@ -738,10 +720,7 @@ export default function AdminDashboard() {
 
             <div className="space-y-2">
               <Label>الصلاحية</Label>
-              <Select
-                value={newUserRole}
-                onValueChange={(value) => setNewUserRole(value as 'admin' | 'user' | 'none')}
-              >
+              <Select value={newUserRole} onValueChange={(value) => setNewUserRole(value as "admin" | "user" | "none")}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
