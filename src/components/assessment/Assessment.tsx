@@ -5,6 +5,7 @@ import { WelcomeScreen } from './WelcomeScreen';
 import { ProgressIndicator } from './ProgressIndicator';
 import { QuestionCard } from './QuestionCard';
 import { ResultScreen } from './ResultScreen';
+import { EditOrganizationModal } from './EditOrganizationModal';
 
 export function Assessment() {
   const {
@@ -33,6 +34,9 @@ export function Assessment() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="absolute top-4 left-4">
+        <EditOrganizationModal />
+      </div>
       <div className="w-full max-w-3xl">
         {currentStep === 'welcome' && (
           <WelcomeScreen onStart={handleStart} />
