@@ -11,6 +11,7 @@ const Index = () => {
 
   const handleLogout = async () => {
     await signOut();
+    window.location.href = '/';
   };
 
   return (
