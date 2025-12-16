@@ -427,7 +427,7 @@ export default function AdminDashboard() {
                               {assessment.is_qualified ? "مؤهل" : "غير مؤهل"}
                             </Badge>
                           </TableCell>
-                          <TableCell>{new Date(assessment.completed_at).toLocaleDateString("ar-EG")}</TableCell>
+                          <TableCell>{new Date(assessment.completed_at).toLocaleDateString("en-GB")}</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="sm" onClick={() => handleViewDetails(assessment)}>
                               <Eye className="h-4 w-4 ml-1" />
