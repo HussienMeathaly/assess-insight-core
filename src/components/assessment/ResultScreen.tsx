@@ -61,8 +61,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
         {/* Score Breakdown */}
         <div className="bg-secondary/50 rounded-xl p-6 mb-6">
           <h3 className="text-lg font-semibold text-foreground mb-4 text-center">تفصيل الدرجات</h3>
-
-          {/* Pie Chart */}
+          {/*{/* Pie Chart */}
           <div className="h-48 mb-6">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -80,7 +79,8 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
                   {pieData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                   ))}
-                </Pie>
+                </Pie>*/}
+          
                 <Tooltip
                   formatter={(value: number, _, props) => [
                     `${value.toFixed(1)} / ${props.payload.maxValue}`,
