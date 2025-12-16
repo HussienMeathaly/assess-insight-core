@@ -15,7 +15,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
 
       <div className="card-elevated rounded-2xl p-8 md:p-12 mb-8">
         <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-4">التقييم الأولي للجاهزية</h2>
-        <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+        <p className="text-muted-foreground text-base leading-relaxed mb-6">
           يهدف هذا التقييم إلى قياس مستوى الجاهزية المبدئية للمنشأة، وتحديد مدى ملاءمتها للاستفادة من التقييم المجاني.
         </p>
 
