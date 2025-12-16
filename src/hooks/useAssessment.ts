@@ -1,62 +1,57 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { assessmentQuestions, MAX_SCORE, QUALIFICATION_THRESHOLD } from '@/data/questions';
 import { Answer, AssessmentResult, QuestionOption } from '@/types/assessment';
-import { RegistrationData } from '@/components/assessment/RegistrationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { logError } from '@/lib/logger';
 
 export function useAssessment() {
   const { user } = useAuth();
-  const [currentStep, setCurrentStep] = useState<'welcome' | 'registration' | 'questions' | 'result'>('welcome');
+  const [currentStep, setCurrentStep] = useState<'welcome' | 'questions' | 'result'>('welcome');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
-  const [registrationData, setRegistrationData] = useState<RegistrationData | null>(null);
 
   const currentQuestion = assessmentQuestions[currentQuestionIndex];
   const totalQuestions = assessmentQuestions.length;
+
+  // Fetch the user's organization on mount
+  useEffect(() => {
+    const fetchOrganization = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('organizations')
+          .select('id')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          logError('Error fetching organization', error);
+          return;
+        }
+
+        if (data) {
+          setOrganizationId(data.id);
+        }
+      } catch (error) {
+        logError('Error fetching organization', error);
+      }
+    };
+
+    fetchOrganization();
+  }, [user]);
 
   const calculateScore = useCallback((option: QuestionOption, weight: number): number => {
     return (option.scorePercentage / 100) * weight;
   }, []);
 
   const handleStart = useCallback(() => {
-    setCurrentStep('registration');
-  }, []);
-
-  const handleRegistration = useCallback(async (data: RegistrationData) => {
-    if (!user) {
-      logError('User not authenticated');
-      return;
-    }
-
-    try {
-      const { data: org, error } = await supabase
-        .from('organizations')
-        .insert({
-          name: data.organizationName,
-          contact_person: data.contactPerson,
-          phone: data.phone,
-          email: data.email,
-          user_id: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setOrganizationId(org.id);
-      setRegistrationData(data);
-      setCurrentStep('questions');
-    } catch (error) {
-      logError('Error saving organization', error);
-    }
-  }, [user]);
-
-  const handleBackToWelcome = useCallback(() => {
-    setCurrentStep('welcome');
+    setCurrentStep('questions');
   }, []);
 
   const handleSelectOption = useCallback((option: QuestionOption) => {
@@ -165,8 +160,6 @@ export function useAssessment() {
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setSelectedOption(null);
-    setOrganizationId(null);
-    setRegistrationData(null);
   }, []);
 
   const retakeAssessment = useCallback(() => {
@@ -182,10 +175,7 @@ export function useAssessment() {
     currentQuestionIndex,
     totalQuestions,
     selectedOption,
-    registrationData,
     handleStart,
-    handleRegistration,
-    handleBackToWelcome,
     handleSelectOption,
     handlePreviousQuestion,
     getResult,

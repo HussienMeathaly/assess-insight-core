@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useAssessment } from '@/hooks/useAssessment';
 import { useAnalysis } from '@/hooks/useAnalysis';
 import { WelcomeScreen } from './WelcomeScreen';
-import { RegistrationForm } from './RegistrationForm';
 import { ProgressIndicator } from './ProgressIndicator';
 import { QuestionCard } from './QuestionCard';
 import { ResultScreen } from './ResultScreen';
@@ -15,8 +14,6 @@ export function Assessment() {
     totalQuestions,
     selectedOption,
     handleStart,
-    handleRegistration,
-    handleBackToWelcome,
     handleSelectOption,
     handlePreviousQuestion,
     getResult,
@@ -39,13 +36,6 @@ export function Assessment() {
       <div className="w-full max-w-3xl">
         {currentStep === 'welcome' && (
           <WelcomeScreen onStart={handleStart} />
-        )}
-
-        {currentStep === 'registration' && (
-          <RegistrationForm 
-            onSubmit={handleRegistration} 
-            onBack={handleBackToWelcome}
-          />
         )}
 
         {currentStep === 'questions' && (
