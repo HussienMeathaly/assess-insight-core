@@ -333,7 +333,7 @@ export default function AdminDashboard() {
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/assessment")}>
               <ChevronLeft className="h-4 w-4 ml-1" />
               الرئيسية
             </Button>
