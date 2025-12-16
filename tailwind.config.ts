@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        arabic: ['"IBM Plex Sans Arabic"', 'sans-serif'],
+        arabic: ['"Readex Pro"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
