@@ -337,7 +337,7 @@ export default function AdminDashboard() {
               <ChevronLeft className="h-4 w-4 ml-1" />
               الرئيسية
             </Button>
-            <h1 className="text-xl font-bold text-foreground text-center">لوحة التحكم</h1>
+            <h1 className="absolute left-1/2 -translate-x-1/2 text-xl font-bold text-foreground">لوحة التحكم</h1>
           </div>
           <Button variant="ghost" size="sm" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 ml-2" />
