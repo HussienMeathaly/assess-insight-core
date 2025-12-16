@@ -33,7 +33,13 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
               className={cn(
                 "group relative p-5 rounded-lg border-2 transition-all duration-300",
                 "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background",
-                selectedOptionId === option.id ? "border-primary bg-primary/10 glow-accent" : "border-border bg-card",
+                selectedOptionId === option.id
+                  ? isYes
+                    ? "border-green-500 bg-green-500/10 glow-accent"
+                    : isNo
+                      ? "border-red-500 bg-red-500/10 glow-accent"
+                      : "border-primary bg-primary/10 glow-accent"
+                  : "border-border bg-card",
                 // Hover colors based on answer type
                 selectedOptionId !== option.id &&
                   isYes &&
