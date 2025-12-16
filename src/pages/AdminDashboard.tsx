@@ -386,7 +386,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Data Tables */}
-        <Tabs defaultValue="assessments" className="space-y-4" dir="rtl">
+        <Tabs defaultValue="assessments" className="space-y-6" dir="rtl">
           <TabsList className="w-full justify-start">
             <TabsTrigger value="assessments">التقييمات</TabsTrigger>
             <TabsTrigger value="organizations">الجهات</TabsTrigger>
