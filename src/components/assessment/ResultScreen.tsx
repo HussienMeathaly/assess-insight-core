@@ -1,9 +1,9 @@
-import { AssessmentResult } from '@/types/assessment';
-import { CheckCircle2, AlertCircle, ArrowLeft, RotateCcw } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import profitLogo from '@/assets/profit-logo.png';
-import { assessmentQuestions } from '@/data/questions';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { AssessmentResult } from "@/types/assessment";
+import { CheckCircle2, AlertCircle, ArrowLeft, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import profitLogo from "@/assets/profit-logo.png";
+import { assessmentQuestions } from "@/data/questions";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 interface ResultScreenProps {
   result: AssessmentResult;
@@ -12,16 +12,22 @@ interface ResultScreenProps {
   onRetake?: () => void;
 }
 
-const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+const CHART_COLORS = [
+  "hsl(var(--primary))",
+  "hsl(var(--success))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+];
 
 export function ResultScreen({ result, analysisText, isLoading, onRetake }: ResultScreenProps) {
   const { isQualified } = result;
 
   const pieData = result.answers.map((answer, index) => {
-    const question = assessmentQuestions.find(q => q.id === answer.questionId);
+    const question = assessmentQuestions.find((q) => q.id === answer.questionId);
     return {
       name: `س${index + 1}`,
-      fullName: question?.text || '',
+      fullName: question?.text || "",
       value: answer.score,
       maxValue: question?.weight || 0,
     };
@@ -30,11 +36,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
   return (
     <div className="animate-scale-in text-center max-w-2xl mx-auto">
       <div className="mb-8">
-        <img 
-          src={profitLogo} 
-          alt="Profit+" 
-          className="h-14 md:h-16 mx-auto"
-        />
+        <img src={profitLogo} alt="Profit+" className="h-14 md:h-16 mx-auto" />
       </div>
 
       <div className="card-elevated rounded-2xl p-8 md:p-12">
@@ -42,7 +44,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           <div
             className={cn(
               "w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center",
-              isQualified ? "bg-success/20" : "bg-muted"
+              isQualified ? "bg-success/20" : "bg-muted",
             )}
           >
             {isQualified ? (
@@ -52,18 +54,14 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
             )}
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
-            نتيجة التقييم الأولي
-          </h2>
-          <p className="text-muted-foreground">
-            {isQualified ? 'جاهزية مبدئية متوفرة' : 'فجوات في الجاهزية'}
-          </p>
+          <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">نتيجة التقييم الأولي</h2>
+          <p className="text-muted-foreground">{isQualified ? "جاهزية مبدئية متوفرة" : "فجوات في الجاهزية"}</p>
         </div>
 
         {/* Score Breakdown */}
         <div className="bg-secondary/50 rounded-xl p-6 mb-6">
-          <h3 className="text-lg font-semibold text-foreground mb-4 text-right">تفصيل الدرجات</h3>
-          
+          <h3 className="text-lg font-semibold text-foreground mb-4 text-center">تفصيل الدرجات</h3>
+
           {/* Pie Chart */}
           <div className="h-48 mb-6">
             <ResponsiveContainer width="100%" height="100%">
@@ -83,13 +81,16 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
                     <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  formatter={(value: number, _, props) => [`${value.toFixed(1)} / ${props.payload.maxValue}`, props.payload.fullName]}
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    direction: 'rtl'
+                <Tooltip
+                  formatter={(value: number, _, props) => [
+                    `${value.toFixed(1)} / ${props.payload.maxValue}`,
+                    props.payload.fullName,
+                  ]}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                    direction: "rtl",
                   }}
                 />
               </PieChart>
@@ -98,26 +99,24 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
 
           <div className="space-y-3">
             {result.answers.map((answer) => {
-              const question = assessmentQuestions.find(q => q.id === answer.questionId);
+              const question = assessmentQuestions.find((q) => q.id === answer.questionId);
               if (!question) return null;
               const maxQuestionScore = question.weight;
               const percentage = (answer.score / maxQuestionScore) * 100;
-              
+
               return (
                 <div key={answer.questionId} className="text-right">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-sm font-medium text-foreground">
                       {answer.score.toFixed(1)} / {maxQuestionScore}
                     </span>
-                    <span className="text-sm text-muted-foreground truncate max-w-[70%]">
-                      {question.text}
-                    </span>
+                    <span className="text-sm text-muted-foreground truncate max-w-[70%]">{question.text}</span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                    <div 
+                    <div
                       className={cn(
                         "h-full rounded-full transition-all duration-500",
-                        percentage >= 70 ? "bg-success" : percentage >= 40 ? "bg-primary" : "bg-muted-foreground"
+                        percentage >= 70 ? "bg-success" : percentage >= 40 ? "bg-primary" : "bg-muted-foreground",
                       )}
                       style={{ width: `${percentage}%` }}
                     />
@@ -126,7 +125,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
               );
             })}
           </div>
-          
+
           {/* Total Score */}
           <div className="mt-4 pt-4 border-t border-border">
             <div className="flex justify-between items-center">
@@ -146,9 +145,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
               <span className="text-muted-foreground">جارٍ تحليل النتائج...</span>
             </div>
           ) : (
-            <p className="text-foreground text-lg leading-relaxed">
-              {analysisText}
-            </p>
+            <p className="text-foreground text-lg leading-relaxed">{analysisText}</p>
           )}
         </div>
 
@@ -177,9 +174,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
         </div>
 
         {!isQualified && (
-          <p className="text-muted-foreground text-sm mt-4">
-            يمكنك الاستمرار في التقييم الشامل للحصول على تحليل أعمق
-          </p>
+          <p className="text-muted-foreground text-sm mt-4">يمكنك الاستمرار في التقييم الشامل للحصول على تحليل أعمق</p>
         )}
       </div>
     </div>
