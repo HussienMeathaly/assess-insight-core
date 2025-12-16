@@ -21,7 +21,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
 
         <div className="flex items-center justify-center gap-3 text-muted-foreground mb-8 p-4 bg-secondary/50 rounded-lg">
           <Shield className="w-5 h-5 text-primary flex-shrink-0" />
-          <p className="text-sm">جميع البيانات المدخلة تُستخدم لأغراض التقييم فقط ولا يتم مشاركتها مع أي طرف ثالث.</p>
+          <p className="text-xs">جميع البيانات المدخلة تُستخدم لأغراض التقييم فقط ولا يتم مشاركتها مع أي طرف ثالث.</p>
         </div>
 
         <button
