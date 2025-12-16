@@ -406,7 +406,7 @@ export default function AdminDashboard() {
                   <Table dir="rtl">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-right">المنظمة</TableHead>
+                        <TableHead className="text-right">الجهة</TableHead>
                         <TableHead className="text-right">المسؤول</TableHead>
                         <TableHead className="text-right">النتيجة</TableHead>
                         <TableHead className="text-right">الحالة</TableHead>
@@ -453,14 +453,14 @@ export default function AdminDashboard() {
           <TabsContent value="organizations">
             <Card>
               <CardHeader>
-                <CardTitle className="text-right">جميع المنظمات</CardTitle>
+                <CardTitle className="text-right">جميع الجهات</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
                   <Table dir="rtl">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-right">اسم المنظمة</TableHead>
+                        <TableHead className="text-right">اسم الجهة</TableHead>
                         <TableHead className="text-right">المسؤول</TableHead>
                         <TableHead className="text-right">البريد الإلكتروني</TableHead>
                         <TableHead className="text-right">الهاتف</TableHead>
@@ -478,7 +478,7 @@ export default function AdminDashboard() {
                           <TableCell dir="ltr" className="text-right">
                             {org.phone}
                           </TableCell>
-                          <TableCell>{new Date(org.created_at).toLocaleDateString("ar-SA")}</TableCell>
+                          <TableCell>{new Date(org.created_at).toLocaleDateString("en-GB")}</TableCell>
                         </TableRow>
                       ))}
                       {organizations.length === 0 && (
@@ -593,7 +593,7 @@ export default function AdminDashboard() {
       <Dialog open={!!selectedAssessment} onOpenChange={() => setSelectedAssessment(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
-            <DialogTitle className="text-right">تفاصيل التقييم - {selectedAssessment?.organization?.name}</DialogTitle>
+            <DialogTitle className="text-center">تفاصيل التقييم - {selectedAssessment?.organization?.name}</DialogTitle>
           </DialogHeader>
 
           {selectedAssessment && (
@@ -601,7 +601,7 @@ export default function AdminDashboard() {
               {/* Organization Info */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">معلومات المنظمة</CardTitle>
+                  <CardTitle className="text-base">معلومات الجهة</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -637,7 +637,7 @@ export default function AdminDashboard() {
                     {selectedAssessment.total_score} / {selectedAssessment.max_score}
                   </div>
                   <Badge variant={selectedAssessment.is_qualified ? "default" : "secondary"} className="text-sm">
-                    {selectedAssessment.is_qualified ? "مؤهل للتقييم الشامل" : "غير مؤهل"}
+                    {selectedAssessment.is_qualified ? "مؤهل للتقييم المجاني" : "غير مؤهل"}
                   </Badge>
                 </CardContent>
               </Card>
