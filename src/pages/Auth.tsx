@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,6 +8,13 @@ import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, ArrowLeft, Loader2, AlertCirc
 import { cn } from '@/lib/utils';
 import { logError } from '@/lib/logger';
 
+// اسم الجهة + اسم مدخل البيانات: عربي/إنجليزي/أرقام/مسافات/_ فقط
+const validOrgAndNameRegex = /^[\u0600-\u06FFa-zA-Z0-9\s_]+$/;
+// رقم التواصل: أرقام فقط وبحد أدنى 10
+const phoneDigitsMin10Regex = /^\d{10,}$/;
+
+type SignupField = 'organizationName' | 'contactPerson' | 'phone';
+
 const loginSchema = z.object({
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل')
@@ -16,10 +23,24 @@ const loginSchema = z.object({
 const signupSchema = z.object({
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-  organizationName: z.string().trim().min(2, 'اسم الجهة مطلوب'),
-  contactPerson: z.string().trim().min(2, 'اسم مدخل البيانات مطلوب'),
-  phone: z.string().trim().min(9, 'رقم التواصل غير صحيح')
+  organizationName: z.string()
+    .trim()
+    .min(2, 'اسم الجهة مطلوب')
+    .regex(validOrgAndNameRegex, 'اسم الجهة يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
+  contactPerson: z.string()
+    .trim()
+    .min(2, 'اسم مدخل البيانات مطلوب')
+    .regex(validOrgAndNameRegex, 'اسم مدخل البيانات يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
+  phone: z.string()
+    .trim()
+    .regex(phoneDigitsMin10Regex, 'رقم التواصل يجب أن لا يقل عن 10 أرقام')
 });
+
+const signupFieldSchema = {
+  organizationName: signupSchema.shape.organizationName,
+  contactPerson: signupSchema.shape.contactPerson,
+  phone: signupSchema.shape.phone,
+} as const;
 
 const resetPasswordSchema = z.object({
   newPassword: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
@@ -144,16 +165,41 @@ export default function Auth() {
       navigate('/assessment');
     }
   }, [isAuthenticated, loading, navigate, isResettingPassword]);
+  const debounceTimers = useRef<Record<string, number>>({});
+
+  const validateSignupField = useCallback((field: SignupField, value: string) => {
+    const result = signupFieldSchema[field].safeParse(value);
+    return result.success ? undefined : result.error.errors[0]?.message;
+  }, []);
+
+  const debouncedValidateSignupField = useCallback((field: SignupField, value: string) => {
+    const key = `signup_${field}`;
+    if (debounceTimers.current[key]) {
+      window.clearTimeout(debounceTimers.current[key]);
+    }
+    debounceTimers.current[key] = window.setTimeout(() => {
+      const error = validateSignupField(field, value);
+      setErrors(prev => ({ ...prev, [field]: error }));
+    }, 400);
+  }, [validateSignupField]);
+
   const handleChange = (field: keyof typeof formData, value: string) => {
+    const nextValue = field === 'phone' ? value.replace(/\D/g, '') : value;
+
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: nextValue
     }));
+
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({
         ...prev,
         [field]: undefined
       }));
+    }
+
+    if (!isLogin && (field === 'organizationName' || field === 'contactPerson' || field === 'phone')) {
+      debouncedValidateSignupField(field as SignupField, nextValue);
     }
   };
   const getPasswordStrength = (password: string) => {
@@ -886,7 +932,7 @@ export default function Auth() {
                     <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'phone' ? "text-primary" : "text-muted-foreground")}>
                       <Phone className="w-5 h-5" />
                     </div>
-                    <input type="tel" value={formData.phone} onChange={e => handleChange('phone', e.target.value)} onFocus={() => setFocusedField('phone')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.phone ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="05xxxxxxxx" dir="ltr" />
+                    <input type="tel" inputMode="numeric" pattern="[0-9]*" minLength={10} value={formData.phone} onChange={e => handleChange('phone', e.target.value)} onFocus={() => setFocusedField('phone')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.phone ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="05xxxxxxxx" dir="ltr" />
                     {formData.phone && !errors.phone && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                         <CheckCircle2 className="w-5 h-5" />
                       </div>}
