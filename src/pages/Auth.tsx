@@ -429,7 +429,7 @@ export default function Auth() {
               <h2 className="text-2xl font-bold text-foreground md:text-2xl">
                 نسيت كلمة المرور؟
               </h2>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-muted-foreground mt-2 text-sm">
                 أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين
               </p>
             </div>
