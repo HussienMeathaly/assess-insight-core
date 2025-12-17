@@ -57,7 +57,13 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
                 <div
                   className={cn(
                     "w-5 h-5 rounded-full border-2 transition-all duration-300 flex-shrink-0",
-                    selectedOptionId === option.id ? "border-primary bg-primary" : "border-muted-foreground",
+                    selectedOptionId === option.id
+                      ? isYes
+                        ? "border-green-500 bg-green-500/10"
+                        : isNo
+                          ? "border-red-500 bg-red-500/10"
+                          : "border-primary bg-primary"
+                      : "border-muted-foreground",
                     selectedOptionId !== option.id && isYes && "group-hover:border-green-500",
                     selectedOptionId !== option.id && isNo && "group-hover:border-red-500",
                     selectedOptionId !== option.id && !isYes && !isNo && "group-hover:border-primary/50",
@@ -72,13 +78,7 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
                 <span
                   className={cn(
                     "text-sm md:text-lg font-medium transition-colors",
-                    selectedOptionId === option.id
-                      ? isYes
-                        ? "text-green-500"
-                        : isNo
-                          ? "text-red-500"
-                          : "text-primary"
-                      : "text-foreground",
+                    selectedOptionId === option.id ? "text-primary" : "text-foreground",
                     selectedOptionId !== option.id && isYes && "group-hover:text-green-500",
                     selectedOptionId !== option.id && isNo && "group-hover:text-red-500",
                   )}
