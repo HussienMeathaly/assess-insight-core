@@ -15,7 +15,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
   const { isQualified } = result;
 
   return (
-    <div className="animate-scale-in text-center max-w-2xl mx-auto px-1">
+    <div className="animate-scale-in text-center max-w-2xl mx-auto px-1 pt-16 md:pt-0">
       <div className="mb-6 md:mb-8">
         <img src={profitLogo} alt="Profit+" className="h-12 md:h-14 lg:h-16 mx-auto" />
       </div>
