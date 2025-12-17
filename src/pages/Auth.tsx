@@ -12,44 +12,30 @@ import { logError } from '@/lib/logger';
 const validOrgAndNameRegex = /^[\u0600-\u06FFa-zA-Z0-9\s_]+$/;
 // رقم التواصل: أرقام فقط وبحد أدنى 10
 const phoneDigitsMin10Regex = /^\d{10,}$/;
-
 type SignupField = 'organizationName' | 'contactPerson' | 'phone';
-
 const loginSchema = z.object({
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل')
 });
-
 const signupSchema = z.object({
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-  organizationName: z.string()
-    .trim()
-    .min(2, 'اسم الجهة مطلوب')
-    .regex(validOrgAndNameRegex, 'اسم الجهة يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
-  contactPerson: z.string()
-    .trim()
-    .min(2, 'اسم مدخل البيانات مطلوب')
-    .regex(validOrgAndNameRegex, 'اسم مدخل البيانات يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
-  phone: z.string()
-    .trim()
-    .regex(phoneDigitsMin10Regex, 'رقم التواصل يجب أن لا يقل عن 10 أرقام')
+  organizationName: z.string().trim().min(2, 'اسم الجهة مطلوب').regex(validOrgAndNameRegex, 'اسم الجهة يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
+  contactPerson: z.string().trim().min(2, 'اسم مدخل البيانات مطلوب').regex(validOrgAndNameRegex, 'اسم مدخل البيانات يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
+  phone: z.string().trim().regex(phoneDigitsMin10Regex, 'رقم التواصل يجب أن لا يقل عن 10 أرقام')
 });
-
 const signupFieldSchema = {
   organizationName: signupSchema.shape.organizationName,
   contactPerson: signupSchema.shape.contactPerson,
-  phone: signupSchema.shape.phone,
+  phone: signupSchema.shape.phone
 } as const;
-
 const resetPasswordSchema = z.object({
   newPassword: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
   confirmPassword: z.string().min(6, 'تأكيد كلمة المرور مطلوب')
-}).refine((data) => data.newPassword === data.confirmPassword, {
+}).refine(data => data.newPassword === data.confirmPassword, {
   message: 'كلمتا المرور غير متطابقتين',
   path: ['confirmPassword']
 });
-
 type FormErrors = {
   email?: string;
   password?: string;
@@ -61,9 +47,7 @@ type FormErrors = {
   newPassword?: string;
   confirmPassword?: string;
 };
-
 const SESSION_STORAGE_KEY = 'auth_form_data';
-
 export default function Auth() {
   const navigate = useNavigate();
   const {
@@ -100,7 +84,6 @@ export default function Auth() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
-  
   const [formData, setFormData] = useState(() => {
     const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (saved) {
@@ -130,14 +113,17 @@ export default function Auth() {
 
   // Listen for PASSWORD_RECOVERY event
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: {
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setIsResettingPassword(true);
         setIsForgotPassword(false);
         setIsLogin(true);
       }
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -158,7 +144,6 @@ export default function Auth() {
   const clearSessionStorage = () => {
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
   };
-
   useEffect(() => {
     if (isAuthenticated && !loading && !isResettingPassword) {
       clearSessionStorage();
@@ -166,12 +151,10 @@ export default function Auth() {
     }
   }, [isAuthenticated, loading, navigate, isResettingPassword]);
   const debounceTimers = useRef<Record<string, number>>({});
-
   const validateSignupField = useCallback((field: SignupField, value: string) => {
     const result = signupFieldSchema[field].safeParse(value);
     return result.success ? undefined : result.error.errors[0]?.message;
   }, []);
-
   const debouncedValidateSignupField = useCallback((field: SignupField, value: string) => {
     const key = `signup_${field}`;
     if (debounceTimers.current[key]) {
@@ -179,25 +162,24 @@ export default function Auth() {
     }
     debounceTimers.current[key] = window.setTimeout(() => {
       const error = validateSignupField(field, value);
-      setErrors(prev => ({ ...prev, [field]: error }));
+      setErrors(prev => ({
+        ...prev,
+        [field]: error
+      }));
     }, 400);
   }, [validateSignupField]);
-
   const handleChange = (field: keyof typeof formData, value: string) => {
     const nextValue = field === 'phone' ? value.replace(/\D/g, '') : value;
-
     setFormData(prev => ({
       ...prev,
       [field]: nextValue
     }));
-
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({
         ...prev,
         [field]: undefined
       }));
     }
-
     if (!isLogin && (field === 'organizationName' || field === 'contactPerson' || field === 'phone')) {
       debouncedValidateSignupField(field as SignupField, nextValue);
     }
@@ -375,11 +357,9 @@ export default function Auth() {
       setIsSubmitting(false);
     }
   };
-
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-
     const result = resetPasswordSchema.safeParse(resetPasswordData);
     if (!result.success) {
       const fieldErrors: Partial<Pick<FormErrors, 'newPassword' | 'confirmPassword' | 'general'>> = {};
@@ -390,13 +370,13 @@ export default function Auth() {
       setErrors(fieldErrors);
       return;
     }
-
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.auth.updateUser({
+      const {
+        error
+      } = await supabase.auth.updateUser({
         password: resetPasswordData.newPassword
       });
-
       if (error) {
         setErrors({
           general: 'حدث خطأ أثناء تحديث كلمة المرور'
@@ -412,22 +392,35 @@ export default function Auth() {
       setIsSubmitting(false);
     }
   };
-
   const getNewPasswordStrength = (password: string) => {
-    if (!password) return { strength: 0, label: '', color: '' };
+    if (!password) return {
+      strength: 0,
+      label: '',
+      color: ''
+    };
     let strength = 0;
     if (password.length >= 6) strength++;
     if (password.length >= 8) strength++;
     if (/[A-Z]/.test(password)) strength++;
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-    if (strength <= 2) return { strength, label: 'ضعيفة', color: 'bg-red-500' };
-    if (strength <= 3) return { strength, label: 'متوسطة', color: 'bg-yellow-500' };
-    return { strength, label: 'قوية', color: 'bg-green-500' };
+    if (strength <= 2) return {
+      strength,
+      label: 'ضعيفة',
+      color: 'bg-red-500'
+    };
+    if (strength <= 3) return {
+      strength,
+      label: 'متوسطة',
+      color: 'bg-yellow-500'
+    };
+    return {
+      strength,
+      label: 'قوية',
+      color: 'bg-green-500'
+    };
   };
-
   const newPasswordStrength = getNewPasswordStrength(resetPasswordData.newPassword);
-
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -463,15 +456,15 @@ export default function Auth() {
               يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة
             </p>
             
-            <button 
-              onClick={() => {
-                setResetSuccess(false);
-                setIsResettingPassword(false);
-                setResetPasswordData({ newPassword: '', confirmPassword: '' });
-                navigate('/auth');
-              }} 
-              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
-            >
+            <button onClick={() => {
+            setResetSuccess(false);
+            setIsResettingPassword(false);
+            setResetPasswordData({
+              newPassword: '',
+              confirmPassword: ''
+            });
+            navigate('/auth');
+          }} className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300">
               تسجيل الدخول
             </button>
           </div>
@@ -513,62 +506,29 @@ export default function Auth() {
                   كلمة المرور الجديدة
                 </label>
                 <div className="relative">
-                  <div className={cn(
-                    "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-                    focusedField === 'newPassword' ? "text-primary" : "text-muted-foreground"
-                  )}>
+                  <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'newPassword' ? "text-primary" : "text-muted-foreground")}>
                     <Lock className="w-5 h-5" />
                   </div>
-                  <input
-                    type={showNewPassword ? "text" : "password"}
-                    value={resetPasswordData.newPassword}
-                    onChange={(e) => setResetPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                    onFocus={() => setFocusedField('newPassword')}
-                    onBlur={() => setFocusedField(null)}
-                    className={cn(
-                      "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
-                      "focus:outline-none focus:bg-secondary transition-all duration-300",
-                      errors.newPassword ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"
-                    )}
-                    placeholder="أدخل كلمة المرور الجديدة"
-                    dir="ltr"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                  <input type={showNewPassword ? "text" : "password"} value={resetPasswordData.newPassword} onChange={e => setResetPasswordData(prev => ({
+                  ...prev,
+                  newPassword: e.target.value
+                }))} onFocus={() => setFocusedField('newPassword')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.newPassword ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="أدخل كلمة المرور الجديدة" dir="ltr" />
+                  <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                     {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                {errors.newPassword && (
-                  <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                {errors.newPassword && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                     <AlertCircle className="w-4 h-4" />
                     {errors.newPassword}
-                  </p>
-                )}
-                {resetPasswordData.newPassword && (
-                  <div className="space-y-2 animate-fade-in">
+                  </p>}
+                {resetPasswordData.newPassword && <div className="space-y-2 animate-fade-in">
                     <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((level) => (
-                        <div
-                          key={level}
-                          className={cn(
-                            "h-1 flex-1 rounded-full transition-all duration-300",
-                            level <= newPasswordStrength.strength ? newPasswordStrength.color : "bg-secondary"
-                          )}
-                        />
-                      ))}
+                      {[1, 2, 3, 4, 5].map(level => <div key={level} className={cn("h-1 flex-1 rounded-full transition-all duration-300", level <= newPasswordStrength.strength ? newPasswordStrength.color : "bg-secondary")} />)}
                     </div>
-                    <p className={cn(
-                      "text-xs",
-                      newPasswordStrength.strength <= 2 ? "text-red-500" :
-                      newPasswordStrength.strength <= 3 ? "text-yellow-500" : "text-green-500"
-                    )}>
+                    <p className={cn("text-xs", newPasswordStrength.strength <= 2 ? "text-red-500" : newPasswordStrength.strength <= 3 ? "text-yellow-500" : "text-green-500")}>
                       قوة كلمة المرور: {newPasswordStrength.label}
                     </p>
-                  </div>
-                )}
+                  </div>}
               </div>
 
               {/* Confirm Password */}
@@ -577,79 +537,42 @@ export default function Auth() {
                   تأكيد كلمة المرور
                 </label>
                 <div className="relative">
-                  <div className={cn(
-                    "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-                    focusedField === 'confirmPassword' ? "text-primary" : "text-muted-foreground"
-                  )}>
+                  <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'confirmPassword' ? "text-primary" : "text-muted-foreground")}>
                     <Shield className="w-5 h-5" />
                   </div>
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={resetPasswordData.confirmPassword}
-                    onChange={(e) => setResetPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    onFocus={() => setFocusedField('confirmPassword')}
-                    onBlur={() => setFocusedField(null)}
-                    className={cn(
-                      "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
-                      "focus:outline-none focus:bg-secondary transition-all duration-300",
-                      errors.confirmPassword ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"
-                    )}
-                    placeholder="أعد إدخال كلمة المرور"
-                    dir="ltr"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                  <input type={showConfirmPassword ? "text" : "password"} value={resetPasswordData.confirmPassword} onChange={e => setResetPasswordData(prev => ({
+                  ...prev,
+                  confirmPassword: e.target.value
+                }))} onFocus={() => setFocusedField('confirmPassword')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.confirmPassword ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="أعد إدخال كلمة المرور" dir="ltr" />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                {errors.confirmPassword && (
-                  <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                {errors.confirmPassword && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                     <AlertCircle className="w-4 h-4" />
                     {errors.confirmPassword}
-                  </p>
-                )}
-                {resetPasswordData.confirmPassword && resetPasswordData.newPassword === resetPasswordData.confirmPassword && (
-                  <p className="text-green-500 text-sm flex items-center gap-1 animate-fade-in">
+                  </p>}
+                {resetPasswordData.confirmPassword && resetPasswordData.newPassword === resetPasswordData.confirmPassword && <p className="text-green-500 text-sm flex items-center gap-1 animate-fade-in">
                     <CheckCircle2 className="w-4 h-4" />
                     كلمتا المرور متطابقتان
-                  </p>
-                )}
+                  </p>}
               </div>
 
               {/* Error Message */}
-              {errors.general && (
-                <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
+              {errors.general && <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
                   <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                   <p className="text-destructive text-sm">{errors.general}</p>
-                </div>
-              )}
+                </div>}
 
               {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={cn(
-                  "w-full py-4 font-bold rounded-xl transition-all duration-300",
-                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
-                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
-                  "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
-                  "flex items-center justify-center gap-3"
-                )}
-              >
-                {isSubmitting ? (
-                  <>
+              <button type="submit" disabled={isSubmitting} className={cn("w-full py-4 font-bold rounded-xl transition-all duration-300", "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background", "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100", "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent", "flex items-center justify-center gap-3")}>
+                {isSubmitting ? <>
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>جاري التحديث...</span>
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <KeyRound className="w-5 h-5" />
                     <span>تحديث كلمة المرور</span>
-                  </>
-                )}
+                  </>}
               </button>
             </form>
           </div>
@@ -872,10 +795,10 @@ export default function Auth() {
             <div className={cn("inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 transition-all duration-500", isLogin ? "bg-primary/10" : "bg-accent/10")}>
               {isLogin ? <LogIn className="w-8 h-8 text-primary" /> : <UserPlus className="w-8 h-8 text-accent" />}
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+            <h2 className="text-2xl font-bold text-foreground md:text-2xl">
               {isLogin ? 'مرحباً بك' : 'إنشاء حساب جديد'}
             </h2>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-2 text-sm">
               {isLogin ? 'سجل دخولك للمتابعة' : 'أدخل بياناتك للبدء في التقييم'}
             </p>
           </div>
