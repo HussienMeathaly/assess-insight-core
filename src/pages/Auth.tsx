@@ -7,20 +7,17 @@ import profitLogo from '@/assets/profit-logo.png';
 import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2, MailCheck, Building2, User, Phone, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { logError } from '@/lib/logger';
-
 const loginSchema = z.object({
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
-  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل')
 });
-
 const signupSchema = z.object({
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
   organizationName: z.string().trim().min(2, 'اسم الجهة مطلوب'),
   contactPerson: z.string().trim().min(2, 'اسم مدخل البيانات مطلوب'),
-  phone: z.string().trim().min(9, 'رقم التواصل غير صحيح'),
+  phone: z.string().trim().min(9, 'رقم التواصل غير صحيح')
 });
-
 type FormErrors = {
   email?: string;
   password?: string;
@@ -30,13 +27,18 @@ type FormErrors = {
   general?: string;
   emailConfirmationHint?: boolean;
 };
-
 const SESSION_STORAGE_KEY = 'auth_form_data';
-
 export default function Auth() {
   const navigate = useNavigate();
-  const { signIn, signUp, resetPassword, isAuthenticated, loading, user } = useAuth();
-  
+  const {
+    signIn,
+    signUp,
+    resetPassword,
+    isAuthenticated,
+    loading,
+    user
+  } = useAuth();
+
   // Initialize state from sessionStorage
   const [isLogin, setIsLogin] = useState(() => {
     const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
@@ -46,7 +48,6 @@ export default function Auth() {
     }
     return true;
   });
-  
   const [isForgotPassword, setIsForgotPassword] = useState(() => {
     const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (saved) {
@@ -55,17 +56,17 @@ export default function Auth() {
     }
     return false;
   });
-  
   const [formData, setFormData] = useState(() => {
     const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       return {
         email: parsed.email || '',
-        password: '', // Never persist password for security
+        password: '',
+        // Never persist password for security
         organizationName: parsed.organizationName || '',
         contactPerson: parsed.contactPerson || '',
-        phone: parsed.phone || '',
+        phone: parsed.phone || ''
       };
     }
     return {
@@ -73,10 +74,9 @@ export default function Auth() {
       password: '',
       organizationName: '',
       contactPerson: '',
-      phone: '',
+      phone: ''
     };
   });
-  
   const [errors, setErrors] = useState<FormErrors>({});
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showResetSent, setShowResetSent] = useState(false);
@@ -92,7 +92,7 @@ export default function Auth() {
       contactPerson: formData.contactPerson,
       phone: formData.phone,
       isLogin,
-      isForgotPassword,
+      isForgotPassword
     };
     sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(dataToSave));
   }, [formData.email, formData.organizationName, formData.contactPerson, formData.phone, isLogin, isForgotPassword]);
@@ -101,65 +101,78 @@ export default function Auth() {
   const clearSessionStorage = () => {
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
   };
-
   useEffect(() => {
     if (isAuthenticated && !loading) {
       clearSessionStorage();
       navigate('/assessment');
     }
   }, [isAuthenticated, loading, navigate]);
-
   const handleChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
     if (errors[field as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
     }
   };
-
   const getPasswordStrength = (password: string) => {
-    if (!password) return { strength: 0, label: '', color: '' };
+    if (!password) return {
+      strength: 0,
+      label: '',
+      color: ''
+    };
     let strength = 0;
     if (password.length >= 6) strength++;
     if (password.length >= 8) strength++;
     if (/[A-Z]/.test(password)) strength++;
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-    
-    if (strength <= 2) return { strength, label: 'ضعيفة', color: 'bg-red-500' };
-    if (strength <= 3) return { strength, label: 'متوسطة', color: 'bg-yellow-500' };
-    return { strength, label: 'قوية', color: 'bg-green-500' };
+    if (strength <= 2) return {
+      strength,
+      label: 'ضعيفة',
+      color: 'bg-red-500'
+    };
+    if (strength <= 3) return {
+      strength,
+      label: 'متوسطة',
+      color: 'bg-yellow-500'
+    };
+    return {
+      strength,
+      label: 'قوية',
+      color: 'bg-green-500'
+    };
   };
-
   const passwordStrength = getPasswordStrength(formData.password);
-
   const saveOrganization = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from('organizations')
-        .insert({
-          name: formData.organizationName,
-          contact_person: formData.contactPerson,
-          phone: formData.phone,
-          email: formData.email,
-          user_id: userId,
-        });
-
+      const {
+        error
+      } = await supabase.from('organizations').insert({
+        name: formData.organizationName,
+        contact_person: formData.contactPerson,
+        phone: formData.phone,
+        email: formData.email,
+        user_id: userId
+      });
       if (error) throw error;
     } catch (error) {
       logError('Error saving organization', error);
       throw error;
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    
     const schema = isLogin ? loginSchema : signupSchema;
-    const dataToValidate = isLogin 
-      ? { email: formData.email, password: formData.password }
-      : formData;
-    
+    const dataToValidate = isLogin ? {
+      email: formData.email,
+      password: formData.password
+    } : formData;
     const result = schema.safeParse(dataToValidate);
     if (!result.success) {
       const fieldErrors: Partial<Record<'email' | 'password' | 'organizationName' | 'contactPerson' | 'phone' | 'general', string>> = {};
@@ -170,17 +183,20 @@ export default function Auth() {
       setErrors(fieldErrors);
       return;
     }
-
     setIsSubmitting(true);
-    
     try {
       if (isLogin) {
-        const { error } = await signIn(formData.email, formData.password);
+        const {
+          error
+        } = await signIn(formData.email, formData.password);
         if (error) {
           handleAuthError(error);
         }
       } else {
-        const { data, error } = await signUp(formData.email, formData.password);
+        const {
+          data,
+          error
+        } = await signUp(formData.email, formData.password);
         if (error) {
           handleAuthError(error);
         } else if (data?.user) {
@@ -191,17 +207,19 @@ export default function Auth() {
         }
       }
     } catch {
-      setErrors({ general: 'حدث خطأ في الاتصال' });
+      setErrors({
+        general: 'حدث خطأ في الاتصال'
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const handleAuthError = (error: { message: string }) => {
+  const handleAuthError = (error: {
+    message: string;
+  }) => {
     let errorMessage = 'حدث خطأ غير متوقع';
     let isEmailConfirmationHint = false;
     const msg = error.message.toLowerCase();
-    
     if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
       if (isLogin) {
         errorMessage = 'بيانات تسجيل الدخول غير صحيحة، أو لم يتم تأكيد البريد الإلكتروني بعد';
@@ -223,71 +241,75 @@ export default function Auth() {
     } else if (msg.includes('session') || msg.includes('refresh')) {
       errorMessage = 'انتهت الجلسة، يرجى المحاولة مرة أخرى';
     }
-    
-    setErrors({ general: errorMessage, emailConfirmationHint: isEmailConfirmationHint });
+    setErrors({
+      general: errorMessage,
+      emailConfirmationHint: isEmailConfirmationHint
+    });
   };
-
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setIsForgotPassword(false);
     setErrors({});
-    setFormData({ email: '', password: '', organizationName: '', contactPerson: '', phone: '' });
+    setFormData({
+      email: '',
+      password: '',
+      organizationName: '',
+      contactPerson: '',
+      phone: ''
+    });
     setShowConfirmation(false);
     setShowResetSent(false);
     // Clear sessionStorage when switching modes
     clearSessionStorage();
   };
-
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    
     const emailResult = z.string().email('البريد الإلكتروني غير صحيح').safeParse(formData.email);
     if (!emailResult.success) {
-      setErrors({ email: emailResult.error.errors[0].message });
+      setErrors({
+        email: emailResult.error.errors[0].message
+      });
       return;
     }
-
     setIsSubmitting(true);
     try {
-      const { error } = await resetPassword(formData.email);
+      const {
+        error
+      } = await resetPassword(formData.email);
       if (error) {
-        setErrors({ general: 'حدث خطأ أثناء إرسال رابط إعادة التعيين' });
+        setErrors({
+          general: 'حدث خطأ أثناء إرسال رابط إعادة التعيين'
+        });
       } else {
         setShowResetSent(true);
       }
     } catch {
-      setErrors({ general: 'حدث خطأ في الاتصال' });
+      setErrors({
+        general: 'حدث خطأ في الاتصال'
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-primary animate-spin" />
           <p className="text-muted-foreground">جاري التحميل...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Show email confirmation message
   if (showConfirmation) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
+    return <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           {/* Logo Section */}
           <div className="text-center mb-8 animate-fade-in">
             <div className="relative inline-block">
               <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-              <img 
-                src={profitLogo} 
-                alt="Profit+" 
-                className="h-20 md:h-24 mx-auto mb-4 relative z-10"
-              />
+              <img src={profitLogo} alt="Profit+" className="h-20 md:h-24 mx-auto mb-4 relative z-10" />
             </div>
           </div>
 
@@ -317,32 +339,23 @@ export default function Auth() {
               </p>
             </div>
             
-            <button
-              onClick={toggleMode}
-              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
-            >
+            <button onClick={toggleMode} className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300">
               العودة لتسجيل الدخول
             </button>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Show password reset sent message
   if (showResetSent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
+    return <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           {/* Logo Section */}
           <div className="text-center mb-8 animate-fade-in">
             <div className="relative inline-block">
               <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-              <img 
-                src={profitLogo} 
-                alt="Profit+" 
-                className="h-20 md:h-24 mx-auto mb-4 relative z-10"
-              />
+              <img src={profitLogo} alt="Profit+" className="h-20 md:h-24 mx-auto mb-4 relative z-10" />
             </div>
           </div>
 
@@ -372,37 +385,34 @@ export default function Auth() {
               </p>
             </div>
             
-            <button
-              onClick={() => {
-                setShowResetSent(false);
-                setIsForgotPassword(false);
-                setFormData({ email: '', password: '', organizationName: '', contactPerson: '', phone: '' });
-                clearSessionStorage();
-              }}
-              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
-            >
+            <button onClick={() => {
+            setShowResetSent(false);
+            setIsForgotPassword(false);
+            setFormData({
+              email: '',
+              password: '',
+              organizationName: '',
+              contactPerson: '',
+              phone: ''
+            });
+            clearSessionStorage();
+          }} className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300">
               العودة لتسجيل الدخول
             </button>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Show forgot password form
   if (isForgotPassword) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
+    return <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           {/* Logo Section */}
           <div className="text-center mb-8 animate-fade-in">
             <div className="relative inline-block">
               <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-              <img 
-                src={profitLogo} 
-                alt="Profit+" 
-                className="h-20 md:h-24 mx-auto mb-4 relative z-10"
-              />
+              <img src={profitLogo} alt="Profit+" className="h-20 md:h-24 mx-auto mb-4 relative z-10" />
             </div>
             <p className="text-muted-foreground text-lg font-medium">منصة التقييم المؤسسي</p>
           </div>
@@ -416,7 +426,7 @@ export default function Auth() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 bg-primary/10">
                 <Lock className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+              <h2 className="text-2xl font-bold text-foreground md:text-2xl">
                 نسيت كلمة المرور؟
               </h2>
               <p className="text-muted-foreground mt-2">
@@ -431,109 +441,67 @@ export default function Auth() {
                   البريد الإلكتروني
                 </label>
                 <div className="relative">
-                  <div className={cn(
-                    "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-                    focusedField === 'email' ? "text-primary" : "text-muted-foreground"
-                  )}>
+                  <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'email' ? "text-primary" : "text-muted-foreground")}>
                     <Mail className="w-5 h-5" />
                   </div>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
-                    onFocus={() => setFocusedField('email')}
-                    onBlur={() => setFocusedField(null)}
-                    className={cn(
-                      "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
-                      "focus:outline-none focus:bg-secondary transition-all duration-300",
-                      errors.email 
-                        ? "border-destructive focus:border-destructive" 
-                        : "border-border focus:border-primary"
-                    )}
-                    placeholder="example@domain.com"
-                    dir="ltr"
-                  />
-                  {formData.email && !errors.email && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                  <input type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.email ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="example@domain.com" dir="ltr" />
+                  {formData.email && !errors.email && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                       <CheckCircle2 className="w-5 h-5" />
-                    </div>
-                  )}
+                    </div>}
                 </div>
-                {errors.email && (
-                  <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                {errors.email && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                     <AlertCircle className="w-4 h-4" />
                     {errors.email}
-                  </p>
-                )}
+                  </p>}
               </div>
 
               {/* Error Message */}
-              {errors.general && (
-                <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
+              {errors.general && <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
                   <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                   <p className="text-destructive text-sm">{errors.general}</p>
-                </div>
-              )}
+                </div>}
 
               {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={cn(
-                  "w-full py-4 font-bold rounded-xl transition-all duration-300",
-                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
-                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
-                  "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
-                  "flex items-center justify-center gap-3"
-                )}
-              >
-                {isSubmitting ? (
-                  <>
+              <button type="submit" disabled={isSubmitting} className={cn("w-full py-4 font-bold rounded-xl transition-all duration-300", "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background", "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100", "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent", "flex items-center justify-center gap-3")}>
+                {isSubmitting ? <>
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>جاري الإرسال...</span>
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <Mail className="w-5 h-5" />
                     <span>إرسال رابط إعادة التعيين</span>
-                  </>
-                )}
+                  </>}
               </button>
             </form>
 
             {/* Back to Login */}
             <div className="mt-8 pt-6 border-t border-border/50">
-              <button
-                onClick={() => {
-                  setIsForgotPassword(false);
-                  setErrors({});
-                  setFormData({ email: '', password: '', organizationName: '', contactPerson: '', phone: '' });
-                  clearSessionStorage();
-                }}
-                className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
-              >
+              <button onClick={() => {
+              setIsForgotPassword(false);
+              setErrors({});
+              setFormData({
+                email: '',
+                password: '',
+                organizationName: '',
+                contactPerson: '',
+                phone: ''
+              });
+              clearSessionStorage();
+            }} className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group">
                 <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                 <span>العودة لتسجيل الدخول</span>
               </button>
             </div>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+  return <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8 animate-fade-in">
           <div className="relative inline-block">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-            <img 
-              src={profitLogo} 
-              alt="Profit+" 
-              className="h-20 md:h-24 mx-auto mb-4 relative z-10"
-            />
+            <img src={profitLogo} alt="Profit+" className="h-20 md:h-24 mx-auto mb-4 relative z-10" />
           </div>
           <p className="text-muted-foreground text-lg font-medium">منصة التقييم المؤسسي</p>
         </div>
@@ -545,15 +513,8 @@ export default function Auth() {
           
           {/* Header */}
           <div className="text-center mb-8">
-            <div className={cn(
-              "inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 transition-all duration-500",
-              isLogin ? "bg-primary/10" : "bg-accent/10"
-            )}>
-              {isLogin ? (
-                <LogIn className="w-8 h-8 text-primary" />
-              ) : (
-                <UserPlus className="w-8 h-8 text-accent" />
-              )}
+            <div className={cn("inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 transition-all duration-500", isLogin ? "bg-primary/10" : "bg-accent/10")}>
+              {isLogin ? <LogIn className="w-8 h-8 text-primary" /> : <UserPlus className="w-8 h-8 text-accent" />}
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
               {isLogin ? 'مرحباً بك' : 'إنشاء حساب جديد'}
@@ -565,47 +526,25 @@ export default function Auth() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Organization Fields - Only for Signup */}
-            {!isLogin && (
-              <>
+            {!isLogin && <>
                 {/* Organization Name */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-foreground">
                     اسم الجهة
                   </label>
                   <div className="relative">
-                    <div className={cn(
-                      "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-                      focusedField === 'organizationName' ? "text-primary" : "text-muted-foreground"
-                    )}>
+                    <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'organizationName' ? "text-primary" : "text-muted-foreground")}>
                       <Building2 className="w-5 h-5" />
                     </div>
-                    <input
-                      type="text"
-                      value={formData.organizationName}
-                      onChange={(e) => handleChange('organizationName', e.target.value)}
-                      onFocus={() => setFocusedField('organizationName')}
-                      onBlur={() => setFocusedField(null)}
-                      className={cn(
-                        "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
-                        "focus:outline-none focus:bg-secondary transition-all duration-300",
-                        errors.organizationName 
-                          ? "border-destructive focus:border-destructive" 
-                          : "border-border focus:border-primary"
-                      )}
-                      placeholder="أدخل اسم الجهة"
-                    />
-                    {formData.organizationName && !errors.organizationName && (
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                    <input type="text" value={formData.organizationName} onChange={e => handleChange('organizationName', e.target.value)} onFocus={() => setFocusedField('organizationName')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.organizationName ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="أدخل اسم الجهة" />
+                    {formData.organizationName && !errors.organizationName && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                         <CheckCircle2 className="w-5 h-5" />
-                      </div>
-                    )}
+                      </div>}
                   </div>
-                  {errors.organizationName && (
-                    <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                  {errors.organizationName && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                       <AlertCircle className="w-4 h-4" />
                       {errors.organizationName}
-                    </p>
-                  )}
+                    </p>}
                 </div>
 
                 {/* Contact Person */}
@@ -614,39 +553,18 @@ export default function Auth() {
                     اسم مدخل البيانات
                   </label>
                   <div className="relative">
-                    <div className={cn(
-                      "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-                      focusedField === 'contactPerson' ? "text-primary" : "text-muted-foreground"
-                    )}>
+                    <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'contactPerson' ? "text-primary" : "text-muted-foreground")}>
                       <User className="w-5 h-5" />
                     </div>
-                    <input
-                      type="text"
-                      value={formData.contactPerson}
-                      onChange={(e) => handleChange('contactPerson', e.target.value)}
-                      onFocus={() => setFocusedField('contactPerson')}
-                      onBlur={() => setFocusedField(null)}
-                      className={cn(
-                        "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
-                        "focus:outline-none focus:bg-secondary transition-all duration-300",
-                        errors.contactPerson 
-                          ? "border-destructive focus:border-destructive" 
-                          : "border-border focus:border-primary"
-                      )}
-                      placeholder="أدخل اسم مدخل البيانات"
-                    />
-                    {formData.contactPerson && !errors.contactPerson && (
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                    <input type="text" value={formData.contactPerson} onChange={e => handleChange('contactPerson', e.target.value)} onFocus={() => setFocusedField('contactPerson')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.contactPerson ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="أدخل اسم مدخل البيانات" />
+                    {formData.contactPerson && !errors.contactPerson && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                         <CheckCircle2 className="w-5 h-5" />
-                      </div>
-                    )}
+                      </div>}
                   </div>
-                  {errors.contactPerson && (
-                    <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                  {errors.contactPerson && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                       <AlertCircle className="w-4 h-4" />
                       {errors.contactPerson}
-                    </p>
-                  )}
+                    </p>}
                 </div>
 
                 {/* Phone */}
@@ -655,43 +573,20 @@ export default function Auth() {
                     رقم التواصل
                   </label>
                   <div className="relative">
-                    <div className={cn(
-                      "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-                      focusedField === 'phone' ? "text-primary" : "text-muted-foreground"
-                    )}>
+                    <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'phone' ? "text-primary" : "text-muted-foreground")}>
                       <Phone className="w-5 h-5" />
                     </div>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleChange('phone', e.target.value)}
-                      onFocus={() => setFocusedField('phone')}
-                      onBlur={() => setFocusedField(null)}
-                      className={cn(
-                        "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
-                        "focus:outline-none focus:bg-secondary transition-all duration-300",
-                        errors.phone 
-                          ? "border-destructive focus:border-destructive" 
-                          : "border-border focus:border-primary"
-                      )}
-                      placeholder="05xxxxxxxx"
-                      dir="ltr"
-                    />
-                    {formData.phone && !errors.phone && (
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                    <input type="tel" value={formData.phone} onChange={e => handleChange('phone', e.target.value)} onFocus={() => setFocusedField('phone')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.phone ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="05xxxxxxxx" dir="ltr" />
+                    {formData.phone && !errors.phone && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                         <CheckCircle2 className="w-5 h-5" />
-                      </div>
-                    )}
+                      </div>}
                   </div>
-                  {errors.phone && (
-                    <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                  {errors.phone && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                       <AlertCircle className="w-4 h-4" />
                       {errors.phone}
-                    </p>
-                  )}
+                    </p>}
                 </div>
-              </>
-            )}
+              </>}
 
             {/* Email Field */}
             <div className="space-y-2">
@@ -699,48 +594,24 @@ export default function Auth() {
                 البريد الإلكتروني
               </label>
               <div className="relative">
-                <div className={cn(
-                  "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-                  focusedField === 'email' ? "text-primary" : "text-muted-foreground"
-                )}>
+                <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'email' ? "text-primary" : "text-muted-foreground")}>
                   <Mail className="w-5 h-5" />
                 </div>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField(null)}
-                  className={cn(
-                    "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
-                    "focus:outline-none focus:bg-secondary transition-all duration-300",
-                    errors.email 
-                      ? "border-destructive focus:border-destructive" 
-                      : "border-border focus:border-primary"
-                  )}
-                  placeholder="example@domain.com"
-                  dir="ltr"
-                />
-                {formData.email && !errors.email && (
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                <input type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.email ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="example@domain.com" dir="ltr" />
+                {formData.email && !errors.email && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                     <CheckCircle2 className="w-5 h-5" />
-                  </div>
-                )}
+                  </div>}
               </div>
-              {errors.email && (
-                <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+              {errors.email && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                   <AlertCircle className="w-4 h-4" />
                   {errors.email}
-                </p>
-              )}
+                </p>}
               
               {/* Email verification notice for signup */}
-              {!isLogin && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
+              {!isLogin && <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Mail className="w-3 h-3" />
                   سيتم إرسال رابط تأكيد إلى هذا البريد
-                </p>
-              )}
+                </p>}
             </div>
 
             {/* Password Field */}
@@ -749,153 +620,85 @@ export default function Auth() {
                 كلمة المرور
               </label>
               <div className="relative">
-                <div className={cn(
-                  "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
-                  focusedField === 'password' ? "text-primary" : "text-muted-foreground"
-                )}>
+                <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'password' ? "text-primary" : "text-muted-foreground")}>
                   <Lock className="w-5 h-5" />
                 </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                  className={cn(
-                    "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
-                    "focus:outline-none focus:bg-secondary transition-all duration-300",
-                    errors.password 
-                      ? "border-destructive focus:border-destructive" 
-                      : "border-border focus:border-primary"
-                  )}
-                  placeholder="••••••••"
-                  dir="ltr"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
+                <input type={showPassword ? 'text' : 'password'} value={formData.password} onChange={e => handleChange('password', e.target.value)} onFocus={() => setFocusedField('password')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.password ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="••••••••" dir="ltr" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               
               {/* Password Strength Indicator (only for signup) */}
-              {!isLogin && formData.password && (
-                <div className="space-y-2 animate-fade-in">
+              {!isLogin && formData.password && <div className="space-y-2 animate-fade-in">
                   <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div
-                        key={i}
-                        className={cn(
-                          "h-1.5 flex-1 rounded-full transition-all duration-300",
-                          i <= passwordStrength.strength ? passwordStrength.color : "bg-muted"
-                        )}
-                      />
-                    ))}
+                    {[1, 2, 3, 4, 5].map(i => <div key={i} className={cn("h-1.5 flex-1 rounded-full transition-all duration-300", i <= passwordStrength.strength ? passwordStrength.color : "bg-muted")} />)}
                   </div>
-                  <p className={cn(
-                    "text-xs",
-                    passwordStrength.strength <= 2 ? "text-red-500" : 
-                    passwordStrength.strength <= 3 ? "text-yellow-500" : "text-green-500"
-                  )}>
+                  <p className={cn("text-xs", passwordStrength.strength <= 2 ? "text-red-500" : passwordStrength.strength <= 3 ? "text-yellow-500" : "text-green-500")}>
                     قوة كلمة المرور: {passwordStrength.label}
                   </p>
-                </div>
-              )}
+                </div>}
               
-              {errors.password && (
-                <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+              {errors.password && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                   <AlertCircle className="w-4 h-4" />
                   {errors.password}
-                </p>
-              )}
+                </p>}
             </div>
 
             {/* Forgot Password Link - Only for Login */}
-            {isLogin && (
-              <div className="text-left">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsForgotPassword(true);
-                    setErrors({});
-                  }}
-                  className="text-sm text-primary hover:text-primary/80 hover:underline transition-colors"
-                >
+            {isLogin && <div className="text-left">
+                <button type="button" onClick={() => {
+              setIsForgotPassword(true);
+              setErrors({});
+            }} className="text-sm text-primary hover:text-primary/80 hover:underline transition-colors">
                   نسيت كلمة المرور؟
                 </button>
-              </div>
-            )}
+              </div>}
 
             {/* Privacy Notice - Only for Signup */}
-            {!isLogin && (
-              <div className="flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-xl text-right">
+            {!isLogin && <div className="flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-xl text-right">
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   جميع البيانات المدخلة تُستخدم لأغراض التقييم فقط ولا يتم مشاركتها مع أي طرف ثالث.
                 </p>
-              </div>
-            )}
+              </div>}
 
             {/* Error Message */}
-            {errors.general && (
-              <div className="space-y-3 animate-scale-in">
+            {errors.general && <div className="space-y-3 animate-scale-in">
                 <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3">
                   <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                   <p className="text-destructive text-sm">{errors.general}</p>
                 </div>
-                {errors.emailConfirmationHint && (
-                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                {errors.emailConfirmationHint && <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
                     <p className="text-amber-600 text-sm flex items-center gap-2">
                       <Mail className="w-4 h-4 flex-shrink-0" />
                       إذا كنت قد سجلت مسبقاً، تحقق من بريدك الإلكتروني وافتح رابط التأكيد
                     </p>
-                  </div>
-                )}
-              </div>
-            )}
+                  </div>}
+              </div>}
 
             {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={cn(
-                "w-full py-4 font-bold rounded-xl transition-all duration-300",
-                "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
-                "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
-                "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
-                "flex items-center justify-center gap-3"
-              )}
-            >
-              {isSubmitting ? (
-                <>
+            <button type="submit" disabled={isSubmitting} className={cn("w-full py-4 font-bold rounded-xl transition-all duration-300", "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background", "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100", "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent", "flex items-center justify-center gap-3")}>
+              {isSubmitting ? <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span>جاري المعالجة...</span>
-                </>
-              ) : (
-                <>
+                </> : <>
                   {isLogin ? <LogIn className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
                   <span>{isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'}</span>
-                </>
-              )}
+                </>}
             </button>
           </form>
 
           {/* Toggle Mode */}
           <div className="mt-8 pt-6 border-t border-border/50">
-            <button
-              onClick={toggleMode}
-              className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
-            >
+            <button onClick={toggleMode} className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group">
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
               <span>{isLogin ? 'ليس لديك حساب؟ سجل الآن' : 'لديك حساب؟ سجل الدخول'}</span>
             </button>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
