@@ -33,8 +33,8 @@ export function Assessment() {
   }, [currentStep, getResult, analyzeResult, saveAssessmentToDatabase]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="absolute top-4 left-4">
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-6">
+      <div className="absolute top-3 left-3 md:top-4 md:left-4 z-10">
         <EditOrganizationModal />
       </div>
       <div className="w-full max-w-3xl">
@@ -43,7 +43,7 @@ export function Assessment() {
         )}
 
         {currentStep === 'questions' && (
-          <div className="card-elevated rounded-2xl p-8 md:p-12">
+          <div className="card-elevated rounded-2xl p-5 md:p-8 lg:p-12">
             <ProgressIndicator
               current={currentQuestionIndex + 1}
               total={totalQuestions}

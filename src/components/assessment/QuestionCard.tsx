@@ -12,14 +12,14 @@ interface QuestionCardProps {
 export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious }: QuestionCardProps) {
   return (
     <div className="animate-slide-up">
-      <h2 className="text-2xl md:text-2xl font-semibold text-foreground mb-10 leading-relaxed text-center">
+      <h2 className="text-lg md:text-xl lg:text-2xl font-semibold text-foreground mb-6 md:mb-10 leading-relaxed text-center">
         {question.text}
       </h2>
 
       <div
         className={cn(
-          "grid gap-4",
-          question.options.length <= 2 ? "grid-cols-2 max-w-md mx-auto" : "grid-cols-1 max-w-lg mx-auto",
+          "grid gap-3 md:gap-4",
+          question.options.length <= 2 ? "grid-cols-2 max-w-sm md:max-w-md mx-auto" : "grid-cols-1 max-w-lg mx-auto",
         )}
       >
         {question.options.map((option) => {
@@ -31,7 +31,7 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
               key={option.id}
               onClick={() => onSelect(option)}
               className={cn(
-                "group relative p-5 rounded-lg border-2 transition-all duration-300",
+                "group relative p-3 md:p-5 rounded-lg border-2 transition-all duration-300",
                 "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background",
                 selectedOptionId === option.id
                   ? isYes
@@ -53,7 +53,7 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
                   "hover:border-primary/50 hover:bg-secondary/50 focus:ring-primary/30",
               )}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 md:gap-4">
                 <div
                   className={cn(
                     "w-5 h-5 rounded-full border-2 transition-all duration-300 flex-shrink-0",
@@ -71,7 +71,7 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
                 </div>
                 <span
                   className={cn(
-                    "text-lg font-medium transition-colors",
+                    "text-sm md:text-lg font-medium transition-colors",
                     selectedOptionId === option.id ? "text-primary" : "text-foreground",
                     selectedOptionId !== option.id && isYes && "group-hover:text-green-500",
                     selectedOptionId !== option.id && isNo && "group-hover:text-red-500",
@@ -86,13 +86,13 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
       </div>
 
       {onPrevious && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-6 md:mt-8 flex justify-center">
           <button
             onClick={onPrevious}
-            className="flex items-center gap-2 px-6 py-3 text-muted-foreground hover:text-foreground 
-                       transition-colors duration-200 rounded-lg hover:bg-secondary/50"
+            className="flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 text-muted-foreground hover:text-foreground 
+                       transition-colors duration-200 rounded-lg hover:bg-secondary/50 text-sm md:text-base"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
             <span>السؤال السابق</span>
           </button>
         </div>

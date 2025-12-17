@@ -331,54 +331,60 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/assessment")}>
-              <ChevronLeft className="h-4 w-4 ml-1" />
-              الرئيسية
+        <div className="container mx-auto px-4 py-3 md:py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/assessment")}>
+                <ChevronLeft className="h-4 w-4 ml-1" />
+                <span className="hidden xs:inline">الرئيسية</span>
+              </Button>
+              <h1 className="text-lg md:text-xl font-bold text-foreground sm:hidden">لوحة التحكم</h1>
+              <Button variant="ghost" size="sm" onClick={handleSignOut} className="sm:hidden">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+            <h1 className="hidden sm:block text-xl font-bold text-foreground">لوحة التحكم</h1>
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="hidden sm:flex">
+              <LogOut className="h-4 w-4 ml-2" />
+              تسجيل الخروج
             </Button>
-            <h1 className="absolute left-1/2 -translate-x-1/2 text-xl font-bold text-foreground">لوحة التحكم</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4 ml-2" />
-            تسجيل الخروج
-          </Button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-3 md:px-4 py-4 md:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{organizations.length}</div>
+              <div className="text-xl md:text-2xl font-bold">{organizations.length}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">إجمالي التقييمات</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">إجمالي التقييمات</CardTitle>
               <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{assessments.length}</div>
+              <div className="text-xl md:text-2xl font-bold">{assessments.length}</div>
               <p className="text-xs text-muted-foreground">
-                {qualifiedCount} مؤهل • متوسط النتيجة: {avgScore}
+                {qualifiedCount} مؤهل • متوسط: {avgScore}
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="sm:col-span-2 lg:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">معدل التأهيل</CardTitle>
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">معدل التأهيل</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl md:text-2xl font-bold">
                 {assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%
               </div>
             </CardContent>
@@ -386,15 +392,17 @@ export default function AdminDashboard() {
         </div>
 
         {/* Data Tables */}
-        <Tabs defaultValue="assessments" className="space-y-10" dir="rtl">
-          <TabsList className="w-full justify-start">
-            <TabsTrigger value="assessments">التقييمات</TabsTrigger>
-            <TabsTrigger value="organizations">الجهات</TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-1">
-              <UserCog className="h-4 w-4" />
-              إدارة المستخدمين
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="assessments" className="space-y-4 md:space-y-10" dir="rtl">
+          <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
+            <TabsList className="w-max min-w-full md:w-full justify-start">
+              <TabsTrigger value="assessments" className="text-xs md:text-sm">التقييمات</TabsTrigger>
+              <TabsTrigger value="organizations" className="text-xs md:text-sm">الجهات</TabsTrigger>
+              <TabsTrigger value="users" className="flex items-center gap-1 text-xs md:text-sm">
+                <UserCog className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden xs:inline">إدارة</span> المستخدمين
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="assessments">
             <Card>
@@ -497,12 +505,12 @@ export default function AdminDashboard() {
 
           <TabsContent value="users">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-right">
-                  <Shield className="h-5 w-5" />
+              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <CardTitle className="flex items-center gap-2 text-right text-base md:text-lg">
+                  <Shield className="h-4 w-4 md:h-5 md:w-5" />
                   إدارة المستخدمين والصلاحيات
                 </CardTitle>
-                <Button onClick={() => setShowAddUserDialog(true)} className="flex items-center gap-2">
+                <Button onClick={() => setShowAddUserDialog(true)} size="sm" className="flex items-center gap-2 w-full sm:w-auto">
                   <UserPlus className="h-4 w-4" />
                   إضافة مستخدم
                 </Button>
