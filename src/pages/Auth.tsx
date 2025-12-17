@@ -1069,7 +1069,7 @@ export default function Auth() {
                       onFocus={() => setFocusedField("phone")}
                       onBlur={() => setFocusedField(null)}
                       className={cn(
-                        "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                        "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
                         "focus:outline-none focus:bg-secondary transition-all duration-300",
                         errors.phone
                           ? "border-destructive focus:border-destructive"
@@ -1218,7 +1218,7 @@ export default function Auth() {
 
             {/* Forgot Password Link - Only for Login */}
             {isLogin && (
-              <div className="text-center">
+              <div className="text-left">
                 <button
                   type="button"
                   onClick={() => {
