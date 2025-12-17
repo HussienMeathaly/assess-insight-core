@@ -1218,7 +1218,7 @@ export default function Auth() {
 
             {/* Forgot Password Link - Only for Login */}
             {isLogin && (
-              <div className="text-left">
+              <div className="text-center">
                 <button
                   type="button"
                   onClick={() => {
