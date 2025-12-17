@@ -55,7 +55,9 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           </div>
 
           <h2 className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground mb-2">نتيجة التقييم الأولي</h2>
-          <p className="text-muted-foreground text-sm md:text-base">{isQualified ? "جاهزية مبدئية متوفرة" : "فجوات في الجاهزية"}</p>
+          <p className="text-muted-foreground text-sm md:text-base">
+            {isQualified ? "جاهزية مبدئية متوفرة" : "فجوات في الجاهزية"}
+          </p>
         </div>
 
         {/* Score Breakdown */}
@@ -106,11 +108,13 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
 
               return (
                 <div key={answer.questionId} className="text-right">
-                  <div className="flex justify-between items-center mb-1 gap-2">
+                  <div className="flex flex-row-reverse justify-between items-center mb-1 gap-2">
                     <span className="text-xs md:text-sm font-medium text-foreground whitespace-nowrap">
                       {answer.score.toFixed(1)} / {maxQuestionScore}
                     </span>
-                    <span className="text-xs md:text-sm text-muted-foreground truncate max-w-[65%] md:max-w-[70%]">{question.text}</span>
+                    <span className="text-xs md:text-sm text-muted-foreground truncate max-w-[65%] md:max-w-[70%]">
+                      {question.text}
+                    </span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-1.5 md:h-2 overflow-hidden">
                     <div
