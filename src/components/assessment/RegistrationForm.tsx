@@ -107,11 +107,24 @@ export function RegistrationForm({ onSubmit, onBack }: RegistrationFormProps) {
   const [errors, setErrors] = useState<Partial<Record<keyof RegistrationData, string>>>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  const validateField = (field: keyof RegistrationData, value: string) => {
+    const fieldSchema = {
+      organizationName: registrationSchema.shape.organizationName,
+      contactPerson: registrationSchema.shape.contactPerson,
+      phone: registrationSchema.shape.phone,
+      email: registrationSchema.shape.email,
+    };
+    
+    const result = fieldSchema[field].safeParse(value);
+    return result.success ? undefined : result.error.errors[0]?.message;
+  };
+
   const handleChange = (field: keyof RegistrationData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
+    
+    // Real-time validation
+    const error = validateField(field, value);
+    setErrors(prev => ({ ...prev, [field]: error }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
