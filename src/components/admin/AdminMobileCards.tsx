@@ -33,7 +33,7 @@ export function AssessmentsMobileCards({
     <div className="space-y-3">
       {assessments.map((a) => (
         <Card key={a.id}>
-          <CardContent className="p-4">
+          <CardContent className="p-4 overflow-hidden">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-semibold truncate">{a.organization?.name || "غير معروف"}</p>
@@ -84,21 +84,23 @@ export function OrganizationsMobileCards({ organizations }: { organizations: Adm
     <div className="space-y-3">
       {organizations.map((org) => (
         <Card key={org.id}>
-          <CardContent className="p-4">
-            <p className="font-semibold">{org.name}</p>
+          <CardContent className="p-4 overflow-hidden">
+            <p className="font-semibold truncate" title={org.name}>
+              {org.name}
+            </p>
 
             <div className="mt-3 grid grid-cols-1 gap-2 text-sm">
-              <div>
+              <div className="min-w-0">
                 <span className="text-muted-foreground">المسؤول: </span>
-                <span className="text-foreground">{org.contact_person}</span>
+                <span className="text-foreground break-words">{org.contact_person}</span>
               </div>
-              <div dir="ltr" className="text-left">
+              <div dir="ltr" className="text-left min-w-0">
                 <span className="text-muted-foreground">البريد: </span>
-                <span className="text-foreground">{org.email}</span>
+                <span className="text-foreground break-all">{org.email}</span>
               </div>
-              <div dir="ltr" className="text-left">
+              <div dir="ltr" className="text-left min-w-0">
                 <span className="text-muted-foreground">الهاتف: </span>
-                <span className="text-foreground">{org.phone}</span>
+                <span className="text-foreground break-all">{org.phone}</span>
               </div>
               <div dir="ltr" className="text-left">
                 <span className="text-muted-foreground">تاريخ التسجيل: </span>
@@ -144,10 +146,10 @@ export function UsersMobileCards({
 
         return (
           <Card key={u.id}>
-            <CardContent className="p-4">
+            <CardContent className="p-4 overflow-hidden">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     {isMe && <Badge variant="outline">أنت</Badge>}
                     <span dir="ltr" className="font-semibold truncate">
                       {u.email}
