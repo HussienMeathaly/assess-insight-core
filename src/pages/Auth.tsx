@@ -31,18 +31,52 @@ type FormErrors = {
   emailConfirmationHint?: boolean;
 };
 
+const SESSION_STORAGE_KEY = 'auth_form_data';
+
 export default function Auth() {
   const navigate = useNavigate();
   const { signIn, signUp, resetPassword, isAuthenticated, loading, user } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    organizationName: '',
-    contactPerson: '',
-    phone: '',
+  
+  // Initialize state from sessionStorage
+  const [isLogin, setIsLogin] = useState(() => {
+    const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.isLogin ?? true;
+    }
+    return true;
   });
+  
+  const [isForgotPassword, setIsForgotPassword] = useState(() => {
+    const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed.isForgotPassword ?? false;
+    }
+    return false;
+  });
+  
+  const [formData, setFormData] = useState(() => {
+    const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return {
+        email: parsed.email || '',
+        password: '', // Never persist password for security
+        organizationName: parsed.organizationName || '',
+        contactPerson: parsed.contactPerson || '',
+        phone: parsed.phone || '',
+      };
+    }
+    return {
+      email: '',
+      password: '',
+      organizationName: '',
+      contactPerson: '',
+      phone: '',
+    };
+  });
+  
   const [errors, setErrors] = useState<FormErrors>({});
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showResetSent, setShowResetSent] = useState(false);
@@ -50,8 +84,27 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // Save form data to sessionStorage when it changes
+  useEffect(() => {
+    const dataToSave = {
+      email: formData.email,
+      organizationName: formData.organizationName,
+      contactPerson: formData.contactPerson,
+      phone: formData.phone,
+      isLogin,
+      isForgotPassword,
+    };
+    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(dataToSave));
+  }, [formData.email, formData.organizationName, formData.contactPerson, formData.phone, isLogin, isForgotPassword]);
+
+  // Clear sessionStorage on successful auth
+  const clearSessionStorage = () => {
+    sessionStorage.removeItem(SESSION_STORAGE_KEY);
+  };
+
   useEffect(() => {
     if (isAuthenticated && !loading) {
+      clearSessionStorage();
       navigate('/assessment');
     }
   }, [isAuthenticated, loading, navigate]);
@@ -133,6 +186,7 @@ export default function Auth() {
         } else if (data?.user) {
           // Save organization data after successful signup
           await saveOrganization(data.user.id);
+          clearSessionStorage();
           setShowConfirmation(true);
         }
       }
@@ -180,6 +234,8 @@ export default function Auth() {
     setFormData({ email: '', password: '', organizationName: '', contactPerson: '', phone: '' });
     setShowConfirmation(false);
     setShowResetSent(false);
+    // Clear sessionStorage when switching modes
+    clearSessionStorage();
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -321,6 +377,7 @@ export default function Auth() {
                 setShowResetSent(false);
                 setIsForgotPassword(false);
                 setFormData({ email: '', password: '', organizationName: '', contactPerson: '', phone: '' });
+                clearSessionStorage();
               }}
               className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
             >
@@ -451,6 +508,7 @@ export default function Auth() {
                   setIsForgotPassword(false);
                   setErrors({});
                   setFormData({ email: '', password: '', organizationName: '', contactPerson: '', phone: '' });
+                  clearSessionStorage();
                 }}
                 className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
               >
