@@ -1,41 +1,68 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import profitLogo from '@/assets/profit-logo.png';
-import { Mail, Lock, Eye, EyeOff, LogIn, UserPlus, ArrowLeft, Loader2, AlertCircle, CheckCircle2, MailCheck, Building2, User, Phone, Shield, KeyRound } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { logError } from '@/lib/logger';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import profitLogo from "@/assets/profit-logo.png";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  LogIn,
+  UserPlus,
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  MailCheck,
+  Building2,
+  User,
+  Phone,
+  Shield,
+  KeyRound,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { logError } from "@/lib/logger";
 
 // اسم الجهة + اسم مدخل البيانات: عربي/إنجليزي/أرقام/مسافات/_ فقط
 const validOrgAndNameRegex = /^[\u0600-\u06FFa-zA-Z0-9\s_]+$/;
 // رقم التواصل: أرقام فقط وبحد أدنى 10
 const phoneDigitsMin10Regex = /^\d{10,}$/;
-type SignupField = 'organizationName' | 'contactPerson' | 'phone';
+type SignupField = "organizationName" | "contactPerson" | "phone";
 const loginSchema = z.object({
-  email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
-  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل')
+  email: z.string().trim().email("البريد الإلكتروني غير صحيح"),
+  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
 });
 const signupSchema = z.object({
-  email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
-  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-  organizationName: z.string().trim().min(2, 'اسم الجهة مطلوب').regex(validOrgAndNameRegex, 'اسم الجهة يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
-  contactPerson: z.string().trim().min(2, 'اسم مدخل البيانات مطلوب').regex(validOrgAndNameRegex, 'اسم مدخل البيانات يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
-  phone: z.string().trim().regex(phoneDigitsMin10Regex, 'رقم التواصل يجب أن لا يقل عن 10 أرقام')
+  email: z.string().trim().email("البريد الإلكتروني غير صحيح"),
+  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+  organizationName: z
+    .string()
+    .trim()
+    .min(2, "اسم الجهة مطلوب")
+    .regex(validOrgAndNameRegex, "اسم الجهة يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط"),
+  contactPerson: z
+    .string()
+    .trim()
+    .min(2, "اسم مدخل البيانات مطلوب")
+    .regex(validOrgAndNameRegex, "اسم مدخل البيانات يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط"),
+  phone: z.string().trim().regex(phoneDigitsMin10Regex, "رقم التواصل يجب أن لا يقل عن 10 أرقام"),
 });
 const signupFieldSchema = {
   organizationName: signupSchema.shape.organizationName,
   contactPerson: signupSchema.shape.contactPerson,
-  phone: signupSchema.shape.phone
+  phone: signupSchema.shape.phone,
 } as const;
-const resetPasswordSchema = z.object({
-  newPassword: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
-  confirmPassword: z.string().min(6, 'تأكيد كلمة المرور مطلوب')
-}).refine(data => data.newPassword === data.confirmPassword, {
-  message: 'كلمتا المرور غير متطابقتين',
-  path: ['confirmPassword']
-});
+const resetPasswordSchema = z
+  .object({
+    newPassword: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+    confirmPassword: z.string().min(6, "تأكيد كلمة المرور مطلوب"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "كلمتا المرور غير متطابقتين",
+    path: ["confirmPassword"],
+  });
 type FormErrors = {
   email?: string;
   password?: string;
@@ -47,17 +74,10 @@ type FormErrors = {
   newPassword?: string;
   confirmPassword?: string;
 };
-const SESSION_STORAGE_KEY = 'auth_form_data';
+const SESSION_STORAGE_KEY = "auth_form_data";
 export default function Auth() {
   const navigate = useNavigate();
-  const {
-    signIn,
-    signUp,
-    resetPassword,
-    isAuthenticated,
-    loading,
-    user
-  } = useAuth();
+  const { signIn, signUp, resetPassword, isAuthenticated, loading, user } = useAuth();
 
   // Initialize state from sessionStorage
   const [isLogin, setIsLogin] = useState(() => {
@@ -78,8 +98,8 @@ export default function Auth() {
   });
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [resetPasswordData, setResetPasswordData] = useState({
-    newPassword: '',
-    confirmPassword: ''
+    newPassword: "",
+    confirmPassword: "",
   });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -89,19 +109,19 @@ export default function Auth() {
     if (saved) {
       const parsed = JSON.parse(saved);
       return {
-        email: parsed.email || '',
-        password: '',
-        organizationName: parsed.organizationName || '',
-        contactPerson: parsed.contactPerson || '',
-        phone: parsed.phone || ''
+        email: parsed.email || "",
+        password: "",
+        organizationName: parsed.organizationName || "",
+        contactPerson: parsed.contactPerson || "",
+        phone: parsed.phone || "",
       };
     }
     return {
-      email: '',
-      password: '',
-      organizationName: '',
-      contactPerson: '',
-      phone: ''
+      email: "",
+      password: "",
+      organizationName: "",
+      contactPerson: "",
+      phone: "",
     };
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -114,11 +134,9 @@ export default function Auth() {
   // Listen for PASSWORD_RECOVERY event
   useEffect(() => {
     const {
-      data: {
-        subscription
-      }
+      data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
+      if (event === "PASSWORD_RECOVERY") {
         setIsResettingPassword(true);
         setIsForgotPassword(false);
         setIsLogin(true);
@@ -135,7 +153,7 @@ export default function Auth() {
       contactPerson: formData.contactPerson,
       phone: formData.phone,
       isLogin,
-      isForgotPassword
+      isForgotPassword,
     };
     sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(dataToSave));
   }, [formData.email, formData.organizationName, formData.contactPerson, formData.phone, isLogin, isForgotPassword]);
@@ -147,7 +165,7 @@ export default function Auth() {
   useEffect(() => {
     if (isAuthenticated && !loading && !isResettingPassword) {
       clearSessionStorage();
-      navigate('/assessment');
+      navigate("/assessment");
     }
   }, [isAuthenticated, loading, navigate, isResettingPassword]);
   const debounceTimers = useRef<Record<string, number>>({});
@@ -155,78 +173,82 @@ export default function Auth() {
     const result = signupFieldSchema[field].safeParse(value);
     return result.success ? undefined : result.error.errors[0]?.message;
   }, []);
-  const debouncedValidateSignupField = useCallback((field: SignupField, value: string) => {
-    const key = `signup_${field}`;
-    if (debounceTimers.current[key]) {
-      window.clearTimeout(debounceTimers.current[key]);
-    }
-    debounceTimers.current[key] = window.setTimeout(() => {
-      const error = validateSignupField(field, value);
-      setErrors(prev => ({
-        ...prev,
-        [field]: error
-      }));
-    }, 400);
-  }, [validateSignupField]);
+  const debouncedValidateSignupField = useCallback(
+    (field: SignupField, value: string) => {
+      const key = `signup_${field}`;
+      if (debounceTimers.current[key]) {
+        window.clearTimeout(debounceTimers.current[key]);
+      }
+      debounceTimers.current[key] = window.setTimeout(() => {
+        const error = validateSignupField(field, value);
+        setErrors((prev) => ({
+          ...prev,
+          [field]: error,
+        }));
+      }, 400);
+    },
+    [validateSignupField],
+  );
   const handleChange = (field: keyof typeof formData, value: string) => {
-    const nextValue = field === 'phone' ? value.replace(/\D/g, '') : value;
-    setFormData(prev => ({
+    const nextValue = field === "phone" ? value.replace(/\D/g, "") : value;
+    setFormData((prev) => ({
       ...prev,
-      [field]: nextValue
+      [field]: nextValue,
     }));
     if (errors[field as keyof FormErrors]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: undefined
+        [field]: undefined,
       }));
     }
-    if (!isLogin && (field === 'organizationName' || field === 'contactPerson' || field === 'phone')) {
+    if (!isLogin && (field === "organizationName" || field === "contactPerson" || field === "phone")) {
       debouncedValidateSignupField(field as SignupField, nextValue);
     }
   };
   const getPasswordStrength = (password: string) => {
-    if (!password) return {
-      strength: 0,
-      label: '',
-      color: ''
-    };
+    if (!password)
+      return {
+        strength: 0,
+        label: "",
+        color: "",
+      };
     let strength = 0;
     if (password.length >= 6) strength++;
     if (password.length >= 8) strength++;
     if (/[A-Z]/.test(password)) strength++;
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-    if (strength <= 2) return {
-      strength,
-      label: 'ضعيفة',
-      color: 'bg-red-500'
-    };
-    if (strength <= 3) return {
-      strength,
-      label: 'متوسطة',
-      color: 'bg-yellow-500'
-    };
+    if (strength <= 2)
+      return {
+        strength,
+        label: "ضعيفة",
+        color: "bg-red-500",
+      };
+    if (strength <= 3)
+      return {
+        strength,
+        label: "متوسطة",
+        color: "bg-yellow-500",
+      };
     return {
       strength,
-      label: 'قوية',
-      color: 'bg-green-500'
+      label: "قوية",
+      color: "bg-green-500",
     };
   };
   const passwordStrength = getPasswordStrength(formData.password);
   const saveOrganization = async (userId: string) => {
     try {
-      const {
-        error
-      } = await supabase.from('organizations').insert({
+      const { error } = await supabase.from("organizations").insert({
         name: formData.organizationName,
         contact_person: formData.contactPerson,
         phone: formData.phone,
         email: formData.email,
-        user_id: userId
+        user_id: userId,
       });
       if (error) throw error;
     } catch (error) {
-      logError('Error saving organization', error);
+      logError("Error saving organization", error);
       throw error;
     }
   };
@@ -234,14 +256,18 @@ export default function Auth() {
     e.preventDefault();
     setErrors({});
     const schema = isLogin ? loginSchema : signupSchema;
-    const dataToValidate = isLogin ? {
-      email: formData.email,
-      password: formData.password
-    } : formData;
+    const dataToValidate = isLogin
+      ? {
+          email: formData.email,
+          password: formData.password,
+        }
+      : formData;
     const result = schema.safeParse(dataToValidate);
     if (!result.success) {
-      const fieldErrors: Partial<Record<'email' | 'password' | 'organizationName' | 'contactPerson' | 'phone' | 'general', string>> = {};
-      result.error.errors.forEach(err => {
+      const fieldErrors: Partial<
+        Record<"email" | "password" | "organizationName" | "contactPerson" | "phone" | "general", string>
+      > = {};
+      result.error.errors.forEach((err) => {
         const field = err.path[0] as keyof typeof fieldErrors;
         if (field) fieldErrors[field] = err.message;
       });
@@ -251,17 +277,12 @@ export default function Auth() {
     setIsSubmitting(true);
     try {
       if (isLogin) {
-        const {
-          error
-        } = await signIn(formData.email, formData.password);
+        const { error } = await signIn(formData.email, formData.password);
         if (error) {
           handleAuthError(error);
         }
       } else {
-        const {
-          data,
-          error
-        } = await signUp(formData.email, formData.password);
+        const { data, error } = await signUp(formData.email, formData.password);
         if (error) {
           handleAuthError(error);
         } else if (data?.user) {
@@ -273,42 +294,40 @@ export default function Auth() {
       }
     } catch {
       setErrors({
-        general: 'حدث خطأ في الاتصال'
+        general: "حدث خطأ في الاتصال",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-  const handleAuthError = (error: {
-    message: string;
-  }) => {
-    let errorMessage = 'حدث خطأ غير متوقع';
+  const handleAuthError = (error: { message: string }) => {
+    let errorMessage = "حدث خطأ غير متوقع";
     let isEmailConfirmationHint = false;
     const msg = error.message.toLowerCase();
-    if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
+    if (msg.includes("invalid login credentials") || msg.includes("invalid_credentials")) {
       if (isLogin) {
-        errorMessage = 'بيانات تسجيل الدخول غير صحيحة، أو لم يتم تأكيد البريد الإلكتروني بعد';
+        errorMessage = "بيانات تسجيل الدخول غير صحيحة، أو لم يتم تأكيد البريد الإلكتروني بعد";
         isEmailConfirmationHint = true;
       } else {
-        errorMessage = 'بيانات تسجيل الدخول غير صحيحة';
+        errorMessage = "بيانات تسجيل الدخول غير صحيحة";
       }
-    } else if (msg.includes('user already registered') || msg.includes('already registered')) {
-      errorMessage = 'البريد الإلكتروني مسجل مسبقاً';
-    } else if (msg.includes('email not confirmed')) {
-      errorMessage = 'يرجى تأكيد البريد الإلكتروني أولاً';
+    } else if (msg.includes("user already registered") || msg.includes("already registered")) {
+      errorMessage = "البريد الإلكتروني مسجل مسبقاً";
+    } else if (msg.includes("email not confirmed")) {
+      errorMessage = "يرجى تأكيد البريد الإلكتروني أولاً";
       isEmailConfirmationHint = true;
-    } else if (msg.includes('password should be at least') || msg.includes('password')) {
-      errorMessage = 'كلمة المرور ضعيفة جداً';
-    } else if (msg.includes('rate limit') || msg.includes('too many requests')) {
-      errorMessage = 'محاولات كثيرة، يرجى الانتظار قليلاً';
-    } else if (msg.includes('network') || msg.includes('fetch')) {
-      errorMessage = 'خطأ في الاتصال بالخادم';
-    } else if (msg.includes('session') || msg.includes('refresh')) {
-      errorMessage = 'انتهت الجلسة، يرجى المحاولة مرة أخرى';
+    } else if (msg.includes("password should be at least") || msg.includes("password")) {
+      errorMessage = "كلمة المرور ضعيفة جداً";
+    } else if (msg.includes("rate limit") || msg.includes("too many requests")) {
+      errorMessage = "محاولات كثيرة، يرجى الانتظار قليلاً";
+    } else if (msg.includes("network") || msg.includes("fetch")) {
+      errorMessage = "خطأ في الاتصال بالخادم";
+    } else if (msg.includes("session") || msg.includes("refresh")) {
+      errorMessage = "انتهت الجلسة، يرجى المحاولة مرة أخرى";
     }
     setErrors({
       general: errorMessage,
-      emailConfirmationHint: isEmailConfirmationHint
+      emailConfirmationHint: isEmailConfirmationHint,
     });
   };
   const toggleMode = () => {
@@ -316,11 +335,11 @@ export default function Auth() {
     setIsForgotPassword(false);
     setErrors({});
     setFormData({
-      email: '',
-      password: '',
-      organizationName: '',
-      contactPerson: '',
-      phone: ''
+      email: "",
+      password: "",
+      organizationName: "",
+      contactPerson: "",
+      phone: "",
     });
     setShowConfirmation(false);
     setShowResetSent(false);
@@ -330,28 +349,26 @@ export default function Auth() {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    const emailResult = z.string().email('البريد الإلكتروني غير صحيح').safeParse(formData.email);
+    const emailResult = z.string().email("البريد الإلكتروني غير صحيح").safeParse(formData.email);
     if (!emailResult.success) {
       setErrors({
-        email: emailResult.error.errors[0].message
+        email: emailResult.error.errors[0].message,
       });
       return;
     }
     setIsSubmitting(true);
     try {
-      const {
-        error
-      } = await resetPassword(formData.email);
+      const { error } = await resetPassword(formData.email);
       if (error) {
         setErrors({
-          general: 'حدث خطأ أثناء إرسال رابط إعادة التعيين'
+          general: "حدث خطأ أثناء إرسال رابط إعادة التعيين",
         });
       } else {
         setShowResetSent(true);
       }
     } catch {
       setErrors({
-        general: 'حدث خطأ في الاتصال'
+        general: "حدث خطأ في الاتصال",
       });
     } finally {
       setIsSubmitting(false);
@@ -362,9 +379,9 @@ export default function Auth() {
     setErrors({});
     const result = resetPasswordSchema.safeParse(resetPasswordData);
     if (!result.success) {
-      const fieldErrors: Partial<Pick<FormErrors, 'newPassword' | 'confirmPassword' | 'general'>> = {};
-      result.error.errors.forEach(err => {
-        const field = err.path[0] as 'newPassword' | 'confirmPassword';
+      const fieldErrors: Partial<Pick<FormErrors, "newPassword" | "confirmPassword" | "general">> = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as "newPassword" | "confirmPassword";
         if (field) fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
@@ -372,67 +389,71 @@ export default function Auth() {
     }
     setIsSubmitting(true);
     try {
-      const {
-        error
-      } = await supabase.auth.updateUser({
-        password: resetPasswordData.newPassword
+      const { error } = await supabase.auth.updateUser({
+        password: resetPasswordData.newPassword,
       });
       if (error) {
         setErrors({
-          general: 'حدث خطأ أثناء تحديث كلمة المرور'
+          general: "حدث خطأ أثناء تحديث كلمة المرور",
         });
       } else {
         setResetSuccess(true);
       }
     } catch {
       setErrors({
-        general: 'حدث خطأ في الاتصال'
+        general: "حدث خطأ في الاتصال",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
   const getNewPasswordStrength = (password: string) => {
-    if (!password) return {
-      strength: 0,
-      label: '',
-      color: ''
-    };
+    if (!password)
+      return {
+        strength: 0,
+        label: "",
+        color: "",
+      };
     let strength = 0;
     if (password.length >= 6) strength++;
     if (password.length >= 8) strength++;
     if (/[A-Z]/.test(password)) strength++;
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-    if (strength <= 2) return {
-      strength,
-      label: 'ضعيفة',
-      color: 'bg-red-500'
-    };
-    if (strength <= 3) return {
-      strength,
-      label: 'متوسطة',
-      color: 'bg-yellow-500'
-    };
+    if (strength <= 2)
+      return {
+        strength,
+        label: "ضعيفة",
+        color: "bg-red-500",
+      };
+    if (strength <= 3)
+      return {
+        strength,
+        label: "متوسطة",
+        color: "bg-yellow-500",
+      };
     return {
       strength,
-      label: 'قوية',
-      color: 'bg-green-500'
+      label: "قوية",
+      color: "bg-green-500",
     };
   };
   const newPasswordStrength = getNewPasswordStrength(resetPasswordData.newPassword);
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">
+    return (
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-primary animate-spin" />
           <p className="text-muted-foreground">جاري التحميل...</p>
         </div>
-      </div>;
+      </div>
+    );
   }
 
   // Show password reset success
   if (resetSuccess) {
-    return <div className="min-h-screen flex items-center justify-center p-6">
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="text-center mb-8 animate-fade-in">
             <div className="relative inline-block">
@@ -443,38 +464,41 @@ export default function Auth() {
 
           <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden text-center">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent" />
-            
+
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/10 mb-6">
               <CheckCircle2 className="w-10 h-10 text-green-500" />
             </div>
-            
-            <h2 className="text-2xl font-bold text-foreground mb-4">
-              تم تغيير كلمة المرور بنجاح
-            </h2>
-            
+
+            <h2 className="text-2xl font-bold text-foreground mb-4">تم تغيير كلمة المرور بنجاح</h2>
+
             <p className="text-muted-foreground mb-6 leading-relaxed">
               يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة
             </p>
-            
-            <button onClick={() => {
-            setResetSuccess(false);
-            setIsResettingPassword(false);
-            setResetPasswordData({
-              newPassword: '',
-              confirmPassword: ''
-            });
-            navigate('/auth');
-          }} className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300">
+
+            <button
+              onClick={() => {
+                setResetSuccess(false);
+                setIsResettingPassword(false);
+                setResetPasswordData({
+                  newPassword: "",
+                  confirmPassword: "",
+                });
+                navigate("/auth");
+              }}
+              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
+            >
               تسجيل الدخول
             </button>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
 
   // Show password reset form
   if (isResettingPassword) {
-    return <div className="min-h-screen flex items-center justify-center p-6">
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="text-center mb-8 animate-fade-in">
             <div className="relative inline-block">
@@ -486,103 +510,191 @@ export default function Auth() {
 
           <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-            
+
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 bg-primary/10">
                 <KeyRound className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground">
-                إعادة تعيين كلمة المرور
-              </h2>
-              <p className="text-muted-foreground mt-2 text-sm">
-                أدخل كلمة المرور الجديدة
-              </p>
+              <h2 className="text-2xl font-bold text-foreground">إعادة تعيين كلمة المرور</h2>
+              <p className="text-muted-foreground mt-2 text-sm">أدخل كلمة المرور الجديدة</p>
             </div>
 
             <form onSubmit={handleResetPassword} className="space-y-5">
               {/* New Password */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-foreground">
-                  كلمة المرور الجديدة
-                </label>
+                <label className="block text-sm font-medium text-foreground">كلمة المرور الجديدة</label>
                 <div className="relative">
-                  <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'newPassword' ? "text-primary" : "text-muted-foreground")}>
+                  <div
+                    className={cn(
+                      "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                      focusedField === "newPassword" ? "text-primary" : "text-muted-foreground",
+                    )}
+                  >
                     <Lock className="w-5 h-5" />
                   </div>
-                  <input type={showNewPassword ? "text" : "password"} value={resetPasswordData.newPassword} onChange={e => setResetPasswordData(prev => ({
-                  ...prev,
-                  newPassword: e.target.value
-                }))} onFocus={() => setFocusedField('newPassword')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.newPassword ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="أدخل كلمة المرور الجديدة" dir="ltr" />
-                  <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={resetPasswordData.newPassword}
+                    onChange={(e) =>
+                      setResetPasswordData((prev) => ({
+                        ...prev,
+                        newPassword: e.target.value,
+                      }))
+                    }
+                    onFocus={() => setFocusedField("newPassword")}
+                    onBlur={() => setFocusedField(null)}
+                    className={cn(
+                      "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                      "focus:outline-none focus:bg-secondary transition-all duration-300",
+                      errors.newPassword
+                        ? "border-destructive focus:border-destructive"
+                        : "border-border focus:border-primary",
+                    )}
+                    placeholder="أدخل كلمة المرور الجديدة"
+                    dir="ltr"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                {errors.newPassword && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                {errors.newPassword && (
+                  <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                     <AlertCircle className="w-4 h-4" />
                     {errors.newPassword}
-                  </p>}
-                {resetPasswordData.newPassword && <div className="space-y-2 animate-fade-in">
+                  </p>
+                )}
+                {resetPasswordData.newPassword && (
+                  <div className="space-y-2 animate-fade-in">
                     <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map(level => <div key={level} className={cn("h-1 flex-1 rounded-full transition-all duration-300", level <= newPasswordStrength.strength ? newPasswordStrength.color : "bg-secondary")} />)}
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <div
+                          key={level}
+                          className={cn(
+                            "h-1 flex-1 rounded-full transition-all duration-300",
+                            level <= newPasswordStrength.strength ? newPasswordStrength.color : "bg-secondary",
+                          )}
+                        />
+                      ))}
                     </div>
-                    <p className={cn("text-xs", newPasswordStrength.strength <= 2 ? "text-red-500" : newPasswordStrength.strength <= 3 ? "text-yellow-500" : "text-green-500")}>
+                    <p
+                      className={cn(
+                        "text-xs",
+                        newPasswordStrength.strength <= 2
+                          ? "text-red-500"
+                          : newPasswordStrength.strength <= 3
+                            ? "text-yellow-500"
+                            : "text-green-500",
+                      )}
+                    >
                       قوة كلمة المرور: {newPasswordStrength.label}
                     </p>
-                  </div>}
+                  </div>
+                )}
               </div>
 
               {/* Confirm Password */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-foreground">
-                  تأكيد كلمة المرور
-                </label>
+                <label className="block text-sm font-medium text-foreground">تأكيد كلمة المرور</label>
                 <div className="relative">
-                  <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'confirmPassword' ? "text-primary" : "text-muted-foreground")}>
+                  <div
+                    className={cn(
+                      "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                      focusedField === "confirmPassword" ? "text-primary" : "text-muted-foreground",
+                    )}
+                  >
                     <Shield className="w-5 h-5" />
                   </div>
-                  <input type={showConfirmPassword ? "text" : "password"} value={resetPasswordData.confirmPassword} onChange={e => setResetPasswordData(prev => ({
-                  ...prev,
-                  confirmPassword: e.target.value
-                }))} onFocus={() => setFocusedField('confirmPassword')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.confirmPassword ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="أعد إدخال كلمة المرور" dir="ltr" />
-                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={resetPasswordData.confirmPassword}
+                    onChange={(e) =>
+                      setResetPasswordData((prev) => ({
+                        ...prev,
+                        confirmPassword: e.target.value,
+                      }))
+                    }
+                    onFocus={() => setFocusedField("confirmPassword")}
+                    onBlur={() => setFocusedField(null)}
+                    className={cn(
+                      "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                      "focus:outline-none focus:bg-secondary transition-all duration-300",
+                      errors.confirmPassword
+                        ? "border-destructive focus:border-destructive"
+                        : "border-border focus:border-primary",
+                    )}
+                    placeholder="أعد إدخال كلمة المرور"
+                    dir="ltr"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                {errors.confirmPassword && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                {errors.confirmPassword && (
+                  <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                     <AlertCircle className="w-4 h-4" />
                     {errors.confirmPassword}
-                  </p>}
-                {resetPasswordData.confirmPassword && resetPasswordData.newPassword === resetPasswordData.confirmPassword && <p className="text-green-500 text-sm flex items-center gap-1 animate-fade-in">
-                    <CheckCircle2 className="w-4 h-4" />
-                    كلمتا المرور متطابقتان
-                  </p>}
+                  </p>
+                )}
+                {resetPasswordData.confirmPassword &&
+                  resetPasswordData.newPassword === resetPasswordData.confirmPassword && (
+                    <p className="text-green-500 text-sm flex items-center gap-1 animate-fade-in">
+                      <CheckCircle2 className="w-4 h-4" />
+                      كلمتا المرور متطابقتان
+                    </p>
+                  )}
               </div>
 
               {/* Error Message */}
-              {errors.general && <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
+              {errors.general && (
+                <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
                   <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                   <p className="text-destructive text-sm">{errors.general}</p>
-                </div>}
+                </div>
+              )}
 
               {/* Submit Button */}
-              <button type="submit" disabled={isSubmitting} className={cn("w-full py-4 font-bold rounded-xl transition-all duration-300", "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background", "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100", "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent", "flex items-center justify-center gap-3")}>
-                {isSubmitting ? <>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={cn(
+                  "w-full py-4 font-bold rounded-xl transition-all duration-300",
+                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+                  "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
+                  "flex items-center justify-center gap-3",
+                )}
+              >
+                {isSubmitting ? (
+                  <>
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>جاري التحديث...</span>
-                  </> : <>
+                  </>
+                ) : (
+                  <>
                     <KeyRound className="w-5 h-5" />
                     <span>تحديث كلمة المرور</span>
-                  </>}
+                  </>
+                )}
               </button>
             </form>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
 
   // Show email confirmation message
   if (showConfirmation) {
-    return <div className="min-h-screen flex items-center justify-center p-6">
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           {/* Logo Section */}
           <div className="text-center mb-8 animate-fade-in">
@@ -595,15 +707,13 @@ export default function Auth() {
           {/* Confirmation Card */}
           <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden text-center">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent" />
-            
+
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/10 mb-6">
               <MailCheck className="w-10 h-10 text-green-500" />
             </div>
-            
-            <h2 className="text-2xl font-bold text-foreground mb-4">
-              تم إرسال رابط التأكيد
-            </h2>
-            
+
+            <h2 className="text-2xl font-bold text-foreground mb-4">تم إرسال رابط التأكيد</h2>
+
             <p className="text-muted-foreground mb-6 leading-relaxed">
               تم إرسال رسالة تأكيد إلى بريدك الإلكتروني
               <br />
@@ -613,22 +723,25 @@ export default function Auth() {
             </p>
 
             <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-6">
-              <p className="text-amber-600 text-sm">
-                💡 تحقق من مجلد البريد المزعج (Spam) إذا لم تجد الرسالة
-              </p>
+              <p className="text-amber-600 text-sm">💡 تحقق من مجلد البريد المزعج (Spam) إذا لم تجد الرسالة</p>
             </div>
-            
-            <button onClick={toggleMode} className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300">
+
+            <button
+              onClick={toggleMode}
+              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
+            >
               العودة لتسجيل الدخول
             </button>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
 
   // Show password reset sent message
   if (showResetSent) {
-    return <div className="min-h-screen flex items-center justify-center p-6">
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           {/* Logo Section */}
           <div className="text-center mb-8 animate-fade-in">
@@ -641,15 +754,13 @@ export default function Auth() {
           {/* Reset Sent Card */}
           <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden text-center">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-            
+
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-6">
               <Mail className="w-10 h-10 text-primary" />
             </div>
-            
-            <h2 className="text-2xl font-bold text-foreground mb-4">
-              تم إرسال رابط إعادة التعيين
-            </h2>
-            
+
+            <h2 className="text-2xl font-bold text-foreground mb-4">تم إرسال رابط إعادة التعيين</h2>
+
             <p className="text-muted-foreground mb-6 leading-relaxed">
               تم إرسال رابط إعادة تعيين كلمة المرور إلى
               <br />
@@ -659,33 +770,36 @@ export default function Auth() {
             </p>
 
             <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-6">
-              <p className="text-amber-600 text-sm">
-                💡 تحقق من مجلد البريد المزعج (Spam) إذا لم تجد الرسالة
-              </p>
+              <p className="text-amber-600 text-sm">💡 تحقق من مجلد البريد المزعج (Spam) إذا لم تجد الرسالة</p>
             </div>
-            
-            <button onClick={() => {
-            setShowResetSent(false);
-            setIsForgotPassword(false);
-            setFormData({
-              email: '',
-              password: '',
-              organizationName: '',
-              contactPerson: '',
-              phone: ''
-            });
-            clearSessionStorage();
-          }} className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300">
+
+            <button
+              onClick={() => {
+                setShowResetSent(false);
+                setIsForgotPassword(false);
+                setFormData({
+                  email: "",
+                  password: "",
+                  organizationName: "",
+                  contactPerson: "",
+                  phone: "",
+                });
+                clearSessionStorage();
+              }}
+              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
+            >
               العودة لتسجيل الدخول
             </button>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
 
   // Show forgot password form
   if (isForgotPassword) {
-    return <div className="min-h-screen flex items-center justify-center p-6">
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           {/* Logo Section */}
           <div className="text-center mb-8 animate-fade-in">
@@ -699,82 +813,121 @@ export default function Auth() {
           {/* Forgot Password Card */}
           <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-            
+
             {/* Header */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 bg-primary/10">
                 <Lock className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground md:text-2xl">
-                نسيت كلمة المرور؟
-              </h2>
-              <p className="text-muted-foreground mt-2 text-sm">
-                أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين
-              </p>
+              <h2 className="text-2xl font-bold text-foreground md:text-2xl">نسيت كلمة المرور؟</h2>
+              <p className="text-muted-foreground mt-2 text-sm">أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين</p>
             </div>
 
             <form onSubmit={handleForgotPassword} className="space-y-5">
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-foreground">
-                  البريد الإلكتروني
-                </label>
+                <label className="block text-sm font-medium text-foreground">البريد الإلكتروني</label>
                 <div className="relative">
-                  <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'email' ? "text-primary" : "text-muted-foreground")}>
+                  <div
+                    className={cn(
+                      "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                      focusedField === "email" ? "text-primary" : "text-muted-foreground",
+                    )}
+                  >
                     <Mail className="w-5 h-5" />
                   </div>
-                  <input type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.email ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="example@domain.com" dir="ltr" />
-                  {formData.email && !errors.email && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleChange("email", e.target.value)}
+                    onFocus={() => setFocusedField("email")}
+                    onBlur={() => setFocusedField(null)}
+                    className={cn(
+                      "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                      "focus:outline-none focus:bg-secondary transition-all duration-300",
+                      errors.email
+                        ? "border-destructive focus:border-destructive"
+                        : "border-border focus:border-primary",
+                    )}
+                    placeholder="example@domain.com"
+                    dir="ltr"
+                  />
+                  {formData.email && !errors.email && (
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                       <CheckCircle2 className="w-5 h-5" />
-                    </div>}
+                    </div>
+                  )}
                 </div>
-                {errors.email && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                {errors.email && (
+                  <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                     <AlertCircle className="w-4 h-4" />
                     {errors.email}
-                  </p>}
+                  </p>
+                )}
               </div>
 
               {/* Error Message */}
-              {errors.general && <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
+              {errors.general && (
+                <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
                   <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                   <p className="text-destructive text-sm">{errors.general}</p>
-                </div>}
+                </div>
+              )}
 
               {/* Submit Button */}
-              <button type="submit" disabled={isSubmitting} className={cn("w-full py-4 font-bold rounded-xl transition-all duration-300", "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background", "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100", "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent", "flex items-center justify-center gap-3")}>
-                {isSubmitting ? <>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={cn(
+                  "w-full py-4 font-bold rounded-xl transition-all duration-300",
+                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+                  "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
+                  "flex items-center justify-center gap-3",
+                )}
+              >
+                {isSubmitting ? (
+                  <>
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>جاري الإرسال...</span>
-                  </> : <>
+                  </>
+                ) : (
+                  <>
                     <Mail className="w-5 h-5" />
                     <span>إرسال رابط إعادة التعيين</span>
-                  </>}
+                  </>
+                )}
               </button>
             </form>
 
             {/* Back to Login */}
             <div className="mt-8 pt-6 border-t border-border/50">
-              <button onClick={() => {
-              setIsForgotPassword(false);
-              setErrors({});
-              setFormData({
-                email: '',
-                password: '',
-                organizationName: '',
-                contactPerson: '',
-                phone: ''
-              });
-              clearSessionStorage();
-            }} className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group">
+              <button
+                onClick={() => {
+                  setIsForgotPassword(false);
+                  setErrors({});
+                  setFormData({
+                    email: "",
+                    password: "",
+                    organizationName: "",
+                    contactPerson: "",
+                    phone: "",
+                  });
+                  clearSessionStorage();
+                }}
+                className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+              >
                 <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                 <span>العودة لتسجيل الدخول</span>
               </button>
             </div>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen flex items-center justify-center p-6">
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8 animate-fade-in">
@@ -789,195 +942,364 @@ export default function Auth() {
         <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden">
           {/* Decorative gradient */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-          
+
           {/* Header */}
           <div className="text-center mb-8">
-            <div className={cn("inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 transition-all duration-500", isLogin ? "bg-primary/10" : "bg-accent/10")}>
+            <div
+              className={cn(
+                "inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 transition-all duration-500",
+                isLogin ? "bg-primary/10" : "bg-accent/10",
+              )}
+            >
               {isLogin ? <LogIn className="w-8 h-8 text-primary" /> : <UserPlus className="w-8 h-8 text-accent" />}
             </div>
             <h2 className="text-2xl font-bold text-foreground md:text-2xl">
-              {isLogin ? 'مرحباً بك' : 'إنشاء حساب جديد'}
+              {isLogin ? "مرحباً بك" : "إنشاء حساب جديد"}
             </h2>
             <p className="text-muted-foreground mt-2 text-sm">
-              {isLogin ? 'سجل دخولك للمتابعة' : 'أدخل بياناتك للبدء في التقييم'}
+              {isLogin ? "سجل دخولك للمتابعة" : "أدخل بياناتك للبدء في التقييم"}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Organization Fields - Only for Signup */}
-            {!isLogin && <>
+            {!isLogin && (
+              <>
                 {/* Organization Name */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-foreground">
-                    اسم الجهة
-                  </label>
+                  <label className="block text-sm font-medium text-foreground">اسم الجهة</label>
                   <div className="relative">
-                    <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'organizationName' ? "text-primary" : "text-muted-foreground")}>
+                    <div
+                      className={cn(
+                        "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                        focusedField === "organizationName" ? "text-primary" : "text-muted-foreground",
+                      )}
+                    >
                       <Building2 className="w-5 h-5" />
                     </div>
-                    <input type="text" value={formData.organizationName} onChange={e => handleChange('organizationName', e.target.value)} onFocus={() => setFocusedField('organizationName')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.organizationName ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="أدخل اسم الجهة" />
-                    {formData.organizationName && !errors.organizationName && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                    <input
+                      type="text"
+                      value={formData.organizationName}
+                      onChange={(e) => handleChange("organizationName", e.target.value)}
+                      onFocus={() => setFocusedField("organizationName")}
+                      onBlur={() => setFocusedField(null)}
+                      className={cn(
+                        "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                        "focus:outline-none focus:bg-secondary transition-all duration-300",
+                        errors.organizationName
+                          ? "border-destructive focus:border-destructive"
+                          : "border-border focus:border-primary",
+                      )}
+                      placeholder="أدخل اسم الجهة"
+                    />
+                    {formData.organizationName && !errors.organizationName && (
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                         <CheckCircle2 className="w-5 h-5" />
-                      </div>}
+                      </div>
+                    )}
                   </div>
-                  {errors.organizationName && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                  {errors.organizationName && (
+                    <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                       <AlertCircle className="w-4 h-4" />
                       {errors.organizationName}
-                    </p>}
+                    </p>
+                  )}
                 </div>
 
                 {/* Contact Person */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-foreground">
-                    اسم مدخل البيانات
-                  </label>
+                  <label className="block text-sm font-medium text-foreground">اسم مدخل البيانات</label>
                   <div className="relative">
-                    <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'contactPerson' ? "text-primary" : "text-muted-foreground")}>
+                    <div
+                      className={cn(
+                        "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                        focusedField === "contactPerson" ? "text-primary" : "text-muted-foreground",
+                      )}
+                    >
                       <User className="w-5 h-5" />
                     </div>
-                    <input type="text" value={formData.contactPerson} onChange={e => handleChange('contactPerson', e.target.value)} onFocus={() => setFocusedField('contactPerson')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.contactPerson ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="أدخل اسم مدخل البيانات" />
-                    {formData.contactPerson && !errors.contactPerson && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                    <input
+                      type="text"
+                      value={formData.contactPerson}
+                      onChange={(e) => handleChange("contactPerson", e.target.value)}
+                      onFocus={() => setFocusedField("contactPerson")}
+                      onBlur={() => setFocusedField(null)}
+                      className={cn(
+                        "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                        "focus:outline-none focus:bg-secondary transition-all duration-300",
+                        errors.contactPerson
+                          ? "border-destructive focus:border-destructive"
+                          : "border-border focus:border-primary",
+                      )}
+                      placeholder="أدخل اسم مدخل البيانات"
+                    />
+                    {formData.contactPerson && !errors.contactPerson && (
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                         <CheckCircle2 className="w-5 h-5" />
-                      </div>}
+                      </div>
+                    )}
                   </div>
-                  {errors.contactPerson && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                  {errors.contactPerson && (
+                    <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                       <AlertCircle className="w-4 h-4" />
                       {errors.contactPerson}
-                    </p>}
+                    </p>
+                  )}
                 </div>
 
                 {/* Phone */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-foreground">
-                    رقم التواصل
-                  </label>
+                  <label className="block text-sm font-medium text-foreground">رقم التواصل</label>
                   <div className="relative">
-                    <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'phone' ? "text-primary" : "text-muted-foreground")}>
+                    <div
+                      className={cn(
+                        "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                        focusedField === "phone" ? "text-primary" : "text-muted-foreground",
+                      )}
+                    >
                       <Phone className="w-5 h-5" />
                     </div>
-                    <input type="tel" inputMode="numeric" pattern="[0-9]*" minLength={10} value={formData.phone} onChange={e => handleChange('phone', e.target.value)} onFocus={() => setFocusedField('phone')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.phone ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="05xxxxxxxx" dir="ltr" />
-                    {formData.phone && !errors.phone && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      minLength={10}
+                      value={formData.phone}
+                      onChange={(e) => handleChange("phone", e.target.value)}
+                      onFocus={() => setFocusedField("phone")}
+                      onBlur={() => setFocusedField(null)}
+                      className={cn(
+                        "w-full pr-12 pl-4 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                        "focus:outline-none focus:bg-secondary transition-all duration-300",
+                        errors.phone
+                          ? "border-destructive focus:border-destructive"
+                          : "border-border focus:border-primary",
+                      )}
+                      placeholder="05xxxxxxxx"
+                      dir="ltr"
+                    />
+                    {formData.phone && !errors.phone && (
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                         <CheckCircle2 className="w-5 h-5" />
-                      </div>}
+                      </div>
+                    )}
                   </div>
-                  {errors.phone && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                  {errors.phone && (
+                    <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                       <AlertCircle className="w-4 h-4" />
                       {errors.phone}
-                    </p>}
+                    </p>
+                  )}
                 </div>
-              </>}
+              </>
+            )}
 
             {/* Email Field */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">
-                البريد الإلكتروني
-              </label>
+              <label className="block text-sm font-medium text-foreground">البريد الإلكتروني</label>
               <div className="relative">
-                <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'email' ? "text-primary" : "text-muted-foreground")}>
+                <div
+                  className={cn(
+                    "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                    focusedField === "email" ? "text-primary" : "text-muted-foreground",
+                  )}
+                >
                   <Mail className="w-5 h-5" />
                 </div>
-                <input type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.email ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="example@domain.com" dir="ltr" />
-                {formData.email && !errors.email && <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                  onFocus={() => setFocusedField("email")}
+                  onBlur={() => setFocusedField(null)}
+                  className={cn(
+                    "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                    "focus:outline-none focus:bg-secondary transition-all duration-300",
+                    errors.email ? "border-destructive focus:border-destructive" : "border-border focus:border-primary",
+                  )}
+                  placeholder="example@domain.com"
+                  dir="ltr"
+                />
+                {formData.email && !errors.email && (
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                     <CheckCircle2 className="w-5 h-5" />
-                  </div>}
+                  </div>
+                )}
               </div>
-              {errors.email && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+              {errors.email && (
+                <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                   <AlertCircle className="w-4 h-4" />
                   {errors.email}
-                </p>}
-              
+                </p>
+              )}
+
               {/* Email verification notice for signup */}
-              {!isLogin && <p className="text-xs text-muted-foreground flex items-center gap-1">
+              {!isLogin && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Mail className="w-3 h-3" />
                   سيتم إرسال رابط تأكيد إلى هذا البريد
-                </p>}
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">
-                كلمة المرور
-              </label>
+              <label className="block text-sm font-medium text-foreground">كلمة المرور</label>
               <div className="relative">
-                <div className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200", focusedField === 'password' ? "text-primary" : "text-muted-foreground")}>
+                <div
+                  className={cn(
+                    "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                    focusedField === "password" ? "text-primary" : "text-muted-foreground",
+                  )}
+                >
                   <Lock className="w-5 h-5" />
                 </div>
-                <input type={showPassword ? 'text' : 'password'} value={formData.password} onChange={e => handleChange('password', e.target.value)} onFocus={() => setFocusedField('password')} onBlur={() => setFocusedField(null)} className={cn("w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground", "focus:outline-none focus:bg-secondary transition-all duration-300", errors.password ? "border-destructive focus:border-destructive" : "border-border focus:border-primary")} placeholder="••••••••" dir="ltr" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  onFocus={() => setFocusedField("password")}
+                  onBlur={() => setFocusedField(null)}
+                  className={cn(
+                    "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                    "focus:outline-none focus:bg-secondary transition-all duration-300",
+                    errors.password
+                      ? "border-destructive focus:border-destructive"
+                      : "border-border focus:border-primary",
+                  )}
+                  placeholder="••••••••"
+                  dir="ltr"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              
+
               {/* Password Strength Indicator (only for signup) */}
-              {!isLogin && formData.password && <div className="space-y-2 animate-fade-in">
+              {!isLogin && formData.password && (
+                <div className="space-y-2 animate-fade-in">
                   <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map(i => <div key={i} className={cn("h-1.5 flex-1 rounded-full transition-all duration-300", i <= passwordStrength.strength ? passwordStrength.color : "bg-muted")} />)}
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "h-1.5 flex-1 rounded-full transition-all duration-300",
+                          i <= passwordStrength.strength ? passwordStrength.color : "bg-muted",
+                        )}
+                      />
+                    ))}
                   </div>
-                  <p className={cn("text-xs", passwordStrength.strength <= 2 ? "text-red-500" : passwordStrength.strength <= 3 ? "text-yellow-500" : "text-green-500")}>
+                  <p
+                    className={cn(
+                      "text-xs",
+                      passwordStrength.strength <= 2
+                        ? "text-red-500"
+                        : passwordStrength.strength <= 3
+                          ? "text-yellow-500"
+                          : "text-green-500",
+                    )}
+                  >
                     قوة كلمة المرور: {passwordStrength.label}
                   </p>
-                </div>}
-              
-              {errors.password && <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                </div>
+              )}
+
+              {errors.password && (
+                <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
                   <AlertCircle className="w-4 h-4" />
                   {errors.password}
-                </p>}
+                </p>
+              )}
             </div>
 
             {/* Forgot Password Link - Only for Login */}
-            {isLogin && <div className="text-left">
-                <button type="button" onClick={() => {
-              setIsForgotPassword(true);
-              setErrors({});
-            }} className="text-sm text-primary hover:text-primary/80 hover:underline transition-colors">
+            {isLogin && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPassword(true);
+                    setErrors({});
+                  }}
+                  className="text-sm text-primary hover:text-primary/80 hover:underline transition-colors"
+                >
                   نسيت كلمة المرور؟
                 </button>
-              </div>}
+              </div>
+            )}
 
             {/* Privacy Notice - Only for Signup */}
-            {!isLogin && <div className="flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-xl text-right">
+            {!isLogin && (
+              <div className="flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-xl text-right">
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   جميع البيانات المدخلة تُستخدم لأغراض التقييم فقط ولا يتم مشاركتها مع أي طرف ثالث.
                 </p>
-              </div>}
+              </div>
+            )}
 
             {/* Error Message */}
-            {errors.general && <div className="space-y-3 animate-scale-in">
+            {errors.general && (
+              <div className="space-y-3 animate-scale-in">
                 <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3">
                   <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                   <p className="text-destructive text-sm">{errors.general}</p>
                 </div>
-                {errors.emailConfirmationHint && <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                {errors.emailConfirmationHint && (
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
                     <p className="text-amber-600 text-sm flex items-center gap-2">
                       <Mail className="w-4 h-4 flex-shrink-0" />
                       إذا كنت قد سجلت مسبقاً، تحقق من بريدك الإلكتروني وافتح رابط التأكيد
                     </p>
-                  </div>}
-              </div>}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Submit Button */}
-            <button type="submit" disabled={isSubmitting} className={cn("w-full py-4 font-bold rounded-xl transition-all duration-300", "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background", "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100", "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent", "flex items-center justify-center gap-3")}>
-              {isSubmitting ? <>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={cn(
+                "w-full py-4 font-bold rounded-xl transition-all duration-300",
+                "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+                "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+                "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
+                "flex items-center justify-center gap-3",
+              )}
+            >
+              {isSubmitting ? (
+                <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span>جاري المعالجة...</span>
-                </> : <>
+                </>
+              ) : (
+                <>
                   {isLogin ? <LogIn className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
-                  <span>{isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'}</span>
-                </>}
+                  <span>{isLogin ? "تسجيل الدخول" : "إنشاء حساب"}</span>
+                </>
+              )}
             </button>
           </form>
 
           {/* Toggle Mode */}
           <div className="mt-8 pt-6 border-t border-border/50">
-            <button onClick={toggleMode} className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group">
+            <button
+              onClick={toggleMode}
+              className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+            >
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-              <span>{isLogin ? 'ليس لديك حساب؟ سجل الآن' : 'لديك حساب؟ سجل الدخول'}</span>
+              <span>{isLogin ? "ليس لديك حساب؟ سجل الآن" : "لديك حساب؟ سجل الدخول"}</span>
             </button>
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 }
