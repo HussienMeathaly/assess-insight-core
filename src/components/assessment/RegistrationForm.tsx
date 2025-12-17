@@ -4,21 +4,21 @@ import profitLogo from '@/assets/profit-logo.png';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
 
-// Regex for Arabic and English letters, spaces, and underscores only
-const lettersOnlyRegex = /^[\u0600-\u06FFa-zA-Z\s_]+$/;
+// Regex for Arabic and English letters, numbers, spaces, and underscores only
+const validNameRegex = /^[\u0600-\u06FFa-zA-Z0-9\s_]+$/;
 
 const registrationSchema = z.object({
   organizationName: z.string()
     .trim()
     .min(2, 'اسم الجهة مطلوب')
     .max(100, 'اسم الجهة يجب أن يكون أقل من 100 حرف')
-    .regex(lettersOnlyRegex, 'اسم الجهة يجب أن يحتوي على حروف فقط (عربي أو إنجليزي أو _)'),
+    .regex(validNameRegex, 'اسم الجهة يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _'),
   contactPerson: z.string()
     .trim()
     .min(2, 'اسم مدخل البيانات مطلوب')
     .max(100, 'اسم مدخل البيانات يجب أن يكون أقل من 100 حرف')
-    .regex(lettersOnlyRegex, 'اسم مدخل البيانات يجب أن يحتوي على حروف فقط (عربي أو إنجليزي أو _)'),
-  phone: z.string().trim().min(9, 'رقم التواصل غير صحيح'),
+    .regex(validNameRegex, 'اسم مدخل البيانات يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _'),
+  phone: z.string().trim().min(10, 'رقم التواصل يجب أن لا يقل عن 10 أرقام'),
   email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
 });
 
