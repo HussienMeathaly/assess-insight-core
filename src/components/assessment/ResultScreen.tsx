@@ -132,7 +132,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
 
           {/* Total Score */}
           <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-row-reverse justify-between items-center">
               <span className="text-base md:text-lg font-bold text-primary">
                 {result.totalScore.toFixed(1)} / {result.maxScore}
               </span>
