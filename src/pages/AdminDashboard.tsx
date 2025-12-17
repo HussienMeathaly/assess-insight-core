@@ -410,8 +410,8 @@ export default function AdminDashboard() {
                 <CardTitle className="text-right">جميع التقييمات</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table dir="rtl">
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table dir="rtl" className="min-w-[700px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-right">الجهة</TableHead>
@@ -464,8 +464,8 @@ export default function AdminDashboard() {
                 <CardTitle className="text-right">جميع الجهات</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table dir="rtl">
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table dir="rtl" className="min-w-[650px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-right">اسم الجهة</TableHead>
@@ -516,8 +516,8 @@ export default function AdminDashboard() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table dir="rtl">
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <Table dir="rtl" className="min-w-[600px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="text-right">البريد الإلكتروني</TableHead>
