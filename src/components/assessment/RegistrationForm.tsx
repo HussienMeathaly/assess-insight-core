@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Shield, Building2, User, Phone, Mail, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import profitLogo from '@/assets/profit-logo.png';
 import { z } from 'zod';
@@ -106,6 +106,7 @@ export function RegistrationForm({ onSubmit, onBack }: RegistrationFormProps) {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof RegistrationData, string>>>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
 
   const validateField = (field: keyof RegistrationData, value: string) => {
     const fieldSchema = {
@@ -119,12 +120,29 @@ export function RegistrationForm({ onSubmit, onBack }: RegistrationFormProps) {
     return result.success ? undefined : result.error.errors[0]?.message;
   };
 
+  const debouncedValidate = useCallback((field: keyof RegistrationData, value: string) => {
+    // Clear existing timer for this field
+    if (debounceTimers.current[field]) {
+      clearTimeout(debounceTimers.current[field]);
+    }
+    
+    // Set new timer with 400ms delay
+    debounceTimers.current[field] = setTimeout(() => {
+      const error = validateField(field, value);
+      setErrors(prev => ({ ...prev, [field]: error }));
+    }, 400);
+  }, []);
+
   const handleChange = (field: keyof RegistrationData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Real-time validation
-    const error = validateField(field, value);
-    setErrors(prev => ({ ...prev, [field]: error }));
+    // Clear error immediately when user starts typing (better UX)
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+    
+    // Debounced validation
+    debouncedValidate(field, value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
