@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { logError } from '@/lib/logger';
+
+// اسم الجهة + اسم المسؤول: عربي/إنجليزي/أرقام/مسافات/_ فقط
+const validOrgAndNameRegex = /^[\u0600-\u06FFa-zA-Z0-9\s_]+$/;
+// رقم الجوال: أرقام فقط وبحد أدنى 10
+const phoneDigitsMin10Regex = /^\d{10,}$/;
+
+const orgUpdateSchema = z.object({
+  name: z.string().trim().min(2, 'اسم الجهة مطلوب').regex(validOrgAndNameRegex, 'اسم الجهة يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
+  contact_person: z.string().trim().min(2, 'اسم المسؤول مطلوب').regex(validOrgAndNameRegex, 'اسم المسؤول يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
+  phone: z.string().trim().regex(phoneDigitsMin10Regex, 'رقم الجوال يجب أن لا يقل عن 10 أرقام'),
+  email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
+});
 
 interface OrganizationData {
   id: string;
@@ -70,15 +83,23 @@ export function EditOrganizationModal() {
     e.preventDefault();
     if (!organization) return;
 
+    const result = orgUpdateSchema.safeParse(formData);
+    if (!result.success) {
+      toast.error(result.error.errors[0]?.message ?? 'البيانات المدخلة غير صحيحة');
+      return;
+    }
+
     setLoading(true);
     try {
+      const clean = result.data;
+
       const { error } = await supabase
         .from('organizations')
         .update({
-          name: formData.name.trim(),
-          contact_person: formData.contact_person.trim(),
-          phone: formData.phone.trim(),
-          email: formData.email.trim(),
+          name: clean.name,
+          contact_person: clean.contact_person,
+          phone: clean.phone,
+          email: clean.email,
         })
         .eq('id', organization.id);
 
@@ -129,8 +150,11 @@ export function EditOrganizationModal() {
             <Input
               id="phone"
               type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              minLength={10}
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
               required
               dir="ltr"
               className="text-left"
