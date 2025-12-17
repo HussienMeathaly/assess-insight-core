@@ -33,8 +33,9 @@ type FormErrors = {
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { signIn, signUp, isAuthenticated, loading, user } = useAuth();
+  const { signIn, signUp, resetPassword, isAuthenticated, loading, user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -44,6 +45,7 @@ export default function Auth() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showResetSent, setShowResetSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -173,9 +175,36 @@ export default function Auth() {
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
+    setIsForgotPassword(false);
     setErrors({});
     setFormData({ email: '', password: '', organizationName: '', contactPerson: '', phone: '' });
     setShowConfirmation(false);
+    setShowResetSent(false);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    
+    const emailResult = z.string().email('البريد الإلكتروني غير صحيح').safeParse(formData.email);
+    if (!emailResult.success) {
+      setErrors({ email: emailResult.error.errors[0].message });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await resetPassword(formData.email);
+      if (error) {
+        setErrors({ general: 'حدث خطأ أثناء إرسال رابط إعادة التعيين' });
+      } else {
+        setShowResetSent(true);
+      }
+    } catch {
+      setErrors({ general: 'حدث خطأ في الاتصال' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -238,6 +267,197 @@ export default function Auth() {
             >
               العودة لتسجيل الدخول
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show password reset sent message
+  if (showResetSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          {/* Logo Section */}
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="relative inline-block">
+              <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
+              <img 
+                src={profitLogo} 
+                alt="Profit+" 
+                className="h-20 md:h-24 mx-auto mb-4 relative z-10"
+              />
+            </div>
+          </div>
+
+          {/* Reset Sent Card */}
+          <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden text-center">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+            
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-6">
+              <Mail className="w-10 h-10 text-primary" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-foreground mb-4">
+              تم إرسال رابط إعادة التعيين
+            </h2>
+            
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              تم إرسال رابط إعادة تعيين كلمة المرور إلى
+              <br />
+              <span className="text-foreground font-medium">{formData.email}</span>
+              <br />
+              يرجى فتح الرابط في الرسالة لإعادة تعيين كلمة المرور
+            </p>
+
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-6">
+              <p className="text-amber-600 text-sm">
+                💡 تحقق من مجلد البريد المزعج (Spam) إذا لم تجد الرسالة
+              </p>
+            </div>
+            
+            <button
+              onClick={() => {
+                setShowResetSent(false);
+                setIsForgotPassword(false);
+                setFormData({ email: '', password: '', organizationName: '', contactPerson: '', phone: '' });
+              }}
+              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
+            >
+              العودة لتسجيل الدخول
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show forgot password form
+  if (isForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          {/* Logo Section */}
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="relative inline-block">
+              <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
+              <img 
+                src={profitLogo} 
+                alt="Profit+" 
+                className="h-20 md:h-24 mx-auto mb-4 relative z-10"
+              />
+            </div>
+            <p className="text-muted-foreground text-lg font-medium">منصة التقييم المؤسسي</p>
+          </div>
+
+          {/* Forgot Password Card */}
+          <div className="card-elevated rounded-3xl p-8 md:p-10 animate-slide-up relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+            
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 bg-primary/10">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                نسيت كلمة المرور؟
+              </h2>
+              <p className="text-muted-foreground mt-2">
+                أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين
+              </p>
+            </div>
+
+            <form onSubmit={handleForgotPassword} className="space-y-5">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-foreground">
+                  البريد الإلكتروني
+                </label>
+                <div className="relative">
+                  <div className={cn(
+                    "absolute right-4 top-1/2 -translate-y-1/2 transition-colors duration-200",
+                    focusedField === 'email' ? "text-primary" : "text-muted-foreground"
+                  )}>
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleChange('email', e.target.value)}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                    className={cn(
+                      "w-full pr-12 pl-12 py-4 bg-secondary/50 border-2 rounded-xl text-foreground",
+                      "focus:outline-none focus:bg-secondary transition-all duration-300",
+                      errors.email 
+                        ? "border-destructive focus:border-destructive" 
+                        : "border-border focus:border-primary"
+                    )}
+                    placeholder="example@domain.com"
+                    dir="ltr"
+                  />
+                  {formData.email && !errors.email && (
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
+                      <CheckCircle2 className="w-5 h-5" />
+                    </div>
+                  )}
+                </div>
+                {errors.email && (
+                  <p className="text-destructive text-sm flex items-center gap-1 animate-fade-in">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {errors.general && (
+                <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl flex items-center gap-3 animate-scale-in">
+                  <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+                  <p className="text-destructive text-sm">{errors.general}</p>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={cn(
+                  "w-full py-4 font-bold rounded-xl transition-all duration-300",
+                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+                  "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
+                  "flex items-center justify-center gap-3"
+                )}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>جاري الإرسال...</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-5 h-5" />
+                    <span>إرسال رابط إعادة التعيين</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Back to Login */}
+            <div className="mt-8 pt-6 border-t border-border/50">
+              <button
+                onClick={() => {
+                  setIsForgotPassword(false);
+                  setErrors({});
+                  setFormData({ email: '', password: '', organizationName: '', contactPerson: '', phone: '' });
+                }}
+                className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+              >
+                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                <span>العودة لتسجيل الدخول</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -533,6 +753,22 @@ export default function Auth() {
                 </p>
               )}
             </div>
+
+            {/* Forgot Password Link - Only for Login */}
+            {isLogin && (
+              <div className="text-left">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPassword(true);
+                    setErrors({});
+                  }}
+                  className="text-sm text-primary hover:text-primary/80 hover:underline transition-colors"
+                >
+                  نسيت كلمة المرور؟
+                </button>
+              </div>
+            )}
 
             {/* Privacy Notice - Only for Signup */}
             {!isLogin && (
