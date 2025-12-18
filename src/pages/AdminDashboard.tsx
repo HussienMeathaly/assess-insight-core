@@ -333,20 +333,10 @@ export default function AdminDashboard() {
   }
 
   const qualifiedCount = assessments.filter((a) => a.is_qualified).length;
-  const avgScoreNum =
+  const avgScore =
     assessments.length > 0
-      ? assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length
+      ? (assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length).toFixed(1)
       : 0;
-  const avgScore = avgScoreNum.toFixed(1);
-
-  // Calculate organizations with/without assessments
-  const orgIdsWithAssessments = new Set(
-    assessments.map((a) => a.organization?.name).filter(Boolean)
-  );
-  const organizationsWithAssessments = organizations.filter((org) =>
-    orgIdsWithAssessments.has(org.name)
-  ).length;
-  const organizationsWithoutAssessments = organizations.length - organizationsWithAssessments;
 
   // Filtered assessments based on search, qualification and date filters
   const filteredAssessments = assessments.filter((a) => {
@@ -419,23 +409,8 @@ export default function AdminDashboard() {
               <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-
             <CardContent>
-              {/* العدد */}
-              <div className="text-2xl md:text-3xl font-bold mb-2">{organizations.length}</div>
-
-              {/* تفصيل */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">لديها تقييمات</span>
-                  <span className="font-medium text-green-600">{organizationsWithAssessments}</span>
-                </div>
-
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">بدون تقييمات</span>
-                  <span className="font-medium text-red-500">{organizationsWithoutAssessments}</span>
-                </div>
-              </div>
+              <div className="text-xl md:text-2xl font-bold">{organizations.length}</div>
             </CardContent>
           </Card>
 
@@ -459,11 +434,11 @@ export default function AdminDashboard() {
                 <span
                   className={`
                     inline-block w-2.5 h-2.5 rounded-full
-                    ${avgScoreNum >= 75 ? "bg-green-500" : avgScoreNum >= 50 ? "bg-yellow-500" : "bg-red-500"}
+                    ${avgScore >= 75 ? "bg-green-500" : avgScore >= 50 ? "bg-yellow-500" : "bg-red-500"}
                   `}
                 />
                 <span className="text-xs font-medium">
-                  {avgScoreNum >= 75 ? "جودة عالية" : avgScoreNum >= 50 ? "جودة متوسطة" : "جودة منخفضة"}
+                  {avgScore >= 75 ? "جودة عالية" : avgScore >= 50 ? "جودة متوسطة" : "جودة منخفضة"}
                 </span>
               </div>
             </CardContent>
