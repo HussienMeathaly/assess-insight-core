@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { startOfDay, startOfWeek, startOfMonth, isAfter } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
@@ -95,6 +96,7 @@ export default function AdminDashboard() {
   const [addingUser, setAddingUser] = useState(false);
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
   const [qualificationFilter, setQualificationFilter] = useState<"all" | "qualified" | "not_qualified">("all");
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -334,11 +336,29 @@ export default function AdminDashboard() {
       ? (assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length).toFixed(1)
       : 0;
 
-  // Filtered assessments based on qualification filter
+  // Filtered assessments based on qualification and date filters
   const filteredAssessments = assessments.filter((a) => {
-    if (qualificationFilter === "all") return true;
-    if (qualificationFilter === "qualified") return a.is_qualified;
-    if (qualificationFilter === "not_qualified") return !a.is_qualified;
+    // Qualification filter
+    if (qualificationFilter === "qualified" && !a.is_qualified) return false;
+    if (qualificationFilter === "not_qualified" && a.is_qualified) return false;
+    
+    // Date filter
+    if (dateFilter !== "all") {
+      const assessmentDate = new Date(a.completed_at);
+      const now = new Date();
+      
+      if (dateFilter === "today") {
+        if (!isAfter(assessmentDate, startOfDay(now)) && assessmentDate.toDateString() !== now.toDateString()) {
+          return false;
+        }
+        if (assessmentDate.toDateString() !== now.toDateString()) return false;
+      } else if (dateFilter === "week") {
+        if (!isAfter(assessmentDate, startOfWeek(now, { weekStartsOn: 0 }))) return false;
+      } else if (dateFilter === "month") {
+        if (!isAfter(assessmentDate, startOfMonth(now))) return false;
+      }
+    }
+    
     return true;
   });
 
@@ -425,13 +445,25 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">الحالة:</span>
                   <Select value={qualificationFilter} onValueChange={(v) => setQualificationFilter(v as "all" | "qualified" | "not_qualified")}>
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-[130px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">الكل ({assessments.length})</SelectItem>
+                      <SelectItem value="all">الكل</SelectItem>
                       <SelectItem value="qualified">مؤهل ({qualifiedCount})</SelectItem>
                       <SelectItem value="not_qualified">غير مؤهل ({assessments.length - qualifiedCount})</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <span className="text-sm text-muted-foreground">الفترة:</span>
+                  <Select value={dateFilter} onValueChange={(v) => setDateFilter(v as "all" | "today" | "week" | "month")}>
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">الكل</SelectItem>
+                      <SelectItem value="today">اليوم</SelectItem>
+                      <SelectItem value="week">هذا الأسبوع</SelectItem>
+                      <SelectItem value="month">هذا الشهر</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
