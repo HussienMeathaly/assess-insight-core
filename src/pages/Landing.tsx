@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -33,7 +34,8 @@ const Landing = () => {
       <div className="min-h-screen flex flex-col">
         {/* Header with Login Dropdown */}
         <header className="fixed top-0 left-0 right-0 z-50 p-4 md:p-6">
-          <div className="flex justify-end">
+          <div className="flex justify-between items-center">
+            <ThemeToggle />
             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
               <DropdownMenuTrigger asChild>
                 <Button 
