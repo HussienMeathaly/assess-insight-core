@@ -698,7 +698,7 @@ export default function AdminDashboard() {
                             </TableCell>
                             <TableCell>
                               <Badge variant={u.role === "admin" ? "default" : "secondary"}>
-                                {u.role === "admin" ? "مدير" : u.role === "user" ? "مستخدم"}
+                                {u.role === "admin" ? "مدير" : u.role === "user" ? "مستخدم" : "غير محدد"}
                               </Badge>
                             </TableCell>
                             <TableCell>
