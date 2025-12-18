@@ -15,43 +15,41 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 35% 20%;
 
-    /* Primary = Navy Blue (brand identity) */
+    /* All colors use Navy Blue in light mode */
     --primary: 220 35% 25%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary = Green (accent/CTA) */
-    --secondary: 85 65% 45%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 220 25% 88%;
+    --secondary-foreground: 220 35% 20%;
 
     --muted: 220 20% 90%;
     --muted-foreground: 220 15% 40%;
 
-    /* Accent = Green (highlights) */
-    --accent: 85 65% 45%;
+    --accent: 220 35% 25%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 85 65% 45%;
+    --success: 220 35% 25%;
     --success-foreground: 0 0% 100%;
 
     --border: 220 20% 85%;
     --input: 220 20% 88%;
-    --ring: 85 65% 45%;
+    --ring: 220 35% 25%;
 
     --radius: 0.75rem;
 
-    /* Brand colors */
+    /* Brand colors - Navy only in light mode */
     --brand-navy: 220 35% 25%;
-    --brand-green: 85 65% 45%;
+    --brand-green: 220 35% 25%;
 
-    /* Custom tokens - Light */
+    /* Custom tokens - Light (Navy theme) */
     --gradient-bg: linear-gradient(135deg, hsl(220 25% 96%) 0%, hsl(220 20% 92%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 20% 97%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(85 65% 45%) 0%, hsl(85 55% 35%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(220 35% 25%) 0%, hsl(220 40% 18%) 100%);
     --gradient-primary: linear-gradient(135deg, hsl(220 35% 25%) 0%, hsl(220 40% 18%) 100%);
-    --shadow-glow: 0 0 40px hsl(85 65% 45% / 0.2);
+    --shadow-glow: 0 0 40px hsl(220 35% 25% / 0.15);
     --shadow-card: 0 8px 32px hsl(220 40% 10% / 0.08);
   }
 
