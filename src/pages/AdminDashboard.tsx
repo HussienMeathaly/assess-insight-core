@@ -94,6 +94,7 @@ export default function AdminDashboard() {
   const [newUserRole, setNewUserRole] = useState<"admin" | "user" | "none">("user");
   const [addingUser, setAddingUser] = useState(false);
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
+  const [qualificationFilter, setQualificationFilter] = useState<"all" | "qualified" | "not_qualified">("all");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -333,6 +334,14 @@ export default function AdminDashboard() {
       ? (assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length).toFixed(1)
       : 0;
 
+  // Filtered assessments based on qualification filter
+  const filteredAssessments = assessments.filter((a) => {
+    if (qualificationFilter === "all") return true;
+    if (qualificationFilter === "qualified") return a.is_qualified;
+    if (qualificationFilter === "not_qualified") return !a.is_qualified;
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <header className="border-b border-border bg-card">
@@ -411,13 +420,26 @@ export default function AdminDashboard() {
 
           <TabsContent value="assessments">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <CardTitle className="text-right">جميع التقييمات</CardTitle>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">الحالة:</span>
+                  <Select value={qualificationFilter} onValueChange={(v) => setQualificationFilter(v as "all" | "qualified" | "not_qualified")}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">الكل ({assessments.length})</SelectItem>
+                      <SelectItem value="qualified">مؤهل ({qualifiedCount})</SelectItem>
+                      <SelectItem value="not_qualified">غير مؤهل ({assessments.length - qualifiedCount})</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </CardHeader>
               <CardContent>
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
-                  <AssessmentsMobileCards assessments={assessments} onViewDetails={handleViewDetails} />
+                  <AssessmentsMobileCards assessments={filteredAssessments} onViewDetails={handleViewDetails} />
                 </div>
 
                 {/* Desktop (table) */}
@@ -435,7 +457,7 @@ export default function AdminDashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {assessments.map((assessment) => (
+                        {filteredAssessments.map((assessment) => (
                           <TableRow key={assessment.id}>
                             <TableCell className="font-medium">{assessment.organization?.name || "غير معروف"}</TableCell>
                             <TableCell>{assessment.organization?.contact_person || "-"}</TableCell>
@@ -456,10 +478,10 @@ export default function AdminDashboard() {
                             </TableCell>
                           </TableRow>
                         ))}
-                        {assessments.length === 0 && (
+                        {filteredAssessments.length === 0 && (
                           <TableRow>
                             <TableCell colSpan={6} className="text-center text-muted-foreground">
-                              لا توجد تقييمات بعد
+                              {qualificationFilter === "all" ? "لا توجد تقييمات بعد" : "لا توجد نتائج مطابقة"}
                             </TableCell>
                           </TableRow>
                         )}
