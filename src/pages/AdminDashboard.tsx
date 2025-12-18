@@ -544,12 +544,12 @@ export default function AdminDashboard() {
                     <Table dir="rtl">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text- center">الجهة</TableHead>
-                          <TableHead className="text- center">المسؤول</TableHead>
-                          <TableHead className="text- center">النتيجة</TableHead>
-                          <TableHead className="text- center">الحالة</TableHead>
-                          <TableHead className="text- center">التاريخ</TableHead>
-                          <TableHead className="text- center">الإجراءات</TableHead>
+                          <TableHead className="text-right">الجهة</TableHead>
+                          <TableHead className="text-right">المسؤول</TableHead>
+                          <TableHead className="text-right">النتيجة</TableHead>
+                          <TableHead className="text-right">الحالة</TableHead>
+                          <TableHead className="text-right">التاريخ</TableHead>
+                          <TableHead className="text-right">الإجراءات</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
