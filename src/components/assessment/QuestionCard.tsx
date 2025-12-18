@@ -25,61 +25,62 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
         {question.options.map((option) => {
           const isYes = option.label === "نعم" || option.label.includes("نعم");
           const isNo = option.label === "لا" || option.label.includes("لا");
-          const isSelected = selectedOptionId === option.id;
-          const isYes = option.value === true || option.value === "yes" || option.label === "نعم";
-
-          const isNo = option.value === false || option.value === "no" || option.label === "لا";
 
           return (
             <button
               key={option.id}
               onClick={() => onSelect(option)}
               className={cn(
-                "group p-3 md:p-5 rounded-lg border-2 transition-all duration-300",
-                isSelected
+                "group relative p-3 md:p-5 rounded-lg border-2 transition-all duration-300",
+                "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background",
+                selectedOptionId === option.id
                   ? isYes
-                    ? "border-green-500 bg-green-500/10"
+                    ? "border-green-500 bg-green-500/10 glow-accent"
                     : isNo
-                      ? "border-red-500 bg-red-500/10"
-                      : "border-primary bg-primary/10"
+                      ? "border-red-500 bg-red-500/10 glow-accent"
+                      : "border-primary bg-primary/10 glow-accent"
                   : "border-border bg-card",
+                // Hover colors based on answer type
+                selectedOptionId !== option.id &&
+                  isYes &&
+                  "hover:border-green-500/50 hover:bg-green-500/10 focus:ring-green-500/30",
+                selectedOptionId !== option.id &&
+                  isNo &&
+                  "hover:border-red-500/50 hover:bg-red-500/10 focus:ring-red-500/30",
+                selectedOptionId !== option.id &&
+                  !isYes &&
+                  !isNo &&
+                  "hover:border-primary/50 hover:bg-secondary/50 focus:ring-primary/30",
               )}
             >
-              <div className="flex items-center gap-3">
-                {/* الدائرة */}
+              <div className="flex items-center gap-2 md:gap-4">
                 <div
                   className={cn(
-                    "w-5 h-5 rounded-full border-2 flex items-center justify-center",
-                    isSelected
+                    "w-5 h-5 rounded-full border-2 transition-all duration-300 flex-shrink-0",
+                    selectedOptionId === option.id
                       ? isYes
-                        ? "border-green-500"
+                        ? "border-green-500 bg-green-500"
                         : isNo
-                          ? "border-red-500"
-                          : "border-primary"
+                          ? "border-red-500 bg-red-500"
+                          : "border-primary bg-primary"
                       : "border-muted-foreground",
+                    selectedOptionId !== option.id && isYes && "group-hover:border-green-500",
+                    selectedOptionId !== option.id && isNo && "group-hover:border-red-500",
+                    selectedOptionId !== option.id && !isYes && !isNo && "group-hover:border-primary/50",
                   )}
                 >
-                  {isSelected && (
-                    <div
-                      className={cn(
-                        "w-2 h-2 rounded-full",
-                        isYes ? "bg-green-500" : isNo ? "bg-red-500" : "bg-primary-foreground",
-                      )}
-                    />
+                  {selectedOptionId === option.id && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                    </div>
                   )}
                 </div>
-
-                {/* النص */}
                 <span
                   className={cn(
-                    "text-sm md:text-lg font-medium",
-                    isSelected
-                      ? isYes
-                        ? "text-green-500"
-                        : isNo
-                          ? "text-red-500"
-                          : "text-primary"
-                      : "text-foreground",
+                    "text-sm md:text-lg font-medium transition-colors",
+                    selectedOptionId === option.id ? "text-primary" : "text-foreground",
+                    selectedOptionId !== option.id && isYes && "group-hover:text-green-500",
+                    selectedOptionId !== option.id && isNo && "group-hover:text-red-500",
                   )}
                 >
                   {option.label}
