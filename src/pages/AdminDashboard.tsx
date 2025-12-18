@@ -368,6 +368,12 @@ export default function AdminDashboard() {
       }
     }
 
+    const organizationsWithAssessments = organizations.filter((org) =>
+      assessments.some((a) => a.organization_id === org.id),
+    ).length;
+
+    const organizationsWithoutAssessments = organizations.length - organizationsWithAssessments;
+
     return true;
   });
 
@@ -409,8 +415,23 @@ export default function AdminDashboard() {
               <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
+
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold">{organizations.length}</div>
+              {/* العدد */}
+              <div className="text-2xl md:text-3xl font-bold mb-2">{organizations.length}</div>
+
+              {/* تفصيل */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">لديها تقييمات</span>
+                  <span className="font-medium text-green-600">{organizationsWithAssessments}</span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">بدون تقييمات</span>
+                  <span className="font-medium text-red-500">{organizationsWithoutAssessments}</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
