@@ -485,7 +485,7 @@ export default function Auth() {
                 });
                 navigate("/auth");
               }}
-              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
+              className="w-full py-4 font-bold rounded-xl bg-secondary text-secondary-foreground hover:opacity-90 transition-all duration-300"
             >
               تسجيل الدخول
             </button>
@@ -666,9 +666,9 @@ export default function Auth() {
                 disabled={isSubmitting}
                 className={cn(
                   "w-full py-4 font-bold rounded-xl transition-all duration-300",
-                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+                  "focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:ring-offset-2 focus:ring-offset-background",
                   "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
-                  "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
+                  "bg-secondary text-secondary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
                   "flex items-center justify-center gap-3",
                 )}
               >
@@ -728,7 +728,7 @@ export default function Auth() {
 
             <button
               onClick={toggleMode}
-              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
+              className="w-full py-4 font-bold rounded-xl bg-secondary text-secondary-foreground hover:opacity-90 transition-all duration-300"
             >
               العودة لتسجيل الدخول
             </button>
@@ -786,7 +786,7 @@ export default function Auth() {
                 });
                 clearSessionStorage();
               }}
-              className="w-full py-4 font-bold rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all duration-300"
+              className="w-full py-4 font-bold rounded-xl bg-secondary text-secondary-foreground hover:opacity-90 transition-all duration-300"
             >
               العودة لتسجيل الدخول
             </button>
@@ -880,9 +880,9 @@ export default function Auth() {
                 disabled={isSubmitting}
                 className={cn(
                   "w-full py-4 font-bold rounded-xl transition-all duration-300",
-                  "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+                  "focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:ring-offset-2 focus:ring-offset-background",
                   "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
-                  "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
+                  "bg-secondary text-secondary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
                   "flex items-center justify-center gap-3",
                 )}
               >
@@ -1268,9 +1268,9 @@ export default function Auth() {
               disabled={isSubmitting}
               className={cn(
                 "w-full py-4 font-bold rounded-xl transition-all duration-300",
-                "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+                "focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:ring-offset-2 focus:ring-offset-background",
                 "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
-                "bg-primary text-primary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
+                "bg-secondary text-secondary-foreground hover:opacity-90 hover:scale-[1.02] glow-accent",
                 "flex items-center justify-center gap-3",
               )}
             >
