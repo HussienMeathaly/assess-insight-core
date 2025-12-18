@@ -27,20 +27,11 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Verify the requesting user is an admin
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      console.error("No authorization header");
-      return new Response(
-        JSON.stringify({ error: "غير مصرح" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const authHeader = req.headers.get("Authorization")!;
     
-    // Client with user's token to verify admin status
+    // Client with user's JWT token (verified automatically by Supabase)
     const supabaseClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -50,7 +41,7 @@ serve(async (req: Request): Promise<Response> => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // Get current user
+    // Get current user (JWT already validated by Supabase)
     const { data: { user: currentUser }, error: userError } = await supabaseClient.auth.getUser();
     if (userError || !currentUser) {
       console.error("Failed to get user:", userError);
@@ -60,7 +51,7 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    // Check if user is admin
+    // Check if user is admin using service role client
     const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
       _user_id: currentUser.id,
       _role: "admin",
