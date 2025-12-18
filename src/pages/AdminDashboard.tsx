@@ -333,10 +333,20 @@ export default function AdminDashboard() {
   }
 
   const qualifiedCount = assessments.filter((a) => a.is_qualified).length;
-  const avgScore =
+  const avgScoreNum =
     assessments.length > 0
-      ? (assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length).toFixed(1)
+      ? assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length
       : 0;
+  const avgScore = avgScoreNum.toFixed(1);
+
+  // Calculate organizations with/without assessments
+  const orgIdsWithAssessments = new Set(
+    assessments.map((a) => a.organization?.name).filter(Boolean)
+  );
+  const organizationsWithAssessments = organizations.filter((org) =>
+    orgIdsWithAssessments.has(org.name)
+  ).length;
+  const organizationsWithoutAssessments = organizations.length - organizationsWithAssessments;
 
   // Filtered assessments based on search, qualification and date filters
   const filteredAssessments = assessments.filter((a) => {
@@ -367,12 +377,6 @@ export default function AdminDashboard() {
         if (!isAfter(assessmentDate, startOfMonth(now))) return false;
       }
     }
-
-    const organizationsWithAssessments = organizations.filter((org) =>
-      assessments.some((a) => a.organization_id === org.id),
-    ).length;
-
-    const organizationsWithoutAssessments = organizations.length - organizationsWithAssessments;
 
     return true;
   });
@@ -455,11 +459,11 @@ export default function AdminDashboard() {
                 <span
                   className={`
                     inline-block w-2.5 h-2.5 rounded-full
-                    ${avgScore >= 75 ? "bg-green-500" : avgScore >= 50 ? "bg-yellow-500" : "bg-red-500"}
+                    ${avgScoreNum >= 75 ? "bg-green-500" : avgScoreNum >= 50 ? "bg-yellow-500" : "bg-red-500"}
                   `}
                 />
                 <span className="text-xs font-medium">
-                  {avgScore >= 75 ? "جودة عالية" : avgScore >= 50 ? "جودة متوسطة" : "جودة منخفضة"}
+                  {avgScoreNum >= 75 ? "جودة عالية" : avgScoreNum >= 50 ? "جودة متوسطة" : "جودة منخفضة"}
                 </span>
               </div>
             </CardContent>
