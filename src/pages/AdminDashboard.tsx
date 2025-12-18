@@ -349,16 +349,16 @@ export default function AdminDashboard() {
         return false;
       }
     }
-    
+
     // Qualification filter
     if (qualificationFilter === "qualified" && !a.is_qualified) return false;
     if (qualificationFilter === "not_qualified" && a.is_qualified) return false;
-    
+
     // Date filter
     if (dateFilter !== "all") {
       const assessmentDate = new Date(a.completed_at);
       const now = new Date();
-      
+
       if (dateFilter === "today") {
         if (assessmentDate.toDateString() !== now.toDateString()) return false;
       } else if (dateFilter === "week") {
@@ -367,7 +367,7 @@ export default function AdminDashboard() {
         if (!isAfter(assessmentDate, startOfMonth(now))) return false;
       }
     }
-    
+
     return true;
   });
 
@@ -432,6 +432,7 @@ export default function AdminDashboard() {
               <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">معدل التأهيل</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
+
             <CardContent>
               <div className="text-xl md:text-2xl font-bold">
                 {assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%
@@ -444,8 +445,12 @@ export default function AdminDashboard() {
         <Tabs defaultValue="assessments" className="space-y-4 md:space-y-10" dir="rtl">
           <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
             <TabsList className="w-max min-w-full md:w-full justify-start">
-              <TabsTrigger value="assessments" className="text-xs md:text-sm">التقييمات</TabsTrigger>
-              <TabsTrigger value="organizations" className="text-xs md:text-sm">الجهات</TabsTrigger>
+              <TabsTrigger value="assessments" className="text-xs md:text-sm">
+                التقييمات
+              </TabsTrigger>
+              <TabsTrigger value="organizations" className="text-xs md:text-sm">
+                الجهات
+              </TabsTrigger>
               <TabsTrigger value="users" className="flex items-center gap-1 text-xs md:text-sm">
                 <UserCog className="h-3 w-3 md:h-4 md:w-4" />
                 <span className="hidden xs:inline">إدارة</span> المستخدمين
@@ -460,7 +465,10 @@ export default function AdminDashboard() {
                   <CardTitle className="text-right">جميع التقييمات</CardTitle>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm text-muted-foreground">الحالة:</span>
-                    <Select value={qualificationFilter} onValueChange={(v) => setQualificationFilter(v as "all" | "qualified" | "not_qualified")}>
+                    <Select
+                      value={qualificationFilter}
+                      onValueChange={(v) => setQualificationFilter(v as "all" | "qualified" | "not_qualified")}
+                    >
                       <SelectTrigger className="w-[130px]">
                         <SelectValue />
                       </SelectTrigger>
@@ -471,7 +479,10 @@ export default function AdminDashboard() {
                       </SelectContent>
                     </Select>
                     <span className="text-sm text-muted-foreground">الفترة:</span>
-                    <Select value={dateFilter} onValueChange={(v) => setDateFilter(v as "all" | "today" | "week" | "month")}>
+                    <Select
+                      value={dateFilter}
+                      onValueChange={(v) => setDateFilter(v as "all" | "today" | "week" | "month")}
+                    >
                       <SelectTrigger className="w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
@@ -514,7 +525,9 @@ export default function AdminDashboard() {
                       <TableBody>
                         {filteredAssessments.map((assessment) => (
                           <TableRow key={assessment.id}>
-                            <TableCell className="font-medium">{assessment.organization?.name || "غير معروف"}</TableCell>
+                            <TableCell className="font-medium">
+                              {assessment.organization?.name || "غير معروف"}
+                            </TableCell>
                             <TableCell>{assessment.organization?.contact_person || "-"}</TableCell>
                             <TableCell>
                               {assessment.total_score} / {assessment.max_score}
@@ -608,7 +621,11 @@ export default function AdminDashboard() {
                   <Shield className="h-4 w-4 md:h-5 md:w-5" />
                   إدارة المستخدمين والصلاحيات
                 </CardTitle>
-                <Button onClick={() => setShowAddUserDialog(true)} size="sm" className="flex items-center gap-2 w-full sm:w-auto">
+                <Button
+                  onClick={() => setShowAddUserDialog(true)}
+                  size="sm"
+                  className="flex items-center gap-2 w-full sm:w-auto"
+                >
                   <UserPlus className="h-4 w-4" />
                   إضافة مستخدم
                 </Button>
