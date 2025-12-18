@@ -32,6 +32,7 @@ import {
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Organization {
   id: string;
@@ -381,15 +382,21 @@ export default function AdminDashboard() {
                 <span className="hidden xs:inline">الرئيسية</span>
               </Button>
               <h1 className="text-lg md:text-xl font-bold text-foreground sm:hidden">لوحة التحكم</h1>
-              <Button variant="ghost" size="sm" onClick={handleSignOut} className="sm:hidden">
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1 sm:hidden">
+                <ThemeToggle />
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <h1 className="hidden sm:block text-xl font-bold text-foreground">لوحة التحكم</h1>
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="hidden sm:flex">
-              <LogOut className="h-4 w-4 ml-2" />
-              تسجيل الخروج
-            </Button>
+            <div className="hidden sm:flex items-center gap-2">
+              <ThemeToggle />
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 ml-2" />
+                تسجيل الخروج
+              </Button>
+            </div>
           </div>
         </div>
       </header>

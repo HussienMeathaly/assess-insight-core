@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { LogOut, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Index = () => {
   const { signOut, user } = useAuth();
@@ -23,6 +24,7 @@ const Index = () => {
 
       {user && (
         <div className="fixed top-3 left-3 md:top-4 md:left-4 z-50 flex items-center gap-1.5 md:gap-2">
+          <ThemeToggle />
           {isAdmin && (
             <Link
               to="/admin"
