@@ -434,9 +434,23 @@ export default function AdminDashboard() {
             </CardHeader>
 
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold">
+              {/* النسبة */}
+              <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">
                 {assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%
               </div>
+
+              {/* شريط التقدم */}
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-green-500 transition-all"
+                  style={{
+                    width: `${assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%`,
+                  }}
+                />
+              </div>
+
+              {/* نص توضيحي */}
+              <p className="text-xs text-muted-foreground mt-2">نسبة الجهات المؤهلة من إجمالي التقييمات</p>
             </CardContent>
           </Card>
         </div>
