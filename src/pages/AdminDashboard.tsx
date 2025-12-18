@@ -419,11 +419,28 @@ export default function AdminDashboard() {
               <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">إجمالي التقييمات</CardTitle>
               <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
+
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold">{assessments.length}</div>
-              <p className="text-xs text-muted-foreground">
+              {/* العدد */}
+              <div className="text-2xl md:text-3xl font-bold mb-1">{assessments.length}</div>
+
+              {/* تفاصيل */}
+              <p className="text-xs text-muted-foreground mb-2">
                 {qualifiedCount} مؤهل • متوسط: {avgScore}
               </p>
+
+              {/* مؤشر الجودة */}
+              <div className="flex items-center gap-2">
+                <span
+                  className={`
+                    inline-block w-2.5 h-2.5 rounded-full
+                    ${avgScore >= 75 ? "bg-green-500" : avgScore >= 50 ? "bg-yellow-500" : "bg-red-500"}
+                  `}
+                />
+                <span className="text-xs font-medium">
+                  {avgScore >= 75 ? "جودة عالية" : avgScore >= 50 ? "جودة متوسطة" : "جودة منخفضة"}
+                </span>
+              </div>
             </CardContent>
           </Card>
 
