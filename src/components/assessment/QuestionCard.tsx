@@ -78,9 +78,25 @@ export function QuestionCard({ question, selectedOptionId, onSelect, onPrevious 
                 <span
                   className={cn(
                     "text-sm md:text-lg font-medium transition-colors",
-                    selectedOptionId === option.id ? "text-primary" : "text-foreground",
-                    selectedOptionId !== option.id && isYes && "group-hover:text-green-500",
-                    selectedOptionId !== option.id && isNo && "group-hover:text-red-500",
+
+                    // ✅ اللون بعد الاختيار (نهائي – لا hover)
+                    selectedOptionId === option.id &&
+                      (option.value === "yes"
+                        ? "text-green-500"
+                        : option.value === "no"
+                          ? "text-red-500"
+                          : "text-primary"),
+
+                    // اللون الافتراضي قبل الاختيار
+                    selectedOptionId !== option.id && "text-foreground",
+
+                    // hover يعمل فقط إذا لم يكن الخيار مختارًا
+                    selectedOptionId !== option.id &&
+                      (option.value === "yes"
+                        ? "group-hover:text-green-500"
+                        : option.value === "no"
+                          ? "group-hover:text-red-500"
+                          : "group-hover:text-primary/50"),
                   )}
                 >
                   {option.label}
