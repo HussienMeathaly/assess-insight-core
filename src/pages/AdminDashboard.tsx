@@ -334,7 +334,9 @@ export default function AdminDashboard() {
 
   const qualifiedCount = assessments.filter((a) => a.is_qualified).length;
   const avgScoreNum =
-    assessments.length > 0 ? assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length : 0;
+    assessments.length > 0
+      ? assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length
+      : 0;
   const avgScore = avgScoreNum.toFixed(1);
 
   // Filtered assessments based on search, qualification and date filters
@@ -696,7 +698,7 @@ export default function AdminDashboard() {
                             </TableCell>
                             <TableCell>
                               <Badge variant={u.role === "admin" ? "default" : "secondary"}>
-                                {u.role === "admin" ? "مدير" : u.role === "user" ? "مستخدم" : "بدون صلاحية"}
+                                {u.role === "admin" ? "مدير" : u.role === "user" ? "مستخدم"}
                               </Badge>
                             </TableCell>
                             <TableCell>
@@ -714,7 +716,7 @@ export default function AdminDashboard() {
                                   <SelectContent>
                                     <SelectItem value="admin">مدير</SelectItem>
                                     <SelectItem value="user">مستخدم</SelectItem>
-                                    <SelectItem value="none">بدون صلاحية</SelectItem>
+                                    
                                   </SelectContent>
                                 </Select>
                               )}
