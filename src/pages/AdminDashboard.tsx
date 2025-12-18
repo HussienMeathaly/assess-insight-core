@@ -334,9 +334,7 @@ export default function AdminDashboard() {
 
   const qualifiedCount = assessments.filter((a) => a.is_qualified).length;
   const avgScoreNum =
-    assessments.length > 0
-      ? assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length
-      : 0;
+    assessments.length > 0 ? assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length : 0;
   const avgScore = avgScoreNum.toFixed(1);
 
   // Filtered assessments based on search, qualification and date filters
@@ -546,12 +544,12 @@ export default function AdminDashboard() {
                     <Table dir="rtl">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text-right">الجهة</TableHead>
-                          <TableHead className="text-right">المسؤول</TableHead>
-                          <TableHead className="text-right">النتيجة</TableHead>
-                          <TableHead className="text-right">الحالة</TableHead>
-                          <TableHead className="text-right">التاريخ</TableHead>
-                          <TableHead className="text-right">الإجراءات</TableHead>
+                          <TableHead className="text- center">الجهة</TableHead>
+                          <TableHead className="text- center">المسؤول</TableHead>
+                          <TableHead className="text- center">النتيجة</TableHead>
+                          <TableHead className="text- center">الحالة</TableHead>
+                          <TableHead className="text- center">التاريخ</TableHead>
+                          <TableHead className="text- center">الإجراءات</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
