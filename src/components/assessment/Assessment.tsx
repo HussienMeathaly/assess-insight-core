@@ -70,44 +70,49 @@ export function Assessment() {
   }, [currentStep, getResult, analyzeResult, saveAssessmentToDatabase]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-6">
-      <div className="absolute top-3 left-3 right-3 md:top-4 md:left-4 md:right-4 z-10 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col p-4 md:p-6">
+      {/* Header section */}
+      <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
         <EditOrganizationModal />
         {organizationName && (
-          <div className="text-sm md:text-base text-muted-foreground">
+          <div className="text-sm md:text-base text-muted-foreground self-end sm:self-auto">
             مرحباً بـ <span className="font-semibold text-foreground">{organizationName}</span>
           </div>
         )}
       </div>
-      <div className="w-full max-w-3xl">
-        {currentStep === 'welcome' && (
-          <WelcomeScreen onStart={handleStart} />
-        )}
+      
+      {/* Main content */}
+      <div className="flex-1 flex items-center justify-center">
+        <div className="w-full max-w-3xl">
+          {currentStep === 'welcome' && (
+            <WelcomeScreen onStart={handleStart} />
+          )}
 
-        {currentStep === 'questions' && (
-          <div className="card-elevated rounded-2xl p-5 md:p-8 lg:p-12">
-            <ProgressIndicator
-              current={currentQuestionIndex + 1}
-              total={totalQuestions}
-            />
-            <QuestionCard
-              key={currentQuestion.id}
-              question={currentQuestion}
-              selectedOptionId={selectedOption}
-              onSelect={handleSelectOption}
-              onPrevious={currentQuestionIndex > 0 ? handlePreviousQuestion : undefined}
-            />
-          </div>
-        )}
+          {currentStep === 'questions' && (
+            <div className="card-elevated rounded-2xl p-5 md:p-8 lg:p-12">
+              <ProgressIndicator
+                current={currentQuestionIndex + 1}
+                total={totalQuestions}
+              />
+              <QuestionCard
+                key={currentQuestion.id}
+                question={currentQuestion}
+                selectedOptionId={selectedOption}
+                onSelect={handleSelectOption}
+                onPrevious={currentQuestionIndex > 0 ? handlePreviousQuestion : undefined}
+              />
+            </div>
+          )}
 
-        {currentStep === 'result' && (
-          <ResultScreen
-            result={getResult()}
-            analysisText={analysisText}
-            isLoading={isLoading}
-            onRetake={retakeAssessment}
-          />
-        )}
+          {currentStep === 'result' && (
+            <ResultScreen
+              result={getResult()}
+              analysisText={analysisText}
+              isLoading={isLoading}
+              onRetake={retakeAssessment}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
