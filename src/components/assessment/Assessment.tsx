@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAssessment } from '@/hooks/useAssessment';
 import { useAnalysis } from '@/hooks/useAnalysis';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { WelcomeScreen } from './WelcomeScreen';
 import { ProgressIndicator } from './ProgressIndicator';
 import { QuestionCard } from './QuestionCard';
@@ -8,6 +10,9 @@ import { ResultScreen } from './ResultScreen';
 import { EditOrganizationModal } from './EditOrganizationModal';
 
 export function Assessment() {
+  const { user } = useAuth();
+  const [organizationName, setOrganizationName] = useState<string | null>(null);
+
   const {
     currentStep,
     currentQuestion,
@@ -25,6 +30,26 @@ export function Assessment() {
   const { analysisText, isLoading, analyzeResult } = useAnalysis();
 
   useEffect(() => {
+    const fetchOrganizationName = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('organizations')
+        .select('name')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (data) {
+        setOrganizationName(data.name);
+      }
+    };
+
+    fetchOrganizationName();
+  }, [user]);
+
+  useEffect(() => {
     if (currentStep === 'result') {
       const result = getResult();
       analyzeResult(result);
@@ -34,8 +59,13 @@ export function Assessment() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 md:p-6">
-      <div className="absolute top-3 left-3 md:top-4 md:left-4 z-10">
+      <div className="absolute top-3 left-3 right-3 md:top-4 md:left-4 md:right-4 z-10 flex items-center justify-between">
         <EditOrganizationModal />
+        {organizationName && (
+          <div className="text-sm md:text-base text-muted-foreground">
+            مرحباً بـ <span className="font-semibold text-foreground">{organizationName}</span>
+          </div>
+        )}
       </div>
       <div className="w-full max-w-3xl">
         {currentStep === 'welcome' && (
