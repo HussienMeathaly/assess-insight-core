@@ -31,15 +31,27 @@ export function Assessment() {
 
   useEffect(() => {
     const fetchOrganizationName = async () => {
-      if (!user) return;
+      if (!user) {
+        console.log('No user found for organization fetch');
+        return;
+      }
       
-      const { data } = await supabase
+      console.log('Fetching organization for user:', user.id);
+      
+      const { data, error } = await supabase
         .from('organizations')
         .select('name')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching organization:', error);
+        return;
+      }
+      
+      console.log('Organization data:', data);
       
       if (data) {
         setOrganizationName(data.name);
