@@ -118,8 +118,9 @@ export function EditOrganizationModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-          <Settings className="h-5 w-5" />
+        <Button variant="outline" size="sm" className="gap-2 text-foreground border-border hover:bg-accent">
+          <Settings className="h-4 w-4" />
+          <span>تعديل بيانات الجهة</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" dir="rtl">
