@@ -3,6 +3,7 @@ import { CheckCircle2, AlertCircle, ArrowLeft, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import profitLogo from "@/assets/profit-logo.png";
 import { assessmentQuestions } from "@/data/questions";
+import { useNavigate } from "react-router-dom";
 
 interface ResultScreenProps {
   result: AssessmentResult;
@@ -13,6 +14,7 @@ interface ResultScreenProps {
 
 export function ResultScreen({ result, analysisText, isLoading, onRetake }: ResultScreenProps) {
   const { isQualified } = result;
+  const navigate = useNavigate();
 
   return (
     <div className="animate-scale-in text-center max-w-2xl mx-auto px-1 pt-16 md:pt-0">
@@ -112,6 +114,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
             </button>
           )}
           <button
+            onClick={() => navigate('/free-evaluation')}
             className="flex-1 px-6 md:px-8 py-3 md:py-4 bg-primary text-primary-foreground font-semibold rounded-lg 
                        transition-all duration-300 hover:opacity-90 hover:scale-[1.01] 
                        focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background
