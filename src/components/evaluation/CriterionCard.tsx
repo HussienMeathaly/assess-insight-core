@@ -59,6 +59,16 @@ export function CriterionCard({
       >
         {[...options].sort((a, b) => b.score_percentage - a.score_percentage).map((option) => {
           const isSelected = selectedOptionId === option.id;
+          const rawScore = Math.round((option.score_percentage / 100) * weight);
+          
+          // Color based on percentage: green (>=70%), yellow (40-69%), red (<40%)
+          const getScoreColor = (percentage: number) => {
+            if (percentage >= 70) return { bg: 'bg-green-500', text: 'text-green-500', border: 'border-green-500/30' };
+            if (percentage >= 40) return { bg: 'bg-yellow-500', text: 'text-yellow-500', border: 'border-yellow-500/30' };
+            return { bg: 'bg-red-500', text: 'text-red-500', border: 'border-red-500/30' };
+          };
+          
+          const scoreColor = getScoreColor(option.score_percentage);
           
           return (
             <div
@@ -67,8 +77,8 @@ export function CriterionCard({
                 "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
                 "border-2",
                 isSelected
-                  ? "border-primary bg-primary/10"
-                  : "border-muted hover:border-primary/50 hover:bg-muted/50"
+                  ? `border-primary bg-primary/10`
+                  : `border-muted hover:${scoreColor.border} hover:bg-muted/50`
               )}
               onClick={() => onSelect(option.id, option.score_percentage)}
             >
@@ -83,12 +93,12 @@ export function CriterionCard({
                 {option.label}
               </Label>
               <span className={cn(
-                "text-xs px-2 py-1 rounded-full min-w-[2rem] text-center",
+                "text-xs px-2 py-1 rounded-full min-w-[2rem] text-center font-medium",
                 isSelected
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
+                  ? `${scoreColor.bg} text-white`
+                  : `${scoreColor.bg}/20 ${scoreColor.text}`
               )}>
-                {Math.round((option.score_percentage / 100) * weight)}
+                {rawScore}
               </span>
             </div>
           );
