@@ -52,8 +52,8 @@ export function CriterionCard({ id, name, weight, options, selectedOptionId, onS
             <div
               key={option.id}
               className={cn(
-                "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
-                "border-2",
+                "flex flex-row-reverse items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
+                "border-2 text-right",
                 isSelected ? "border-primary bg-primary/10" : "border-muted hover:border-primary/50 hover:bg-muted/50",
               )}
               onClick={() => onSelect(option.id, option.score_percentage)}
@@ -62,8 +62,7 @@ export function CriterionCard({ id, name, weight, options, selectedOptionId, onS
               <Label
                 htmlFor={`${id}-${option.id}`}
                 className={cn(
-                  "flex flex-row-reverse items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
-                  "border-2 text-right",
+                  "flex-1 cursor-pointer text-sm text-right",
                   isSelected ? "text-primary font-medium" : "text-foreground",
                 )}
               >
@@ -71,7 +70,7 @@ export function CriterionCard({ id, name, weight, options, selectedOptionId, onS
               </Label>
               <span
                 className={cn(
-                  "flex-1 cursor-pointer text-sm text-right",
+                  "text-xs px-2 py-1 rounded-full",
                   isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
                 )}
               >
