@@ -40,7 +40,7 @@ const Landing = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="flex items-center gap-1 md:gap-2 bg-secondary/50 border-border/50 hover:bg-secondary/80 text-foreground px-4 md:px-4 py-2 text-sm md:text-base"
+                  className="flex items-center gap-1 md:gap-2 bg-secondary/50 border-border/50 hover:bg-secondary/80 text-foreground px-4 md:px-8 py-2 text-sm md:text-base"
                 >
                   <span>تسجيل الدخول</span>
                   <ChevronDown
