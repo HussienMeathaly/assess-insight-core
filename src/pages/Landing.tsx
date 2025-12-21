@@ -1,23 +1,23 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { ChevronDown } from 'lucide-react';
-import profitLogo from '@/assets/profit-logo.png';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { ChevronDown } from "lucide-react";
+import profitLogo from "@/assets/profit-logo.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ThemeToggle';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Landing = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleFreeAssessment = () => {
-    navigate('/auth?type=free');
+    navigate("/auth?type=free");
   };
 
   const handleComprehensiveAssessment = () => {
@@ -38,27 +38,26 @@ const Landing = () => {
             <ThemeToggle />
             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex items-center gap-1 md:gap-2 bg-secondary/50 border-border/50 hover:bg-secondary/80 text-foreground px-4 md:px-6 py-2 text-sm md:text-base"
                 >
                   <span>تسجيل الدخول</span>
-                  <ChevronDown className={`h-3 w-3 md:h-4 md:w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`h-3 w-3 md:h-4 md:w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                  />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="start" 
-                className="w-44 md:w-48 bg-card border-border z-50"
-              >
-                <DropdownMenuItem 
+              <DropdownMenuContent align="start" className="w-44 md:w-48 bg-card border-border z-50">
+                <DropdownMenuItem
                   onClick={handleFreeAssessment}
-                  className="cursor-pointer hover:bg-secondary focus:bg-secondary text-foreground text-sm md:text-base"
+                  className="cursor-pointer hover:bg-secondary focus:bg-secondary text-foreground text-sm md:text-base text-right text-right"
                 >
                   التقييم المجاني
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={handleComprehensiveAssessment}
-                  className="cursor-pointer hover:bg-secondary focus:bg-secondary text-muted-foreground text-sm md:text-base"
+                  className="cursor-pointer hover:bg-secondary focus:bg-secondary text-muted-foreground text-sm md:text-base text-right"
                   disabled
                 >
                   التقييم الشامل
@@ -73,18 +72,15 @@ const Landing = () => {
           {/* Logo */}
           <div className="mb-8 md:mb-12 animate-fade-in">
             <div className="bg-secondary/60 p-5 md:p-8 rounded-lg inline-block">
-              <img 
-                src={profitLogo} 
-                alt="Profit+ Logo" 
-                className="h-12 md:h-16 w-auto"
-              />
+              <img src={profitLogo} alt="Profit+ Logo" className="h-12 md:h-16 w-auto" />
             </div>
           </div>
 
           {/* Description */}
-          <div className="max-w-3xl animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="max-w-3xl animate-slide-up" style={{ animationDelay: "0.2s" }}>
             <p className="text-base md:text-lg lg:text-xl text-foreground/90 leading-relaxed px-2">
-              بروفيت بلس هي استديو متخصص في تقديم حلول متكاملة للمستثمرين، من التقييم والتخطيط إلى التنفيذ والتشغيل. نؤمن بأن النجاح يبدأ بفهم عميق للسوق واستراتيجية محكمة، ونعمل على تحويل الأفكار إلى منتجات رابحة
+              بروفيت بلس هي استديو متخصص في تقديم حلول متكاملة للمستثمرين، من التقييم والتخطيط إلى التنفيذ والتشغيل.
+              نؤمن بأن النجاح يبدأ بفهم عميق للسوق واستراتيجية محكمة، ونعمل على تحويل الأفكار إلى منتجات رابحة
             </p>
           </div>
         </main>
