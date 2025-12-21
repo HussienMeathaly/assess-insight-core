@@ -57,7 +57,7 @@ export function CriterionCard({
         }}
         className="space-y-2"
       >
-        {options.map((option) => {
+        {[...options].sort((a, b) => b.score_percentage - a.score_percentage).map((option) => {
           const isSelected = selectedOptionId === option.id;
           
           return (
