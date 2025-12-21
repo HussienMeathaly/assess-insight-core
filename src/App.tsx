@@ -9,6 +9,7 @@ import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
+import FreeEvaluation from "./pages/FreeEvaluation";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./hooks/useAuth";
 
@@ -53,6 +54,7 @@ const App = () => (
                   <AdminDashboard />
                 </ProtectedRoute>
               } />
+              <Route path="/free-evaluation" element={<FreeEvaluation />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
