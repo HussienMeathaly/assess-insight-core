@@ -48,7 +48,7 @@ const Landing = () => {
                   />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" dir="rtl" className="w-40 md:w-48 bg-card border-border z-50">
+              <DropdownMenuContent align="end" dir="rtl" className="w-44 md:w-44 bg-card border-border z-50">
                 <DropdownMenuItem
                   onClick={handleFreeAssessment}
                   className="cursor-pointer hover:bg-secondary focus:bg-secondary text-foreground text-sm md:text-base text-right text-right"
