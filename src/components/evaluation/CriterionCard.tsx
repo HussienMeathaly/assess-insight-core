@@ -83,12 +83,12 @@ export function CriterionCard({
                 {option.label}
               </Label>
               <span className={cn(
-                "text-xs px-2 py-1 rounded-full",
+                "text-xs px-2 py-1 rounded-full min-w-[2rem] text-center",
                 isSelected
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground"
               )}>
-                {option.score_percentage}%
+                {Math.round((option.score_percentage / 100) * weight)}
               </span>
             </div>
           );
