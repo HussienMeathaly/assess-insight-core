@@ -95,6 +95,247 @@ export type Database = {
           },
         ]
       }
+      criteria: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean | null
+          name: string
+          sub_element_id: string
+          weight_percentage: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          name: string
+          sub_element_id: string
+          weight_percentage: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          sub_element_id?: string
+          weight_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "criteria_sub_element_id_fkey"
+            columns: ["sub_element_id"]
+            isOneToOne: false
+            referencedRelation: "sub_elements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      criteria_options: {
+        Row: {
+          created_at: string | null
+          criterion_id: string
+          display_order: number
+          id: string
+          label: string
+          score_percentage: number
+        }
+        Insert: {
+          created_at?: string | null
+          criterion_id: string
+          display_order?: number
+          id?: string
+          label: string
+          score_percentage: number
+        }
+        Update: {
+          created_at?: string | null
+          criterion_id?: string
+          display_order?: number
+          id?: string
+          label?: string
+          score_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "criteria_options_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "criteria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaluation_answers: {
+        Row: {
+          answered_at: string | null
+          criterion_id: string
+          evaluation_id: string
+          id: string
+          score: number
+          selected_option_id: string
+        }
+        Insert: {
+          answered_at?: string | null
+          criterion_id: string
+          evaluation_id: string
+          id?: string
+          score: number
+          selected_option_id: string
+        }
+        Update: {
+          answered_at?: string | null
+          criterion_id?: string
+          evaluation_id?: string
+          id?: string
+          score?: number
+          selected_option_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_answers_criterion_id_fkey"
+            columns: ["criterion_id"]
+            isOneToOne: false
+            referencedRelation: "criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evaluation_answers_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "evaluations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evaluation_answers_selected_option_id_fkey"
+            columns: ["selected_option_id"]
+            isOneToOne: false
+            referencedRelation: "criteria_options"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaluation_domains: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean | null
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          name?: string
+        }
+        Relationships: []
+      }
+      evaluations: {
+        Row: {
+          completed_at: string | null
+          domain_id: string
+          id: string
+          is_completed: boolean | null
+          max_score: number | null
+          organization_id: string
+          started_at: string | null
+          total_score: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          domain_id: string
+          id?: string
+          is_completed?: boolean | null
+          max_score?: number | null
+          organization_id: string
+          started_at?: string | null
+          total_score?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          domain_id?: string
+          id?: string
+          is_completed?: boolean | null
+          max_score?: number | null
+          organization_id?: string
+          started_at?: string | null
+          total_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluations_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "evaluation_domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evaluations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      main_elements: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number
+          domain_id: string
+          id: string
+          is_active: boolean | null
+          name: string
+          weight_percentage: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          domain_id: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          weight_percentage: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          domain_id?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          weight_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "main_elements_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "evaluation_domains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           contact_person: string
@@ -186,6 +427,44 @@ export type Database = {
           weight?: number
         }
         Relationships: []
+      }
+      sub_elements: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean | null
+          main_element_id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          main_element_id: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean | null
+          main_element_id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_elements_main_element_id_fkey"
+            columns: ["main_element_id"]
+            isOneToOne: false
+            referencedRelation: "main_elements"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
