@@ -40,7 +40,6 @@ const Landing = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  size="sm"
                   className="flex items-center gap-1 md:gap-2 bg-secondary/50 border-border/50 hover:bg-secondary/80 text-foreground px-4 md:px-6 py-2 text-sm md:text-base"
                 >
                   <span>تسجيل الدخول</span>
@@ -58,7 +57,7 @@ const Landing = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleComprehensiveAssessment}
-                  className="cursor-pointer hover:bg-secondary focus:bg-secondary text-muted-foreground text-sm md:text-base text-right"
+                  className="cursor-pointer hover:bg-secondary focus:bg-secondary text-muted-foreground text-xs md:text-sm text-right"
                   disabled
                 >
                   التقييم الشامل
