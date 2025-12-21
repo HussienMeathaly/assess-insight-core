@@ -75,7 +75,7 @@ export function CriterionCard({
               key={option.id}
               className={cn(
                 "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
-                "border-2",
+                "border-2 flex-row-reverse",
                 isSelected
                   ? `border-primary bg-primary/10`
                   : `border-muted hover:${scoreColor.border} hover:bg-muted/50`
@@ -86,7 +86,7 @@ export function CriterionCard({
               <Label
                 htmlFor={`${id}-${option.id}`}
                 className={cn(
-                  "flex-1 cursor-pointer text-sm",
+                  "flex-1 cursor-pointer text-sm text-right",
                   isSelected ? "text-primary font-medium" : "text-foreground"
                 )}
               >
