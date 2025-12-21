@@ -18,6 +18,23 @@ interface CriterionCardProps {
   onSelect: (optionId: string, scorePercentage: number) => void;
 }
 
+const getScoreColor = (score: number) => {
+  if (score >= 70) return "text-green-500";
+  if (score >= 40) return "text-yellow-500";
+  return "text-red-500";
+};
+
+const getScoreBgColor = (score: number, isSelected: boolean) => {
+  if (isSelected) {
+    if (score >= 70) return "bg-green-500 text-white";
+    if (score >= 40) return "bg-yellow-500 text-black";
+    return "bg-red-500 text-white";
+  }
+  if (score >= 70) return "bg-green-500/20 text-green-500";
+  if (score >= 40) return "bg-yellow-500/20 text-yellow-500";
+  return "bg-red-500/20 text-red-500";
+};
+
 export function CriterionCard({ id, name, weight, options, selectedOptionId, onSelect }: CriterionCardProps) {
   const isAnswered = !!selectedOptionId;
 
@@ -47,6 +64,8 @@ export function CriterionCard({ id, name, weight, options, selectedOptionId, onS
       >
         {options.map((option) => {
           const isSelected = selectedOptionId === option.id;
+          const scoreColor = getScoreColor(option.score_percentage);
+          const scoreBgColor = getScoreBgColor(option.score_percentage, isSelected);
 
           return (
             <div
@@ -54,7 +73,13 @@ export function CriterionCard({ id, name, weight, options, selectedOptionId, onS
               className={cn(
                 "flex flex-row-reverse items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
                 "border-2 text-right",
-                isSelected ? "border-primary bg-primary/10" : "border-muted hover:border-primary/50 hover:bg-muted/50",
+                isSelected 
+                  ? option.score_percentage >= 70 
+                    ? "border-green-500 bg-green-500/10" 
+                    : option.score_percentage >= 40 
+                      ? "border-yellow-500 bg-yellow-500/10"
+                      : "border-red-500 bg-red-500/10"
+                  : "border-muted hover:border-muted-foreground/50 hover:bg-muted/50",
               )}
               onClick={() => onSelect(option.id, option.score_percentage)}
             >
@@ -63,15 +88,15 @@ export function CriterionCard({ id, name, weight, options, selectedOptionId, onS
                 htmlFor={`${id}-${option.id}`}
                 className={cn(
                   "flex-1 cursor-pointer text-sm text-right",
-                  isSelected ? "text-primary font-medium" : "text-foreground",
+                  isSelected ? `${scoreColor} font-medium` : "text-foreground",
                 )}
               >
                 {option.label}
               </Label>
               <span
                 className={cn(
-                  "text-xs px-2 py-1 rounded-full",
-                  isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                  "text-xs px-2 py-1 rounded-full font-medium",
+                  scoreBgColor,
                 )}
               >
                 {option.score_percentage}%
