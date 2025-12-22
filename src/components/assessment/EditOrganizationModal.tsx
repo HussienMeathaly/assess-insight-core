@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { z } from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Settings } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
-import { logError } from '@/lib/logger';
+import { useState, useEffect } from "react";
+import { z } from "zod";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 
 // اسم الجهة + اسم المسؤول: عربي/إنجليزي/أرقام/مسافات/_ فقط
 const validOrgAndNameRegex = /^[\u0600-\u06FFa-zA-Z0-9\s_]+$/;
@@ -16,10 +16,18 @@ const validOrgAndNameRegex = /^[\u0600-\u06FFa-zA-Z0-9\s_]+$/;
 const phoneDigitsMin10Regex = /^\d{10,}$/;
 
 const orgUpdateSchema = z.object({
-  name: z.string().trim().min(2, 'اسم الجهة مطلوب').regex(validOrgAndNameRegex, 'اسم الجهة يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
-  contact_person: z.string().trim().min(2, 'اسم المسؤول مطلوب').regex(validOrgAndNameRegex, 'اسم المسؤول يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط'),
-  phone: z.string().trim().regex(phoneDigitsMin10Regex, 'رقم الجوال يجب أن لا يقل عن 10 أرقام'),
-  email: z.string().trim().email('البريد الإلكتروني غير صحيح'),
+  name: z
+    .string()
+    .trim()
+    .min(2, "اسم الجهة مطلوب")
+    .regex(validOrgAndNameRegex, "اسم الجهة يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط"),
+  contact_person: z
+    .string()
+    .trim()
+    .min(2, "اسم المسؤول مطلوب")
+    .regex(validOrgAndNameRegex, "اسم المسؤول يجب أن يحتوي على حروف عربية أو إنجليزية أو أرقام أو _ فقط"),
+  phone: z.string().trim().regex(phoneDigitsMin10Regex, "رقم الجوال يجب أن لا يقل عن 10 أرقام"),
+  email: z.string().trim().email("البريد الإلكتروني غير صحيح"),
 });
 
 interface OrganizationData {
@@ -36,10 +44,10 @@ export function EditOrganizationModal() {
   const [loading, setLoading] = useState(false);
   const [organization, setOrganization] = useState<OrganizationData | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
-    contact_person: '',
-    phone: '',
-    email: '',
+    name: "",
+    contact_person: "",
+    phone: "",
+    email: "",
   });
 
   useEffect(() => {
@@ -50,18 +58,18 @@ export function EditOrganizationModal() {
 
   const fetchOrganization = async () => {
     if (!user) return;
-    
+
     try {
       const { data, error } = await supabase
-        .from('organizations')
-        .select('id, name, contact_person, phone, email')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .from("organizations")
+        .select("id, name, contact_person, phone, email")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (error) {
-        logError('Error fetching organization', error);
+        logError("Error fetching organization", error);
         return;
       }
 
@@ -75,7 +83,7 @@ export function EditOrganizationModal() {
         });
       }
     } catch (error) {
-      logError('Error fetching organization', error);
+      logError("Error fetching organization", error);
     }
   };
 
@@ -85,7 +93,7 @@ export function EditOrganizationModal() {
 
     const result = orgUpdateSchema.safeParse(formData);
     if (!result.success) {
-      toast.error(result.error.errors[0]?.message ?? 'البيانات المدخلة غير صحيحة');
+      toast.error(result.error.errors[0]?.message ?? "البيانات المدخلة غير صحيحة");
       return;
     }
 
@@ -94,22 +102,22 @@ export function EditOrganizationModal() {
       const clean = result.data;
 
       const { error } = await supabase
-        .from('organizations')
+        .from("organizations")
         .update({
           name: clean.name,
           contact_person: clean.contact_person,
           phone: clean.phone,
           email: clean.email,
         })
-        .eq('id', organization.id);
+        .eq("id", organization.id);
 
       if (error) throw error;
 
-      toast.success('تم تحديث بيانات الجهة بنجاح');
+      toast.success("تم تحديث بيانات الجهة بنجاح");
       setOpen(false);
     } catch (error) {
-      logError('Error updating organization', error);
-      toast.error('حدث خطأ أثناء تحديث البيانات');
+      logError("Error updating organization", error);
+      toast.error("حدث خطأ أثناء تحديث البيانات");
     } finally {
       setLoading(false);
     }
@@ -118,14 +126,14 @@ export function EditOrganizationModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2 text-foreground border-border hover:bg-accent">
+        <Button variant="outline" size="sm" className="gap-2 text-foreground border-border hover:bg-accent ">
           <Settings className="h-4 w-4" />
           <span>تعديل بيانات الجهة</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="text-right">تعديل بيانات الجهة</DialogTitle>
+          <DialogTitle className="text-center">تعديل بيانات الجهة</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
@@ -155,7 +163,7 @@ export function EditOrganizationModal() {
               pattern="[0-9]*"
               minLength={10}
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "") })}
               required
               dir="ltr"
               className="text-left"
@@ -175,7 +183,7 @@ export function EditOrganizationModal() {
           </div>
           <div className="flex gap-3 pt-4">
             <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+              {loading ? "جاري الحفظ..." : "حفظ التغييرات"}
             </Button>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               إلغاء
