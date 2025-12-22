@@ -203,3 +203,67 @@ export function UsersMobileCards({
     </div>
   );
 }
+
+// Evaluation (Free Evaluation) Mobile Cards
+export type AdminMobileEvaluation = {
+  id: string;
+  total_score: number | null;
+  max_score: number | null;
+  is_completed: boolean | null;
+  started_at: string | null;
+  completed_at: string | null;
+  organization: {
+    name: string;
+    contact_person: string;
+    email: string;
+    phone: string;
+  } | null;
+};
+
+export function EvaluationsMobileCards({
+  evaluations,
+  onViewDetails,
+}: {
+  evaluations: AdminMobileEvaluation[];
+  onViewDetails: (evaluation: AdminMobileEvaluation) => void;
+}) {
+  if (evaluations.length === 0) {
+    return <div className="py-6 text-center text-sm text-muted-foreground">لا توجد تقييمات مجانية بعد</div>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {evaluations.map((e) => (
+        <Card key={e.id}>
+          <CardContent className="p-4 overflow-hidden">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-semibold truncate">{e.organization?.name || "غير معروف"}</p>
+                <p className="mt-1 text-sm text-muted-foreground truncate">المسؤول: {e.organization?.contact_person || "-"}</p>
+              </div>
+              <Badge variant={e.is_completed ? "default" : "secondary"} className="shrink-0">
+                {e.is_completed ? "مكتمل" : "قيد التنفيذ"}
+              </Badge>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <div className="text-foreground">
+                <span className="text-muted-foreground">النتيجة: </span>
+                {e.total_score !== null ? `${e.total_score} / ${e.max_score}` : "-"}
+              </div>
+              <div className="text-left" dir="ltr">
+                <span className="text-muted-foreground">التاريخ: </span>
+                {e.started_at ? new Date(e.started_at).toLocaleDateString("en-GB") : "-"}
+              </div>
+            </div>
+
+            <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={() => onViewDetails(e)}>
+              <Eye className="h-4 w-4 ml-2" />
+              التفاصيل
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
