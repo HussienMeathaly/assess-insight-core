@@ -131,6 +131,8 @@ export default function AdminDashboard() {
   const [newUserRole, setNewUserRole] = useState<"admin" | "user" | "none">("user");
   const [addingUser, setAddingUser] = useState(false);
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
+  const [deletingAssessment, setDeletingAssessment] = useState<string | null>(null);
+  const [deletingEvaluation, setDeletingEvaluation] = useState<string | null>(null);
   const [qualificationFilter, setQualificationFilter] = useState<"all" | "qualified" | "not_qualified">("all");
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -388,6 +390,68 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteAssessment = async (assessmentId: string) => {
+    setDeletingAssessment(assessmentId);
+
+    try {
+      // First delete assessment answers
+      const { error: answersError } = await supabase
+        .from("assessment_answers")
+        .delete()
+        .eq("assessment_id", assessmentId);
+
+      if (answersError) throw answersError;
+
+      // Then delete the assessment
+      const { error } = await supabase
+        .from("assessments")
+        .delete()
+        .eq("id", assessmentId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setAssessments((prev) => prev.filter((a) => a.id !== assessmentId));
+      toast.success("تم حذف التقييم الأولي بنجاح");
+    } catch (error) {
+      console.error("Error deleting assessment:", error);
+      toast.error("حدث خطأ أثناء حذف التقييم");
+    } finally {
+      setDeletingAssessment(null);
+    }
+  };
+
+  const handleDeleteEvaluation = async (evaluationId: string) => {
+    setDeletingEvaluation(evaluationId);
+
+    try {
+      // First delete evaluation answers
+      const { error: answersError } = await supabase
+        .from("evaluation_answers")
+        .delete()
+        .eq("evaluation_id", evaluationId);
+
+      if (answersError) throw answersError;
+
+      // Then delete the evaluation
+      const { error } = await supabase
+        .from("evaluations")
+        .delete()
+        .eq("id", evaluationId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setEvaluations((prev) => prev.filter((e) => e.id !== evaluationId));
+      toast.success("تم حذف التقييم المجاني بنجاح");
+    } catch (error) {
+      console.error("Error deleting evaluation:", error);
+      toast.error("حدث خطأ أثناء حذف التقييم");
+    } finally {
+      setDeletingEvaluation(null);
+    }
+  };
+
   if (authLoading || roleLoading || loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">
@@ -629,7 +693,12 @@ export default function AdminDashboard() {
               <CardContent>
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
-                  <AssessmentsMobileCards assessments={filteredAssessments} onViewDetails={handleViewDetails} />
+                  <AssessmentsMobileCards 
+                    assessments={filteredAssessments} 
+                    onViewDetails={handleViewDetails} 
+                    onDelete={handleDeleteAssessment}
+                    deletingId={deletingAssessment}
+                  />
                 </div>
 
                 {/* Desktop (table) */}
@@ -663,10 +732,25 @@ export default function AdminDashboard() {
                             </TableCell>
                             <TableCell>{new Date(assessment.completed_at).toLocaleDateString("en-GB")}</TableCell>
                             <TableCell>
-                              <Button variant="ghost" size="sm" onClick={() => handleViewDetails(assessment)}>
-                                <Eye className="h-4 w-4 ml-1" />
-                                التفاصيل
-                              </Button>
+                              <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="sm" onClick={() => handleViewDetails(assessment)}>
+                                  <Eye className="h-4 w-4 ml-1" />
+                                  التفاصيل
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={() => handleDeleteAssessment(assessment.id)}
+                                  disabled={deletingAssessment === assessment.id}
+                                >
+                                  {deletingAssessment === assessment.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -720,7 +804,12 @@ export default function AdminDashboard() {
               <CardContent>
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
-                  <EvaluationsMobileCards evaluations={filteredEvaluations} onViewDetails={handleViewEvaluationDetails} />
+                  <EvaluationsMobileCards 
+                    evaluations={filteredEvaluations} 
+                    onViewDetails={handleViewEvaluationDetails}
+                    onDelete={handleDeleteEvaluation}
+                    deletingId={deletingEvaluation}
+                  />
                 </div>
 
                 {/* Desktop (table) */}
@@ -754,10 +843,25 @@ export default function AdminDashboard() {
                             </TableCell>
                             <TableCell>{evaluation.started_at ? new Date(evaluation.started_at).toLocaleDateString("en-GB") : "-"}</TableCell>
                             <TableCell>
-                              <Button variant="ghost" size="sm" onClick={() => handleViewEvaluationDetails(evaluation)}>
-                                <Eye className="h-4 w-4 ml-1" />
-                                التفاصيل
-                              </Button>
+                              <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="sm" onClick={() => handleViewEvaluationDetails(evaluation)}>
+                                  <Eye className="h-4 w-4 ml-1" />
+                                  التفاصيل
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={() => handleDeleteEvaluation(evaluation.id)}
+                                  disabled={deletingEvaluation === evaluation.id}
+                                >
+                                  {deletingEvaluation === evaluation.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
