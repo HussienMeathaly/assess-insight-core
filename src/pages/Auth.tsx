@@ -951,7 +951,7 @@ export default function Auth() {
       
       {/* Animated glow spots */}
       <motion.div
-        className="absolute top-1/4 -right-20 w-96 h-96 bg-primary/20 rounded-full blur-[100px]"
+        className="absolute top-1/4 -right-20 w-96 h-96 bg-primary/20 rounded-full blur-[100px] pointer-events-none"
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.5, 0.3],
@@ -963,7 +963,7 @@ export default function Auth() {
         }}
       />
       <motion.div
-        className="absolute bottom-1/4 -left-20 w-80 h-80 bg-accent/15 rounded-full blur-[80px]"
+        className="absolute bottom-1/4 -left-20 w-80 h-80 bg-accent/15 rounded-full blur-[80px] pointer-events-none"
         animate={{
           scale: [1.2, 1, 1.2],
           opacity: [0.2, 0.4, 0.2],
@@ -1024,7 +1024,7 @@ export default function Auth() {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {/* Card glow border effect */}
-          <div className="absolute -inset-[1px] rounded-3xl overflow-hidden">
+          <div className="absolute -inset-[1px] rounded-3xl overflow-hidden pointer-events-none">
             <motion.div
               className="absolute inset-0"
               animate={{
@@ -1047,7 +1047,7 @@ export default function Auth() {
           <div className="card-elevated rounded-3xl p-8 md:p-10 relative overflow-hidden backdrop-blur-sm">
             {/* Traveling light beam effect */}
             <motion.div
-              className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"
+              className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent pointer-events-none"
               animate={{
                 x: ["-100%", "100%"],
               }}
