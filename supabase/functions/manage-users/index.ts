@@ -71,9 +71,35 @@ serve(async (req: Request): Promise<Response> => {
     if (body.action === "create") {
       const { email, password, role } = body as CreateUserRequest;
 
+      // Validate required fields
       if (!email || !password) {
         return new Response(
           JSON.stringify({ error: "البريد الإلكتروني وكلمة المرور مطلوبان" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email) || email.length > 320) {
+        return new Response(
+          JSON.stringify({ error: "صيغة البريد الإلكتروني غير صحيحة" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Validate password strength
+      if (password.length < 6 || password.length > 128) {
+        return new Response(
+          JSON.stringify({ error: "كلمة المرور يجب أن تكون بين 6 و 128 حرفاً" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Validate role if provided
+      if (role && !["admin", "user"].includes(role)) {
+        return new Response(
+          JSON.stringify({ error: "دور المستخدم غير صالح" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -128,9 +154,11 @@ serve(async (req: Request): Promise<Response> => {
     if (body.action === "delete") {
       const { userId } = body as DeleteUserRequest;
 
-      if (!userId) {
+      // Validate userId format (UUID)
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!userId || !uuidRegex.test(userId)) {
         return new Response(
-          JSON.stringify({ error: "معرف المستخدم مطلوب" }),
+          JSON.stringify({ error: "معرف المستخدم غير صالح" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
