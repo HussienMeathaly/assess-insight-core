@@ -21,9 +21,13 @@ export type AdminMobileAssessment = {
 export function AssessmentsMobileCards({
   assessments,
   onViewDetails,
+  onDelete,
+  deletingId,
 }: {
   assessments: AdminMobileAssessment[];
   onViewDetails: (assessment: AdminMobileAssessment) => void;
+  onDelete?: (id: string) => void;
+  deletingId?: string | null;
 }) {
   if (assessments.length === 0) {
     return <div className="py-6 text-center text-sm text-muted-foreground">لا توجد تقييمات بعد</div>;
@@ -55,10 +59,27 @@ export function AssessmentsMobileCards({
               </div>
             </div>
 
-            <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={() => onViewDetails(a)}>
-              <Eye className="h-4 w-4 ml-2" />
-              التفاصيل
-            </Button>
+            <div className="mt-3 flex gap-2">
+              <Button variant="secondary" size="sm" className="flex-1" onClick={() => onViewDetails(a)}>
+                <Eye className="h-4 w-4 ml-2" />
+                التفاصيل
+              </Button>
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => onDelete(a.id)}
+                  disabled={deletingId === a.id}
+                >
+                  {deletingId === a.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       ))}
@@ -223,9 +244,13 @@ export type AdminMobileEvaluation = {
 export function EvaluationsMobileCards({
   evaluations,
   onViewDetails,
+  onDelete,
+  deletingId,
 }: {
   evaluations: AdminMobileEvaluation[];
   onViewDetails: (evaluation: AdminMobileEvaluation) => void;
+  onDelete?: (id: string) => void;
+  deletingId?: string | null;
 }) {
   if (evaluations.length === 0) {
     return <div className="py-6 text-center text-sm text-muted-foreground">لا توجد تقييمات مجانية بعد</div>;
@@ -257,10 +282,27 @@ export function EvaluationsMobileCards({
               </div>
             </div>
 
-            <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={() => onViewDetails(e)}>
-              <Eye className="h-4 w-4 ml-2" />
-              التفاصيل
-            </Button>
+            <div className="mt-3 flex gap-2">
+              <Button variant="secondary" size="sm" className="flex-1" onClick={() => onViewDetails(e)}>
+                <Eye className="h-4 w-4 ml-2" />
+                التفاصيل
+              </Button>
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => onDelete(e.id)}
+                  disabled={deletingId === e.id}
+                >
+                  {deletingId === e.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       ))}
