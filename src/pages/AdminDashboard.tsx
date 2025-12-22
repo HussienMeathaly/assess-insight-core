@@ -404,10 +404,7 @@ export default function AdminDashboard() {
       if (answersError) throw answersError;
 
       // Then delete the assessment
-      const { error } = await supabase
-        .from("assessments")
-        .delete()
-        .eq("id", assessmentId);
+      const { error } = await supabase.from("assessments").delete().eq("id", assessmentId);
 
       if (error) throw error;
 
@@ -435,10 +432,7 @@ export default function AdminDashboard() {
       if (answersError) throw answersError;
 
       // Then delete the evaluation
-      const { error } = await supabase
-        .from("evaluations")
-        .delete()
-        .eq("id", evaluationId);
+      const { error } = await supabase.from("evaluations").delete().eq("id", evaluationId);
 
       if (error) throw error;
 
@@ -467,9 +461,7 @@ export default function AdminDashboard() {
 
   const qualifiedCount = assessments.filter((a) => a.is_qualified).length;
   const avgScoreNum =
-    assessments.length > 0
-      ? assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length
-      : 0;
+    assessments.length > 0 ? assessments.reduce((sum, a) => sum + a.total_score, 0) / assessments.length : 0;
   const avgScore = avgScoreNum.toFixed(1);
 
   // Filtered assessments based on search, qualification and date filters
@@ -630,19 +622,19 @@ export default function AdminDashboard() {
         <Tabs defaultValue="assessments" className="space-y-4 md:space-y-10" dir="rtl">
           <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
             <TabsList className="w-max min-w-full md:w-full justify-start">
-              <TabsTrigger value="assessments" className="text-xs md:text-sm">
-                التقييمات الأولية
-              </TabsTrigger>
-              <TabsTrigger value="evaluations" className="flex items-center gap-1 text-xs md:text-sm">
-                <FileCheck2 className="h-3 w-3 md:h-4 md:w-4" />
-                التقييم المجاني
+              <TabsTrigger value="users" className="flex items-center gap-1 text-xs md:text-sm">
+                <UserCog className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden xs:inline">إدارة</span> المستخدمين
               </TabsTrigger>
               <TabsTrigger value="organizations" className="text-xs md:text-sm">
                 الجهات
               </TabsTrigger>
-              <TabsTrigger value="users" className="flex items-center gap-1 text-xs md:text-sm">
-                <UserCog className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden xs:inline">إدارة</span> المستخدمين
+              <TabsTrigger value="assessments" className="text-xs md:text-sm">
+                التقييم الأولي
+              </TabsTrigger>
+              <TabsTrigger value="evaluations" className="flex items-center gap-1 text-xs md:text-sm">
+                <FileCheck2 className="h-3 w-3 md:h-4 md:w-4" />
+                التقييم المجاني
               </TabsTrigger>
             </TabsList>
           </div>
@@ -694,9 +686,9 @@ export default function AdminDashboard() {
               <CardContent>
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
-                  <AssessmentsMobileCards 
-                    assessments={filteredAssessments} 
-                    onViewDetails={handleViewDetails} 
+                  <AssessmentsMobileCards
+                    assessments={filteredAssessments}
+                    onViewDetails={handleViewDetails}
                     onDelete={handleDeleteAssessment}
                     deletingId={deletingAssessment}
                   />
@@ -790,7 +782,9 @@ export default function AdminDashboard() {
                       <SelectContent>
                         <SelectItem value="all">الكل ({evaluations.length})</SelectItem>
                         <SelectItem value="completed">مكتمل ({completedEvaluations})</SelectItem>
-                        <SelectItem value="in_progress">قيد التنفيذ ({evaluations.length - completedEvaluations})</SelectItem>
+                        <SelectItem value="in_progress">
+                          قيد التنفيذ ({evaluations.length - completedEvaluations})
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -805,8 +799,8 @@ export default function AdminDashboard() {
               <CardContent>
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
-                  <EvaluationsMobileCards 
-                    evaluations={filteredEvaluations} 
+                  <EvaluationsMobileCards
+                    evaluations={filteredEvaluations}
                     onViewDetails={handleViewEvaluationDetails}
                     onDelete={handleDeleteEvaluation}
                     deletingId={deletingEvaluation}
@@ -835,17 +829,27 @@ export default function AdminDashboard() {
                             </TableCell>
                             <TableCell>{evaluation.organization?.contact_person || "-"}</TableCell>
                             <TableCell>
-                              {evaluation.total_score !== null ? `${evaluation.total_score} / ${evaluation.max_score}` : "-"}
+                              {evaluation.total_score !== null
+                                ? `${evaluation.total_score} / ${evaluation.max_score}`
+                                : "-"}
                             </TableCell>
                             <TableCell>
                               <Badge variant={evaluation.is_completed ? "default" : "secondary"}>
                                 {evaluation.is_completed ? "مكتمل" : "قيد التنفيذ"}
                               </Badge>
                             </TableCell>
-                            <TableCell>{evaluation.started_at ? new Date(evaluation.started_at).toLocaleDateString("en-GB") : "-"}</TableCell>
+                            <TableCell>
+                              {evaluation.started_at
+                                ? new Date(evaluation.started_at).toLocaleDateString("en-GB")
+                                : "-"}
+                            </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="sm" onClick={() => handleViewEvaluationDetails(evaluation)}>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleViewEvaluationDetails(evaluation)}
+                                >
                                   <Eye className="h-4 w-4 ml-1" />
                                   التفاصيل
                                 </Button>
@@ -1004,7 +1008,6 @@ export default function AdminDashboard() {
                                   <SelectContent>
                                     <SelectItem value="admin">مدير</SelectItem>
                                     <SelectItem value="user">مستخدم</SelectItem>
-                                    
                                   </SelectContent>
                                 </Select>
                               )}
@@ -1186,7 +1189,9 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent className="flex items-center gap-6">
                   <div className="text-3xl font-bold text-primary">
-                    {selectedEvaluation.total_score !== null ? `${selectedEvaluation.total_score} / ${selectedEvaluation.max_score}` : "لم يكتمل"}
+                    {selectedEvaluation.total_score !== null
+                      ? `${selectedEvaluation.total_score} / ${selectedEvaluation.max_score}`
+                      : "لم يكتمل"}
                   </div>
                   <Badge variant={selectedEvaluation.is_completed ? "default" : "secondary"} className="text-sm">
                     {selectedEvaluation.is_completed ? "مكتمل" : "قيد التنفيذ"}
