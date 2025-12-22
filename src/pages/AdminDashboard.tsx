@@ -15,6 +15,8 @@ import {
   AssessmentsMobileCards,
   OrganizationsMobileCards,
   UsersMobileCards,
+  EvaluationsMobileCards,
+  type AdminMobileEvaluation,
 } from "@/components/admin/AdminMobileCards";
 import {
   Building2,
@@ -28,6 +30,7 @@ import {
   UserPlus,
   Trash2,
   Loader2,
+  FileCheck2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -78,16 +81,48 @@ interface UserWithRole {
   role: "admin" | "user" | null;
 }
 
+interface Evaluation {
+  id: string;
+  total_score: number | null;
+  max_score: number | null;
+  is_completed: boolean | null;
+  started_at: string | null;
+  completed_at: string | null;
+  organization: {
+    name: string;
+    contact_person: string;
+    email: string;
+    phone: string;
+  } | null;
+}
+
+interface EvaluationAnswer {
+  id: string;
+  criterion_id: string;
+  score: number;
+  criterion: {
+    name: string;
+    weight_percentage: number;
+  } | null;
+  option: {
+    label: string;
+    score_percentage: number;
+  } | null;
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { user, signOut, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading } = useRole();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
   const [assessmentAnswers, setAssessmentAnswers] = useState<AssessmentAnswer[]>([]);
+  const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(null);
+  const [evaluationAnswers, setEvaluationAnswers] = useState<EvaluationAnswer[]>([]);
   const [loadingAnswers, setLoadingAnswers] = useState(false);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
@@ -99,6 +134,8 @@ export default function AdminDashboard() {
   const [qualificationFilter, setQualificationFilter] = useState<"all" | "qualified" | "not_qualified">("all");
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [evaluationStatusFilter, setEvaluationStatusFilter] = useState<"all" | "completed" | "in_progress">("all");
+  const [evaluationSearchQuery, setEvaluationSearchQuery] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -116,7 +153,7 @@ export default function AdminDashboard() {
     async function fetchData() {
       if (!isAdmin) return;
 
-      const [orgsResult, assessmentsResult, rolesResult] = await Promise.all([
+      const [orgsResult, assessmentsResult, rolesResult, evaluationsResult] = await Promise.all([
         supabase.from("organizations").select("*").order("created_at", { ascending: false }),
         supabase
           .from("assessments")
@@ -128,10 +165,20 @@ export default function AdminDashboard() {
           )
           .order("completed_at", { ascending: false }),
         supabase.from("user_roles").select("user_id, role"),
+        supabase
+          .from("evaluations")
+          .select(
+            `
+          *,
+          organization:organizations(name, contact_person, email, phone)
+        `,
+          )
+          .order("started_at", { ascending: false }),
       ]);
 
       if (orgsResult.data) setOrganizations(orgsResult.data);
       if (assessmentsResult.data) setAssessments(assessmentsResult.data as Assessment[]);
+      if (evaluationsResult.data) setEvaluations(evaluationsResult.data as Evaluation[]);
 
       // Fetch users from auth (we'll get them from organizations for now)
       const uniqueUserIds = new Set<string>();
@@ -191,6 +238,27 @@ export default function AdminDashboard() {
 
     if (data) {
       setAssessmentAnswers(data as AssessmentAnswer[]);
+    }
+    setLoadingAnswers(false);
+  };
+
+  const handleViewEvaluationDetails = async (evaluation: Evaluation) => {
+    setSelectedEvaluation(evaluation);
+    setLoadingAnswers(true);
+
+    const { data } = await supabase
+      .from("evaluation_answers")
+      .select(
+        `
+        *,
+        criterion:criteria(name, weight_percentage),
+        option:criteria_options!evaluation_answers_selected_option_id_fkey(label, score_percentage)
+      `,
+      )
+      .eq("evaluation_id", evaluation.id);
+
+    if (data) {
+      setEvaluationAnswers(data as EvaluationAnswer[]);
     }
     setLoadingAnswers(false);
   };
@@ -372,6 +440,26 @@ export default function AdminDashboard() {
     return true;
   });
 
+  // Filtered evaluations based on search and status filters
+  const completedEvaluations = evaluations.filter((e) => e.is_completed).length;
+  const filteredEvaluations = evaluations.filter((e) => {
+    // Text search filter
+    if (evaluationSearchQuery.trim()) {
+      const query = evaluationSearchQuery.trim().toLowerCase();
+      const orgName = e.organization?.name?.toLowerCase() || "";
+      const contactPerson = e.organization?.contact_person?.toLowerCase() || "";
+      if (!orgName.includes(query) && !contactPerson.includes(query)) {
+        return false;
+      }
+    }
+
+    // Status filter
+    if (evaluationStatusFilter === "completed" && !e.is_completed) return false;
+    if (evaluationStatusFilter === "in_progress" && e.is_completed) return false;
+
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <header className="border-b border-border bg-card">
@@ -478,7 +566,11 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
             <TabsList className="w-max min-w-full md:w-full justify-start">
               <TabsTrigger value="assessments" className="text-xs md:text-sm">
-                التقييمات
+                التقييمات الأولية
+              </TabsTrigger>
+              <TabsTrigger value="evaluations" className="flex items-center gap-1 text-xs md:text-sm">
+                <FileCheck2 className="h-3 w-3 md:h-4 md:w-4" />
+                التقييم المجاني
               </TabsTrigger>
               <TabsTrigger value="organizations" className="text-xs md:text-sm">
                 الجهات
@@ -582,6 +674,97 @@ export default function AdminDashboard() {
                           <TableRow>
                             <TableCell colSpan={6} className="text-center text-muted-foreground">
                               {qualificationFilter === "all" ? "لا توجد تقييمات بعد" : "لا توجد نتائج مطابقة"}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="evaluations">
+            <Card>
+              <CardHeader className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <CardTitle className="text-right flex items-center gap-2">
+                    <FileCheck2 className="h-5 w-5" />
+                    تقارير التقييم المجاني
+                  </CardTitle>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm text-muted-foreground">الحالة:</span>
+                    <Select
+                      value={evaluationStatusFilter}
+                      onValueChange={(v) => setEvaluationStatusFilter(v as "all" | "completed" | "in_progress")}
+                    >
+                      <SelectTrigger className="w-[130px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">الكل ({evaluations.length})</SelectItem>
+                        <SelectItem value="completed">مكتمل ({completedEvaluations})</SelectItem>
+                        <SelectItem value="in_progress">قيد التنفيذ ({evaluations.length - completedEvaluations})</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <Input
+                  placeholder="بحث باسم الجهة أو المسؤول..."
+                  value={evaluationSearchQuery}
+                  onChange={(e) => setEvaluationSearchQuery(e.target.value)}
+                  className="max-w-sm"
+                />
+              </CardHeader>
+              <CardContent>
+                {/* Mobile (cards) */}
+                <div className="md:hidden">
+                  <EvaluationsMobileCards evaluations={filteredEvaluations} onViewDetails={handleViewEvaluationDetails} />
+                </div>
+
+                {/* Desktop (table) */}
+                <div className="hidden md:block">
+                  <div className="overflow-x-auto">
+                    <Table dir="rtl">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-right">الجهة</TableHead>
+                          <TableHead className="text-right">المسؤول</TableHead>
+                          <TableHead className="text-right">النتيجة</TableHead>
+                          <TableHead className="text-right">الحالة</TableHead>
+                          <TableHead className="text-right">تاريخ البدء</TableHead>
+                          <TableHead className="text-right">الإجراءات</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredEvaluations.map((evaluation) => (
+                          <TableRow key={evaluation.id}>
+                            <TableCell className="font-medium">
+                              {evaluation.organization?.name || "غير معروف"}
+                            </TableCell>
+                            <TableCell>{evaluation.organization?.contact_person || "-"}</TableCell>
+                            <TableCell>
+                              {evaluation.total_score !== null ? `${evaluation.total_score} / ${evaluation.max_score}` : "-"}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={evaluation.is_completed ? "default" : "secondary"}>
+                                {evaluation.is_completed ? "مكتمل" : "قيد التنفيذ"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{evaluation.started_at ? new Date(evaluation.started_at).toLocaleDateString("en-GB") : "-"}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm" onClick={() => handleViewEvaluationDetails(evaluation)}>
+                                <Eye className="h-4 w-4 ml-1" />
+                                التفاصيل
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        {filteredEvaluations.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center text-muted-foreground">
+                              {evaluationStatusFilter === "all" ? "لا توجد تقييمات مجانية بعد" : "لا توجد نتائج مطابقة"}
                             </TableCell>
                           </TableRow>
                         )}
@@ -836,6 +1019,102 @@ export default function AdminDashboard() {
                             <div className="text-left">
                               <Badge variant="outline">
                                 {answer.score.toFixed(2)} / {answer.question?.weight}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Evaluation Details Dialog */}
+      <Dialog open={!!selectedEvaluation} onOpenChange={() => setSelectedEvaluation(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-center flex items-center justify-center gap-2">
+              <FileCheck2 className="h-5 w-5" />
+              تفاصيل التقييم المجاني - {selectedEvaluation?.organization?.name}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedEvaluation && (
+            <div className="space-y-6">
+              {/* Organization Info */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">معلومات الجهة</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">الاسم:</span>
+                    <span className="mr-2 font-medium">{selectedEvaluation.organization?.name}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">المسؤول:</span>
+                    <span className="mr-2 font-medium">{selectedEvaluation.organization?.contact_person}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">البريد:</span>
+                    <span className="mr-2 font-medium" dir="ltr">
+                      {selectedEvaluation.organization?.email}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">الهاتف:</span>
+                    <span className="mr-2 font-medium" dir="ltr">
+                      {selectedEvaluation.organization?.phone}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Score Summary */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">ملخص النتيجة</CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center gap-6">
+                  <div className="text-3xl font-bold text-primary">
+                    {selectedEvaluation.total_score !== null ? `${selectedEvaluation.total_score} / ${selectedEvaluation.max_score}` : "لم يكتمل"}
+                  </div>
+                  <Badge variant={selectedEvaluation.is_completed ? "default" : "secondary"} className="text-sm">
+                    {selectedEvaluation.is_completed ? "مكتمل" : "قيد التنفيذ"}
+                  </Badge>
+                </CardContent>
+              </Card>
+
+              {/* Answers */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">الإجابات التفصيلية</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingAnswers ? (
+                    <div className="text-center text-muted-foreground py-4">جاري التحميل...</div>
+                  ) : evaluationAnswers.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-4">لا توجد إجابات بعد</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {evaluationAnswers.map((answer, index) => (
+                        <div key={answer.id} className="border-b border-border pb-4 last:border-0">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <p className="font-medium text-sm mb-1">
+                                {index + 1}. {answer.criterion?.name}
+                              </p>
+                              <p className="text-muted-foreground text-sm">
+                                الإجابة: <span className="text-foreground">{answer.option?.label}</span>
+                              </p>
+                            </div>
+                            <div className="text-left">
+                              <Badge variant="outline">
+                                {answer.score.toFixed(2)} / {answer.criterion?.weight_percentage}
                               </Badge>
                             </div>
                           </div>
