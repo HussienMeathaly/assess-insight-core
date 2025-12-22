@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import { useAssessment } from '@/hooks/useAssessment';
-import { useAnalysis } from '@/hooks/useAnalysis';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { logError, logInfo } from '@/lib/logger';
-import { WelcomeScreen } from './WelcomeScreen';
-import { ProgressIndicator } from './ProgressIndicator';
-import { QuestionCard } from './QuestionCard';
-import { ResultScreen } from './ResultScreen';
-import { EditOrganizationModal } from './EditOrganizationModal';
+import { useEffect, useState } from "react";
+import { useAssessment } from "@/hooks/useAssessment";
+import { useAnalysis } from "@/hooks/useAnalysis";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { logError, logInfo } from "@/lib/logger";
+import { WelcomeScreen } from "./WelcomeScreen";
+import { ProgressIndicator } from "./ProgressIndicator";
+import { QuestionCard } from "./QuestionCard";
+import { ResultScreen } from "./ResultScreen";
+import { EditOrganizationModal } from "./EditOrganizationModal";
 
 export function Assessment() {
   const { user } = useAuth();
@@ -33,26 +33,26 @@ export function Assessment() {
   useEffect(() => {
     const fetchOrganizationName = async () => {
       if (!user) {
-        logInfo('No user found for organization fetch');
+        logInfo("No user found for organization fetch");
         return;
       }
 
-      logInfo('Fetching organization for user', { userId: user.id });
+      logInfo("Fetching organization for user", { userId: user.id });
 
       const { data, error } = await supabase
-        .from('organizations')
-        .select('name')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .from("organizations")
+        .select("name")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (error) {
-        logError('Error fetching organization', error);
+        logError("Error fetching organization", error);
         return;
       }
 
-      logInfo('Organization data fetched', { hasOrg: !!data });
+      logInfo("Organization data fetched", { hasOrg: !!data });
 
       if (data) {
         setOrganizationName(data.name);
@@ -63,7 +63,7 @@ export function Assessment() {
   }, [user]);
 
   useEffect(() => {
-    if (currentStep === 'result') {
+    if (currentStep === "result") {
       const result = getResult();
       analyzeResult(result);
       saveAssessmentToDatabase();
@@ -73,7 +73,7 @@ export function Assessment() {
   return (
     <div className="min-h-screen flex flex-col p-4 md:p-6">
       {/* Header section */}
-      <div className="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
         <EditOrganizationModal />
         {organizationName && (
           <div className="text-sm md:text-base text-muted-foreground self-end sm:self-auto">
@@ -81,20 +81,15 @@ export function Assessment() {
           </div>
         )}
       </div>
-      
+
       {/* Main content */}
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-3xl">
-          {currentStep === 'welcome' && (
-            <WelcomeScreen onStart={handleStart} />
-          )}
+          {currentStep === "welcome" && <WelcomeScreen onStart={handleStart} />}
 
-          {currentStep === 'questions' && (
+          {currentStep === "questions" && (
             <div className="card-elevated rounded-2xl p-5 md:p-8 lg:p-12">
-              <ProgressIndicator
-                current={currentQuestionIndex + 1}
-                total={totalQuestions}
-              />
+              <ProgressIndicator current={currentQuestionIndex + 1} total={totalQuestions} />
               <QuestionCard
                 key={currentQuestion.id}
                 question={currentQuestion}
@@ -105,7 +100,7 @@ export function Assessment() {
             </div>
           )}
 
-          {currentStep === 'result' && (
+          {currentStep === "result" && (
             <ResultScreen
               result={getResult()}
               analysisText={analysisText}
