@@ -3,6 +3,7 @@ import { useAssessment } from '@/hooks/useAssessment';
 import { useAnalysis } from '@/hooks/useAnalysis';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { logError, logInfo } from '@/lib/logger';
 import { WelcomeScreen } from './WelcomeScreen';
 import { ProgressIndicator } from './ProgressIndicator';
 import { QuestionCard } from './QuestionCard';
@@ -32,12 +33,12 @@ export function Assessment() {
   useEffect(() => {
     const fetchOrganizationName = async () => {
       if (!user) {
-        console.log('No user found for organization fetch');
+        logInfo('No user found for organization fetch');
         return;
       }
-      
-      console.log('Fetching organization for user:', user.id);
-      
+
+      logInfo('Fetching organization for user', { userId: user.id });
+
       const { data, error } = await supabase
         .from('organizations')
         .select('name')
@@ -45,14 +46,14 @@ export function Assessment() {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-      
+
       if (error) {
-        console.error('Error fetching organization:', error);
+        logError('Error fetching organization', error);
         return;
       }
-      
-      console.log('Organization data:', data);
-      
+
+      logInfo('Organization data fetched', { hasOrg: !!data });
+
       if (data) {
         setOrganizationName(data.name);
       }

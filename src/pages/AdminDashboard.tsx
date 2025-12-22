@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { logError } from "@/lib/logger";
 
 interface Organization {
   id: string;
@@ -297,7 +298,7 @@ export default function AdminDashboard() {
 
       toast.success("تم تحديث الصلاحية بنجاح");
     } catch (error) {
-      console.error("Error updating role:", error);
+      logError("Error updating role", error);
       toast.error("حدث خطأ أثناء تحديث الصلاحية");
     } finally {
       setUpdatingRole(null);
@@ -350,7 +351,7 @@ export default function AdminDashboard() {
       setNewUserPassword("");
       setNewUserRole("user");
     } catch (error) {
-      console.error("Error adding user:", error);
+      logError("Error adding user", error);
       toast.error("حدث خطأ أثناء إضافة المستخدم");
     } finally {
       setAddingUser(false);
@@ -383,7 +384,7 @@ export default function AdminDashboard() {
       setUsers((prev) => prev.filter((u) => u.id !== userId));
       toast.success("تم حذف المستخدم بنجاح");
     } catch (error) {
-      console.error("Error deleting user:", error);
+      logError("Error deleting user", error);
       toast.error("حدث خطأ أثناء حذف المستخدم");
     } finally {
       setDeletingUser(null);
@@ -414,7 +415,7 @@ export default function AdminDashboard() {
       setAssessments((prev) => prev.filter((a) => a.id !== assessmentId));
       toast.success("تم حذف التقييم الأولي بنجاح");
     } catch (error) {
-      console.error("Error deleting assessment:", error);
+      logError("Error deleting assessment", error);
       toast.error("حدث خطأ أثناء حذف التقييم");
     } finally {
       setDeletingAssessment(null);
@@ -445,7 +446,7 @@ export default function AdminDashboard() {
       setEvaluations((prev) => prev.filter((e) => e.id !== evaluationId));
       toast.success("تم حذف التقييم المجاني بنجاح");
     } catch (error) {
-      console.error("Error deleting evaluation:", error);
+      logError("Error deleting evaluation", error);
       toast.error("حدث خطأ أثناء حذف التقييم");
     } finally {
       setDeletingEvaluation(null);
