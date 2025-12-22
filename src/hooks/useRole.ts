@@ -15,8 +15,9 @@ export function useRole() {
     }
 
     try {
+      // Use the single-arg overload that uses auth.uid() internally (safer)
       const { data, error } = await supabase
-        .rpc('has_role', { _user_id: user.id, _role: 'admin' });
+        .rpc('has_role', { _role: 'admin' });
 
       if (!error && data === true) {
         setIsAdmin(true);
