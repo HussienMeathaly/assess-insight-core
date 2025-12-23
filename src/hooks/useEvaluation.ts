@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
+import { useAuth } from '@/hooks/useAuth';
+import { logInfo, logError } from '@/lib/logger';
 interface CriterionOption {
   id: string;
   criterion_id: string;
@@ -49,11 +50,45 @@ interface EvaluationAnswer {
 }
 
 export function useEvaluation() {
+  const { user } = useAuth();
   const [domain, setDomain] = useState<EvaluationDomain | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Map<string, EvaluationAnswer>>(new Map());
   const [currentMainElementIndex, setCurrentMainElementIndex] = useState(0);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // Fetch organization ID for current user
+  useEffect(() => {
+    async function fetchOrganization() {
+      if (!user) {
+        logInfo('No user found for organization fetch in evaluation');
+        return;
+      }
+
+      logInfo('Fetching organization for evaluation user', { userId: user.id });
+
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        logError('Error fetching organization for evaluation', error);
+        return;
+      }
+
+      if (data) {
+        setOrganizationId(data.id);
+        logInfo('Organization found for evaluation', { orgId: data.id });
+      }
+    }
+
+    fetchOrganization();
+  }, [user]);
 
   useEffect(() => {
     fetchEvaluationData();
@@ -236,6 +271,74 @@ export function useEvaluation() {
   const isLastElement = domain ? currentMainElementIndex === domain.main_elements.length - 1 : false;
   const isFirstElement = currentMainElementIndex === 0;
 
+  // Save evaluation to database
+  const saveEvaluation = useCallback(async () => {
+    if (!domain || !organizationId || saved || saving) {
+      logInfo('Cannot save evaluation', { 
+        hasDomain: !!domain, 
+        hasOrgId: !!organizationId, 
+        saved, 
+        saving 
+      });
+      return false;
+    }
+
+    setSaving(true);
+    logInfo('Saving evaluation to database', { organizationId, totalScore: scores.total });
+
+    try {
+      // Create evaluation record
+      const { data: evaluation, error: evalError } = await supabase
+        .from('evaluations')
+        .insert({
+          organization_id: organizationId,
+          domain_id: domain.id,
+          total_score: scores.total,
+          max_score: scores.max,
+          is_completed: true,
+          completed_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (evalError) {
+        logError('Error creating evaluation', evalError);
+        throw evalError;
+      }
+
+      logInfo('Evaluation created', { evaluationId: evaluation.id });
+
+      // Save all answers
+      const answersToInsert = Array.from(answers.values()).map(answer => ({
+        evaluation_id: evaluation.id,
+        criterion_id: answer.criterionId,
+        selected_option_id: answer.selectedOptionId,
+        score: answer.score,
+      }));
+
+      if (answersToInsert.length > 0) {
+        const { error: answersError } = await supabase
+          .from('evaluation_answers')
+          .insert(answersToInsert);
+
+        if (answersError) {
+          logError('Error saving evaluation answers', answersError);
+          throw answersError;
+        }
+
+        logInfo('Evaluation answers saved', { count: answersToInsert.length });
+      }
+
+      setSaved(true);
+      return true;
+    } catch (err) {
+      logError('Failed to save evaluation', err);
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }, [domain, organizationId, saved, saving, scores, answers]);
+
   return {
     domain,
     loading,
@@ -251,6 +354,9 @@ export function useEvaluation() {
     goToElement,
     isComplete,
     isLastElement,
-    isFirstElement
+    isFirstElement,
+    saveEvaluation,
+    saving,
+    saved,
   };
 }

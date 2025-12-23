@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useEvaluation } from '@/hooks/useEvaluation';
@@ -7,6 +7,7 @@ import { MainElementView } from '@/components/evaluation/MainElementView';
 import { EvaluationResult } from '@/components/evaluation/EvaluationResult';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import profitLogo from '@/assets/profit-logo.png';
 
 export default function FreeEvaluation() {
@@ -27,8 +28,22 @@ export default function FreeEvaluation() {
     goToPreviousElement,
     goToElement,
     isFirstElement,
-    isLastElement
+    isLastElement,
+    saveEvaluation,
+    saving,
+    saved
   } = useEvaluation();
+
+  // Save evaluation when showing results
+  useEffect(() => {
+    if (showResults && !saved && !saving) {
+      saveEvaluation().then(success => {
+        if (success) {
+          toast.success('تم حفظ نتائج التقييم بنجاح');
+        }
+      });
+    }
+  }, [showResults, saved, saving, saveEvaluation]);
 
   const handleRetake = () => {
     window.location.reload();
