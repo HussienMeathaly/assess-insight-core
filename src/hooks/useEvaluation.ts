@@ -273,25 +273,44 @@ export function useEvaluation() {
 
   // Save evaluation to database
   const saveEvaluation = useCallback(async () => {
-    if (!domain || !organizationId || saved || saving) {
+    if (!domain || saved || saving) {
       logInfo('Cannot save evaluation', { 
         hasDomain: !!domain, 
-        hasOrgId: !!organizationId, 
         saved, 
         saving 
       });
       return false;
     }
 
+    // If no organization ID, try to fetch it now
+    let orgId = organizationId;
+    if (!orgId && user) {
+      const { data } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (data) {
+        orgId = data.id;
+        setOrganizationId(data.id);
+      }
+    }
+
+    if (!orgId) {
+      logInfo('No organization found for user, cannot save evaluation');
+      return false;
+    }
+
     setSaving(true);
-    logInfo('Saving evaluation to database', { organizationId, totalScore: scores.total });
+    logInfo('Saving evaluation to database', { organizationId: orgId, totalScore: scores.total });
 
     try {
       // Create evaluation record
       const { data: evaluation, error: evalError } = await supabase
         .from('evaluations')
         .insert({
-          organization_id: organizationId,
+          organization_id: orgId,
           domain_id: domain.id,
           total_score: scores.total,
           max_score: scores.max,
@@ -337,7 +356,7 @@ export function useEvaluation() {
     } finally {
       setSaving(false);
     }
-  }, [domain, organizationId, saved, saving, scores, answers]);
+  }, [domain, organizationId, user, saved, saving, scores, answers]);
 
   return {
     domain,
