@@ -104,11 +104,31 @@ interface EvaluationAnswer {
   criterion: {
     name: string;
     weight_percentage: number;
+    sub_element: {
+      id: string;
+      name: string;
+      main_element: {
+        id: string;
+        name: string;
+        weight_percentage: number;
+      } | null;
+    } | null;
   } | null;
   option: {
     label: string;
     score_percentage: number;
   } | null;
+}
+
+interface GroupedEvaluationAnswers {
+  mainElementId: string;
+  mainElementName: string;
+  mainElementWeight: number;
+  subElements: {
+    subElementId: string;
+    subElementName: string;
+    criteria: EvaluationAnswer[];
+  }[];
 }
 
 export default function AdminDashboard() {
@@ -254,7 +274,19 @@ export default function AdminDashboard() {
       .select(
         `
         *,
-        criterion:criteria(name, weight_percentage),
+        criterion:criteria(
+          name, 
+          weight_percentage,
+          sub_element:sub_elements(
+            id,
+            name,
+            main_element:main_elements(
+              id,
+              name,
+              weight_percentage
+            )
+          )
+        ),
         option:criteria_options!evaluation_answers_selected_option_id_fkey(label, score_percentage)
       `,
       )
@@ -1199,7 +1231,7 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Answers */}
+              {/* Answers - Grouped by Main Element and Sub Element */}
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">الإجابات التفصيلية</CardTitle>
@@ -1210,26 +1242,91 @@ export default function AdminDashboard() {
                   ) : evaluationAnswers.length === 0 ? (
                     <div className="text-center text-muted-foreground py-4">لا توجد إجابات بعد</div>
                   ) : (
-                    <div className="space-y-4">
-                      {evaluationAnswers.map((answer, index) => (
-                        <div key={answer.id} className="border-b border-border pb-4 last:border-0">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <p className="font-medium text-sm mb-1">
-                                {index + 1}. {answer.criterion?.name}
-                              </p>
-                              <p className="text-muted-foreground text-sm">
-                                الإجابة: <span className="text-foreground">{answer.option?.label}</span>
-                              </p>
-                            </div>
-                            <div className="text-left">
-                              <Badge variant="outline">
-                                {answer.score.toFixed(2)} / {answer.criterion?.weight_percentage}
+                    <div className="space-y-6">
+                      {(() => {
+                        // Group answers by main element and sub element
+                        const grouped = evaluationAnswers.reduce((acc, answer) => {
+                          const mainElement = answer.criterion?.sub_element?.main_element;
+                          const subElement = answer.criterion?.sub_element;
+                          
+                          if (!mainElement || !subElement) return acc;
+                          
+                          const mainKey = mainElement.id;
+                          if (!acc[mainKey]) {
+                            acc[mainKey] = {
+                              id: mainElement.id,
+                              name: mainElement.name,
+                              weight: mainElement.weight_percentage,
+                              subElements: {},
+                              totalScore: 0,
+                              maxScore: 0,
+                            };
+                          }
+                          
+                          const subKey = subElement.id;
+                          if (!acc[mainKey].subElements[subKey]) {
+                            acc[mainKey].subElements[subKey] = {
+                              id: subElement.id,
+                              name: subElement.name,
+                              answers: [],
+                            };
+                          }
+                          
+                          acc[mainKey].subElements[subKey].answers.push(answer);
+                          acc[mainKey].totalScore += answer.score;
+                          acc[mainKey].maxScore += answer.criterion?.weight_percentage || 0;
+                          
+                          return acc;
+                        }, {} as Record<string, {
+                          id: string;
+                          name: string;
+                          weight: number;
+                          subElements: Record<string, { id: string; name: string; answers: EvaluationAnswer[] }>;
+                          totalScore: number;
+                          maxScore: number;
+                        }>);
+                        
+                        return Object.values(grouped).map((mainElement) => (
+                          <div key={mainElement.id} className="border border-border rounded-lg overflow-hidden">
+                            {/* Main Element Header */}
+                            <div className="bg-primary/10 px-4 py-3 flex items-center justify-between">
+                              <h4 className="font-bold text-foreground">{mainElement.name}</h4>
+                              <Badge variant="default">
+                                {mainElement.totalScore.toFixed(1)} / {mainElement.maxScore}
                               </Badge>
                             </div>
+                            
+                            {/* Sub Elements */}
+                            <div className="divide-y divide-border">
+                              {Object.values(mainElement.subElements).map((subElement) => (
+                                <div key={subElement.id} className="p-4">
+                                  <h5 className="font-medium text-muted-foreground text-sm mb-3">
+                                    {subElement.name}
+                                  </h5>
+                                  <div className="space-y-3">
+                                    {subElement.answers.map((answer) => (
+                                      <div 
+                                        key={answer.id} 
+                                        className="flex items-start justify-between gap-4 bg-muted/30 rounded-md p-3"
+                                      >
+                                        <div className="flex-1">
+                                          <p className="text-sm font-medium mb-1">{answer.criterion?.name}</p>
+                                          <p className="text-sm text-muted-foreground">
+                                            الإجابة: <span className="text-foreground">{answer.option?.label}</span>
+                                          </p>
+                                        </div>
+                                        <Badge variant="outline" className="shrink-0">
+                                          {answer.score.toFixed(2)} / {answer.criterion?.weight_percentage}
+                                        </Badge>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ));
+                      })()}
                     </div>
                   )}
                 </CardContent>
