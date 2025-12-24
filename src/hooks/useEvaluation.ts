@@ -274,23 +274,43 @@ export function useEvaluation() {
   // Save evaluation to database
   const saveEvaluation = useCallback(async () => {
     if (!domain || saved || saving) {
-      logInfo('Cannot save evaluation', { 
-        hasDomain: !!domain, 
-        saved, 
-        saving 
+      logInfo('Cannot save evaluation', {
+        hasDomain: !!domain,
+        saved,
+        saving,
       });
       return false;
     }
 
-    // If no organization ID, try to fetch it now
+    // Ensure we have an authenticated user id (avoid relying on hook timing)
+    let userId = user?.id ?? null;
+    if (!userId) {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        logError('Error getting authenticated user in saveEvaluation', error);
+      }
+      userId = data.user?.id ?? null;
+    }
+
+    if (!userId) {
+      logInfo('No authenticated user found, cannot save evaluation');
+      return false;
+    }
+
+    // Ensure organization id
     let orgId = organizationId;
-    if (!orgId && user) {
-      const { data } = await supabase
+    if (!orgId) {
+      const { data, error } = await supabase
         .from('organizations')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle();
-      
+
+      if (error) {
+        logError('Error fetching organization for evaluation save', error);
+        return false;
+      }
+
       if (data) {
         orgId = data.id;
         setOrganizationId(data.id);
@@ -298,7 +318,7 @@ export function useEvaluation() {
     }
 
     if (!orgId) {
-      logInfo('No organization found for user, cannot save evaluation');
+      logInfo('No organization found for user, cannot save evaluation', { userId });
       return false;
     }
 
@@ -328,7 +348,7 @@ export function useEvaluation() {
       logInfo('Evaluation created', { evaluationId: evaluation.id });
 
       // Save all answers
-      const answersToInsert = Array.from(answers.values()).map(answer => ({
+      const answersToInsert = Array.from(answers.values()).map((answer) => ({
         evaluation_id: evaluation.id,
         criterion_id: answer.criterionId,
         selected_option_id: answer.selectedOptionId,
@@ -336,9 +356,7 @@ export function useEvaluation() {
       }));
 
       if (answersToInsert.length > 0) {
-        const { error: answersError } = await supabase
-          .from('evaluation_answers')
-          .insert(answersToInsert);
+        const { error: answersError } = await supabase.from('evaluation_answers').insert(answersToInsert);
 
         if (answersError) {
           logError('Error saving evaluation answers', answersError);
