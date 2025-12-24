@@ -54,7 +54,11 @@ const App = () => (
                   <AdminDashboard />
                 </ProtectedRoute>
               } />
-              <Route path="/free-evaluation" element={<FreeEvaluation />} />
+              <Route path="/free-evaluation" element={
+                <ProtectedRoute>
+                  <FreeEvaluation />
+                </ProtectedRoute>
+              } />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
