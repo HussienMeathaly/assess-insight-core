@@ -37,9 +37,11 @@ export default function FreeEvaluation() {
   // Save evaluation when showing results
   useEffect(() => {
     if (showResults && !saved && !saving) {
-      saveEvaluation().then(success => {
+      saveEvaluation().then((success) => {
         if (success) {
           toast.success('تم حفظ نتائج التقييم بنجاح');
+        } else {
+          toast.error('تعذر حفظ التقييم. تأكد من تسجيل الدخول ثم أعد المحاولة.');
         }
       });
     }
