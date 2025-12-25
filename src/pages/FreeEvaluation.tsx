@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { useEvaluation } from '@/hooks/useEvaluation';
+import { RegistrationForm, type RegistrationData } from '@/components/assessment/RegistrationForm';
 import { EvaluationProgress } from '@/components/evaluation/EvaluationProgress';
 import { MainElementView } from '@/components/evaluation/MainElementView';
 import { EvaluationResult } from '@/components/evaluation/EvaluationResult';
@@ -12,7 +15,10 @@ import profitLogo from '@/assets/profit-logo.png';
 
 export default function FreeEvaluation() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [showResults, setShowResults] = useState(false);
+  const [checkingOrg, setCheckingOrg] = useState(true);
+  const [needsOrganization, setNeedsOrganization] = useState(false);
   
   const {
     domain,
@@ -34,6 +40,64 @@ export default function FreeEvaluation() {
     saved
   } = useEvaluation();
 
+  // Ensure the user has an organization before starting (required for saving reports)
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkOrganization() {
+      if (!user) {
+        setNeedsOrganization(false);
+        setCheckingOrg(false);
+        return;
+      }
+
+      setCheckingOrg(true);
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      if (error) {
+        setCheckingOrg(false);
+        toast.error('تعذر التحقق من بيانات الجهة. حاول مرة أخرى.');
+        return;
+      }
+
+      setNeedsOrganization(!data);
+      setCheckingOrg(false);
+    }
+
+    checkOrganization();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const handleOrganizationSubmit = async (data: RegistrationData) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase.from('organizations').insert({
+        name: data.organizationName,
+        contact_person: data.contactPerson,
+        phone: data.phone,
+        email: data.email,
+        user_id: user.id,
+      });
+
+      if (error) throw error;
+
+      toast.success('تم حفظ بيانات الجهة بنجاح');
+      setNeedsOrganization(false);
+    } catch {
+      toast.error('تعذر حفظ بيانات الجهة. يرجى المحاولة مرة أخرى.');
+    }
+  };
+
   // Save evaluation when showing results
   useEffect(() => {
     if (showResults && !saved && !saving) {
@@ -41,7 +105,7 @@ export default function FreeEvaluation() {
         if (success) {
           toast.success('تم حفظ نتائج التقييم بنجاح');
         } else {
-          toast.error('تعذر حفظ التقييم. تأكد من تسجيل الدخول ثم أعد المحاولة.');
+          toast.error('تعذر حفظ التقييم. تأكد من تسجيل الدخول وإكمال بيانات الجهة.');
         }
       });
     }
@@ -54,6 +118,32 @@ export default function FreeEvaluation() {
   const handleBack = () => {
     navigate('/');
   };
+
+  if (authLoading || checkingOrg) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" dir="rtl">
+        <Helmet>
+          <title>التقييم المجاني | PROFIT</title>
+        </Helmet>
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">جاري التحقق من الحساب...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (needsOrganization) {
+    return (
+      <div className="min-h-screen py-10 px-4" dir="rtl">
+        <Helmet>
+          <title>إكمال بيانات الجهة | PROFIT</title>
+          <meta name="description" content="أكمل بيانات الجهة للبدء في التقييم المجاني وحفظ التقرير في لوحة التحكم" />
+        </Helmet>
+        <RegistrationForm onSubmit={handleOrganizationSubmit} onBack={() => navigate('/')} />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
