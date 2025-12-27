@@ -18,6 +18,8 @@ import {
   EvaluationsMobileCards,
   type AdminMobileEvaluation,
 } from "@/components/admin/AdminMobileCards";
+import { EditOrganizationButton } from "@/components/admin/EditOrganizationButton";
+import { EditOrganizationForm } from "@/components/admin/EditOrganizationForm";
 import {
   Building2,
   ClipboardCheck,
@@ -159,6 +161,7 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [evaluationStatusFilter, setEvaluationStatusFilter] = useState<"all" | "completed" | "in_progress">("all");
   const [evaluationSearchQuery, setEvaluationSearchQuery] = useState("");
+  const [editingOrganization, setEditingOrganization] = useState<Organization | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -925,7 +928,10 @@ export default function AdminDashboard() {
               <CardContent>
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
-                  <OrganizationsMobileCards organizations={organizations} />
+                  <OrganizationsMobileCards
+                    organizations={organizations}
+                    onEdit={(org) => setEditingOrganization(org)}
+                  />
                 </div>
 
                 {/* Desktop (table) */}
@@ -939,12 +945,25 @@ export default function AdminDashboard() {
                           <TableHead className="text-right">البريد الإلكتروني</TableHead>
                           <TableHead className="text-right">الهاتف</TableHead>
                           <TableHead className="text-right">تاريخ التسجيل</TableHead>
+                          <TableHead className="text-right">الإجراءات</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {organizations.map((org) => (
                           <TableRow key={org.id}>
-                            <TableCell className="font-medium">{org.name}</TableCell>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center gap-1">
+                                {org.name}
+                                <EditOrganizationButton
+                                  organization={org}
+                                  onUpdate={(updatedOrg) => {
+                                    setOrganizations((prev) =>
+                                      prev.map((o) => (o.id === updatedOrg.id ? { ...o, ...updatedOrg } : o))
+                                    );
+                                  }}
+                                />
+                              </div>
+                            </TableCell>
                             <TableCell>{org.contact_person}</TableCell>
                             <TableCell dir="ltr" className="text-right">
                               {org.email}
@@ -953,11 +972,21 @@ export default function AdminDashboard() {
                               {org.phone}
                             </TableCell>
                             <TableCell>{new Date(org.created_at).toLocaleDateString("en-GB")}</TableCell>
+                            <TableCell>
+                              <EditOrganizationButton
+                                organization={org}
+                                onUpdate={(updatedOrg) => {
+                                  setOrganizations((prev) =>
+                                    prev.map((o) => (o.id === updatedOrg.id ? { ...o, ...updatedOrg } : o))
+                                  );
+                                }}
+                              />
+                            </TableCell>
                           </TableRow>
                         ))}
                         {organizations.length === 0 && (
                           <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground">
+                            <TableCell colSpan={6} className="text-center text-muted-foreground">
                               لا توجد منظمات بعد
                             </TableCell>
                           </TableRow>
@@ -1409,6 +1438,27 @@ export default function AdminDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Organization Dialog (Mobile) */}
+      {editingOrganization && (
+        <Dialog open={!!editingOrganization} onOpenChange={() => setEditingOrganization(null)}>
+          <DialogContent className="sm:max-w-md" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="text-center">تعديل بيانات الجهة</DialogTitle>
+            </DialogHeader>
+            <EditOrganizationForm
+              organization={editingOrganization}
+              onUpdate={(updatedOrg) => {
+                setOrganizations((prev) =>
+                  prev.map((o) => (o.id === updatedOrg.id ? { ...o, ...updatedOrg } : o))
+                );
+                setEditingOrganization(null);
+              }}
+              onCancel={() => setEditingOrganization(null)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
