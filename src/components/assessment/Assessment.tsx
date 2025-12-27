@@ -73,13 +73,8 @@ export function Assessment() {
   return (
     <div className="min-h-screen flex flex-col p-4 md:p-6">
       {/* Header section */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+      <div className="flex items-center justify-start mb-4">
         <EditOrganizationModal />
-        {organizationName && (
-          <div className="text-sm md:text-base text-muted-foreground self-end sm:self-auto">
-            مرحباً بـ <span className="font-semibold text-foreground">{organizationName}</span>
-          </div>
-        )}
       </div>
 
       {/* Main content */}
