@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Loader2, Trash2 } from "lucide-react";
+import { Eye, Loader2, Trash2, Pencil } from "lucide-react";
 
 export type AdminMobileAssessment = {
   id: string;
@@ -96,7 +96,13 @@ export type AdminMobileOrganization = {
   created_at: string;
 };
 
-export function OrganizationsMobileCards({ organizations }: { organizations: AdminMobileOrganization[] }) {
+export function OrganizationsMobileCards({
+  organizations,
+  onEdit,
+}: {
+  organizations: AdminMobileOrganization[];
+  onEdit?: (org: AdminMobileOrganization) => void;
+}) {
   if (organizations.length === 0) {
     return <div className="py-6 text-center text-sm text-muted-foreground">لا توجد منظمات بعد</div>;
   }
@@ -106,9 +112,22 @@ export function OrganizationsMobileCards({ organizations }: { organizations: Adm
       {organizations.map((org) => (
         <Card key={org.id}>
           <CardContent className="p-4 overflow-hidden">
-            <p className="font-semibold truncate" title={org.name}>
-              {org.name}
-            </p>
+            <div className="flex items-start justify-between gap-2">
+              <p className="font-semibold truncate flex-1" title={org.name}>
+                {org.name}
+              </p>
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(org)}
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground shrink-0"
+                  title="تعديل بيانات الجهة"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
 
             <div className="mt-3 grid grid-cols-1 gap-2 text-sm">
               <div className="min-w-0">
