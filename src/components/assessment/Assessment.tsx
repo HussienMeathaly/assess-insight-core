@@ -8,7 +8,6 @@ import { WelcomeScreen } from "./WelcomeScreen";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { QuestionCard } from "./QuestionCard";
 import { ResultScreen } from "./ResultScreen";
-import { EditOrganizationModal } from "./EditOrganizationModal";
 
 export function Assessment() {
   const { user } = useAuth();
@@ -72,10 +71,6 @@ export function Assessment() {
 
   return (
     <div className="min-h-screen flex flex-col p-4 md:p-6">
-      {/* Header section */}
-      <div className="flex items-center justify-start mb-4">
-        <EditOrganizationModal />
-      </div>
 
       {/* Main content */}
       <div className="flex-1 flex items-center justify-center">

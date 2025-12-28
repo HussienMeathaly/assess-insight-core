@@ -951,19 +951,7 @@ export default function AdminDashboard() {
                       <TableBody>
                         {organizations.map((org) => (
                           <TableRow key={org.id}>
-                            <TableCell className="font-medium">
-                              <div className="flex items-center gap-1">
-                                {org.name}
-                                <EditOrganizationButton
-                                  organization={org}
-                                  onUpdate={(updatedOrg) => {
-                                    setOrganizations((prev) =>
-                                      prev.map((o) => (o.id === updatedOrg.id ? { ...o, ...updatedOrg } : o))
-                                    );
-                                  }}
-                                />
-                              </div>
-                            </TableCell>
+                            <TableCell className="font-medium">{org.name}</TableCell>
                             <TableCell>{org.contact_person}</TableCell>
                             <TableCell dir="ltr" className="text-right">
                               {org.email}
