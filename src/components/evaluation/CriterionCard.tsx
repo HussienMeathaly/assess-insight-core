@@ -59,7 +59,7 @@ export function CriterionCard({
       >
         {[...options].sort((a, b) => b.score_percentage - a.score_percentage).map((option) => {
           const isSelected = selectedOptionId === option.id;
-          const rawScore = Math.round((option.score_percentage / 100) * weight);
+          const rawScore = ((option.score_percentage / 100) * weight).toFixed(1).replace(/\.0$/, '');
           
           // Color based on percentage: green (>=70%), yellow (40-69%), red (<40%)
           const getScoreColor = (percentage: number) => {
