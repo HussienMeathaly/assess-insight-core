@@ -1276,7 +1276,6 @@ export default function AdminDashboard() {
                               weight: mainElement.weight_percentage,
                               subElements: {},
                               totalScore: 0,
-                              maxScore: 0,
                             };
                           }
                           
@@ -1291,7 +1290,6 @@ export default function AdminDashboard() {
                           
                           acc[mainKey].subElements[subKey].answers.push(answer);
                           acc[mainKey].totalScore += answer.score;
-                          acc[mainKey].maxScore += answer.criterion?.weight_percentage || 0;
                           
                           return acc;
                         }, {} as Record<string, {
@@ -1300,7 +1298,6 @@ export default function AdminDashboard() {
                           weight: number;
                           subElements: Record<string, { id: string; name: string; answers: EvaluationAnswer[] }>;
                           totalScore: number;
-                          maxScore: number;
                         }>);
                         
                         return Object.values(grouped).map((mainElement) => (
@@ -1309,7 +1306,7 @@ export default function AdminDashboard() {
                             <div className="bg-primary/10 px-4 py-3 flex items-center justify-between">
                               <h4 className="font-bold text-foreground">{mainElement.name}</h4>
                               <Badge variant="default">
-                                {mainElement.totalScore.toFixed(1)} / {mainElement.maxScore}
+                                {mainElement.totalScore.toFixed(1)} / {mainElement.weight}
                               </Badge>
                             </div>
                             
@@ -1321,22 +1318,25 @@ export default function AdminDashboard() {
                                     {subElement.name}
                                   </h5>
                                   <div className="space-y-3">
-                                    {subElement.answers.map((answer) => (
-                                      <div 
-                                        key={answer.id} 
-                                        className="flex items-start justify-between gap-4 bg-muted/30 rounded-md p-3"
-                                      >
-                                        <div className="flex-1">
-                                          <p className="text-sm font-medium mb-1">{answer.criterion?.name}</p>
-                                          <p className="text-sm text-muted-foreground">
-                                            الإجابة: <span className="text-foreground">{answer.option?.label}</span>
-                                          </p>
+                                    {subElement.answers.map((answer) => {
+                                      const criterionWeight = answer.criterion?.weight_percentage || 0;
+                                      return (
+                                        <div 
+                                          key={answer.id} 
+                                          className="flex items-start justify-between gap-4 bg-muted/30 rounded-md p-3"
+                                        >
+                                          <div className="flex-1">
+                                            <p className="text-sm font-medium mb-1">{answer.criterion?.name}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                              الإجابة: <span className="text-foreground">{answer.option?.label}</span>
+                                            </p>
+                                          </div>
+                                          <Badge variant="outline" className="shrink-0">
+                                            {answer.score.toFixed(1)} / {criterionWeight}
+                                          </Badge>
                                         </div>
-                                        <Badge variant="outline" className="shrink-0">
-                                          {answer.score.toFixed(2)} / {answer.criterion?.weight_percentage}
-                                        </Badge>
-                                      </div>
-                                    ))}
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               ))}
