@@ -251,21 +251,28 @@ export function useEvaluation() {
     return domain.main_elements[currentMainElementIndex];
   }, [domain, currentMainElementIndex]);
 
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function goToNextElement() {
     if (domain && currentMainElementIndex < domain.main_elements.length - 1) {
       setCurrentMainElementIndex(prev => prev + 1);
+      scrollToTop();
     }
   }
 
   function goToPreviousElement() {
     if (currentMainElementIndex > 0) {
       setCurrentMainElementIndex(prev => prev - 1);
+      scrollToTop();
     }
   }
 
   function goToElement(index: number) {
     if (domain && index >= 0 && index < domain.main_elements.length) {
       setCurrentMainElementIndex(index);
+      scrollToTop();
     }
   }
 
