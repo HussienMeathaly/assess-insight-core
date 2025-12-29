@@ -1289,7 +1289,10 @@ export default function AdminDashboard() {
                           }
                           
                           acc[mainKey].subElements[subKey].answers.push(answer);
-                          acc[mainKey].totalScore += answer.score;
+                          // Calculate actual score: (criterion weight * score percentage) / 100
+                          const criterionWeight = answer.criterion?.weight_percentage || 0;
+                          const actualScore = (criterionWeight * answer.score) / 100;
+                          acc[mainKey].totalScore += actualScore;
                           
                           return acc;
                         }, {} as Record<string, {
@@ -1320,6 +1323,8 @@ export default function AdminDashboard() {
                                   <div className="space-y-3">
                                     {subElement.answers.map((answer) => {
                                       const criterionWeight = answer.criterion?.weight_percentage || 0;
+                                      // Calculate actual score: (criterion weight * score percentage) / 100
+                                      const actualScore = (criterionWeight * answer.score) / 100;
                                       return (
                                         <div 
                                           key={answer.id} 
@@ -1332,7 +1337,7 @@ export default function AdminDashboard() {
                                             </p>
                                           </div>
                                           <Badge variant="outline" className="shrink-0">
-                                            {answer.score.toFixed(1)} / {criterionWeight}
+                                            {actualScore.toFixed(1)} / {criterionWeight}
                                           </Badge>
                                         </div>
                                       );
