@@ -99,15 +99,12 @@ export function EvaluationProgress({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center mb-1">
+                  <div className="flex items-center mb-1">
                     <span className={cn(
                       "font-medium text-sm truncate",
                       isActive ? "text-primary" : "text-foreground"
                     )}>
                       {element.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground mr-2">
-                      {element.weight}%
                     </span>
                   </div>
                   <div className="h-1.5 bg-muted rounded-full overflow-hidden">
