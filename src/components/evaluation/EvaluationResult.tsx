@@ -128,8 +128,8 @@ export function EvaluationResult({
                     <span className={cn("text-sm", elementInfo.color)}>
                       {elementInfo.label}
                     </span>
-                    <span className="text-sm text-muted-foreground">
-                      ({element.score.toFixed(1)}% / {element.max}%)
+                    <span className="text-sm font-medium text-foreground">
+                      {element.score.toFixed(1)}
                     </span>
                   </div>
                 </div>
