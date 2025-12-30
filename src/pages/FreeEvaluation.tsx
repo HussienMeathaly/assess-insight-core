@@ -121,6 +121,11 @@ export default function FreeEvaluation() {
     navigate('/');
   };
 
+  // Navigate back to assessment results
+  const handleBackToAssessment = () => {
+    navigate('/assessment');
+  };
+
   if (authLoading || checkingOrg) {
     return (
       <div className="min-h-screen flex items-center justify-center" dir="rtl">
@@ -223,7 +228,7 @@ export default function FreeEvaluation() {
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={() => navigate('/')}
+                onClick={handleBackToAssessment}
               >
                 <ArrowRight className="w-5 h-5" />
               </Button>
