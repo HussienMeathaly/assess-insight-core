@@ -584,71 +584,101 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-3 md:px-4 py-4 md:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
-          <Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+          {/* بطاقة الجهات */}
+          <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/80">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
-              <Building2 className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Building2 className="h-5 w-5 text-primary" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-xl md:text-2xl font-bold">{organizations.length}</div>
+              <div className="text-3xl font-bold text-foreground mb-2">{organizations.length}</div>
+              <p className="text-xs text-muted-foreground">
+                جهة مسجلة في النظام
+              </p>
             </CardContent>
           </Card>
 
-          <Card>
+          {/* بطاقة التقييم الأولي */}
+          <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/80">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500/50 via-blue-500 to-blue-500/50" />
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">إجمالي التقييمات</CardTitle>
-              <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">التقييم الأولي</CardTitle>
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <ClipboardCheck className="h-5 w-5 text-blue-500" />
+              </div>
             </CardHeader>
-
             <CardContent>
-              {/* العدد */}
-              <div className="text-2xl md:text-3xl font-bold mb-1">{assessments.length}</div>
-
-              {/* تفاصيل */}
-              <p className="text-xs text-muted-foreground mb-2">
-                {qualifiedCount} مؤهل • متوسط: {avgScore}
-              </p>
-
-              {/* مؤشر الجودة */}
+              <div className="text-3xl font-bold text-foreground mb-1">{assessments.length}</div>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/30">
+                  {qualifiedCount} مؤهل
+                </Badge>
+                <Badge variant="outline" className="text-xs bg-orange-500/10 text-orange-600 border-orange-500/30">
+                  {assessments.length - qualifiedCount} غير مؤهل
+                </Badge>
+              </div>
               <div className="flex items-center gap-2">
-                <span
-                  className={`
-                    inline-block w-2.5 h-2.5 rounded-full
-                    ${avgScoreNum >= 75 ? "bg-green-500" : avgScoreNum >= 50 ? "bg-yellow-500" : "bg-red-500"}
-                  `}
-                />
-                <span className="text-xs font-medium">
-                  {avgScoreNum >= 75 ? "جودة عالية" : avgScoreNum >= 50 ? "جودة متوسطة" : "جودة منخفضة"}
+                <span className={`w-2 h-2 rounded-full ${avgScoreNum >= 75 ? "bg-green-500" : avgScoreNum >= 50 ? "bg-yellow-500" : "bg-red-500"}`} />
+                <span className="text-xs text-muted-foreground">متوسط: {avgScore}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* بطاقة التقييم المجاني */}
+          <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/80">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/50 via-purple-500 to-purple-500/50" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">التقييم المجاني</CardTitle>
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <FileCheck2 className="h-5 w-5 text-purple-500" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground mb-1">{evaluations.length}</div>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/30">
+                  {completedEvaluations} مكتمل
+                </Badge>
+                <Badge variant="outline" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">
+                  {evaluations.length - completedEvaluations} قيد التنفيذ
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  متوسط: {evaluations.length > 0 
+                    ? (evaluations.filter(e => e.is_completed && e.total_score !== null).reduce((sum, e) => sum + (e.total_score || 0), 0) / (completedEvaluations || 1)).toFixed(1)
+                    : 0}%
                 </span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="sm:col-span-2 lg:col-span-1">
+          {/* بطاقة معدل التأهيل */}
+          <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/80">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500/50 via-green-500 to-green-500/50" />
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">معدل التأهيل</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">معدل التأهيل</CardTitle>
+              <div className="p-2 rounded-lg bg-green-500/10">
+                <Users className="h-5 w-5 text-green-500" />
+              </div>
             </CardHeader>
-
             <CardContent>
-              {/* النسبة */}
-              <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">
+              <div className="text-3xl font-bold text-green-600 mb-2">
                 {assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%
               </div>
-
-              {/* شريط التقدم */}
-              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-2">
                 <div
-                  className="h-full bg-green-500 transition-all"
+                  className="h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-500"
                   style={{
                     width: `${assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%`,
                   }}
                 />
               </div>
-
-              {/* نص توضيحي */}
-              <p className="text-xs text-muted-foreground mt-2">نسبة الجهات المؤهلة من إجمالي التقييمات</p>
+              <p className="text-xs text-muted-foreground">نسبة الجهات المؤهلة</p>
             </CardContent>
           </Card>
         </div>
