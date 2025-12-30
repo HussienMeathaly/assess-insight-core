@@ -71,7 +71,7 @@ export function CriterionCard({
         }}
         className="space-y-2"
       >
-        {[...options].sort((a, b) => b.score_percentage - a.score_percentage).map((option) => {
+        {options.map((option) => {
           const isSelected = selectedOptionId === option.id;
           const rawScore = ((option.score_percentage / 100) * weight).toFixed(1).replace(/\.0$/, '');
           
