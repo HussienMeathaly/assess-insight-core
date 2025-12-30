@@ -35,6 +35,7 @@ interface MainElementViewProps {
   element: MainElement;
   answers: Map<string, { selectedOptionId: string }>;
   onAnswerCriterion: (criterionId: string, optionId: string, scorePercentage: number) => void;
+  onClearCriterion?: (criterionId: string) => void;
   onNext: () => void;
   onPrevious: () => void;
   isFirst: boolean;
@@ -46,6 +47,7 @@ export function MainElementView({
   element,
   answers,
   onAnswerCriterion,
+  onClearCriterion,
   onNext,
   onPrevious,
   isFirst,
@@ -90,6 +92,7 @@ export function MainElementView({
           criteria={subElement.criteria}
           answers={answers}
           onAnswerCriterion={onAnswerCriterion}
+          onClearCriterion={onClearCriterion}
         />
       ))}
 
