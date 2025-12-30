@@ -20,13 +20,15 @@ interface SubElementSectionProps {
   criteria: Criterion[];
   answers: Map<string, { selectedOptionId: string }>;
   onAnswerCriterion: (criterionId: string, optionId: string, scorePercentage: number) => void;
+  onClearCriterion?: (criterionId: string) => void;
 }
 
 export function SubElementSection({
   name,
   criteria,
   answers,
-  onAnswerCriterion
+  onAnswerCriterion,
+  onClearCriterion
 }: SubElementSectionProps) {
   const sortedCriteria = [...criteria].sort((a, b) => a.display_order - b.display_order);
 
@@ -49,6 +51,7 @@ export function SubElementSection({
               onSelect={(optionId, scorePercentage) => 
                 onAnswerCriterion(criterion.id, optionId, scorePercentage)
               }
+              onClear={onClearCriterion}
             />
           );
         })}

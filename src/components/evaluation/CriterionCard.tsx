@@ -1,7 +1,7 @@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, X } from 'lucide-react';
 
 interface CriterionOption {
   id: string;
@@ -16,6 +16,7 @@ interface CriterionCardProps {
   options: CriterionOption[];
   selectedOptionId?: string;
   onSelect: (optionId: string, scorePercentage: number) => void;
+  onClear?: (criterionId: string) => void;
 }
 
 export function CriterionCard({
@@ -24,7 +25,8 @@ export function CriterionCard({
   weight,
   options,
   selectedOptionId,
-  onSelect
+  onSelect,
+  onClear
 }: CriterionCardProps) {
   const isAnswered = !!selectedOptionId;
 
@@ -45,6 +47,18 @@ export function CriterionCard({
             الوزن: {weight}%
           </span>
         </div>
+        {isAnswered && onClear && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onClear(id);
+            }}
+            className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+            title="مسح الاختيار"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <RadioGroup

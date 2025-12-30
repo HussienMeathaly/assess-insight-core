@@ -30,6 +30,7 @@ export default function FreeEvaluation() {
     currentMainElement,
     currentMainElementIndex,
     answerCriterion,
+    clearCriterion,
     goToNextElement,
     goToPreviousElement,
     goToElement,
@@ -264,6 +265,7 @@ export default function FreeEvaluation() {
               element={currentMainElement}
               answers={answers}
               onAnswerCriterion={answerCriterion}
+              onClearCriterion={clearCriterion}
               onNext={goToNextElement}
               onPrevious={goToPreviousElement}
               isFirst={isFirstElement}

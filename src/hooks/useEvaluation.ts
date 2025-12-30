@@ -189,6 +189,14 @@ export function useEvaluation() {
     });
   }
 
+  function clearCriterion(criterionId: string) {
+    setAnswers(prev => {
+      const newAnswers = new Map(prev);
+      newAnswers.delete(criterionId);
+      return newAnswers;
+    });
+  }
+
   // Calculate scores
   const scores = useMemo(() => {
     if (!domain) return { total: 0, max: 100, percentage: 0, byMainElement: new Map() };
@@ -397,6 +405,7 @@ export function useEvaluation() {
     currentMainElement,
     currentMainElementIndex,
     answerCriterion,
+    clearCriterion,
     goToNextElement,
     goToPreviousElement,
     goToElement,
