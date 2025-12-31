@@ -15,13 +15,10 @@ export const assessmentQuestions: Question[] = [
     id: 2,
     text: 'هل سبق وأن تعاملت مع منتجات مشابهة؟',
     weight: 3,
-    type: 'multiple',
+    type: 'binary',
     options: [
-      { id: 'q2_5plus', label: 'أكثر من 5 سنوات', scorePercentage: 100 },
-      { id: 'q2_3to5', label: 'أكثر من 3 وأقل من 5 سنوات', scorePercentage: 85 },
-      { id: 'q2_1to3', label: 'أكثر من سنة وأقل من 3 سنوات', scorePercentage: 70 },
-      { id: 'q2_less1', label: 'أقل من سنة', scorePercentage: 50 },
-      { id: 'q2_none', label: 'لا يوجد', scorePercentage: 0 },
+      { id: 'q2_yes', label: 'نعم', scorePercentage: 100 },
+      { id: 'q2_no', label: 'لا', scorePercentage: 0 },
     ],
   },
   {

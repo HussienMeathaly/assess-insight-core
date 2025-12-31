@@ -57,7 +57,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
                 <div key={answer.questionId} className="text-right">
                   <div className="flex flex-row-reverse justify-between items-center mb-1 gap-2">
                     <span className="text-xs md:text-sm font-medium text-foreground whitespace-nowrap">
-                      {answer.score.toFixed(1)} / {maxQuestionScore}
+                      {Math.round(answer.score)} / {maxQuestionScore}
                     </span>
                     <span className="text-xs md:text-sm text-muted-foreground truncate max-w-[65%] md:max-w-[70%]">
                       {question.text}
@@ -81,7 +81,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border">
             <div className="flex flex-row-reverse justify-between items-center">
               <span className="text-base md:text-lg font-bold text-primary">
-                {result.totalScore.toFixed(1)} / {result.maxScore}
+                {Math.round(result.totalScore)} / {result.maxScore}
               </span>
               <span className="text-xs md:text-sm font-semibold text-foreground">المجموع الكلي</span>
             </div>
