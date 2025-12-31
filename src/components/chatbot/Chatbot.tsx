@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChatbot } from "@/hooks/useChatbot";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
+import { QuickQuestions } from "./QuickQuestions";
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -90,10 +91,11 @@ export function Chatbot() {
             <ScrollArea className="flex-1 p-3" ref={scrollRef}>
               <div className="space-y-3">
                 {messages.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm">مرحباً! أنا مساعد بروفت الذكي</p>
-                    <p className="text-xs mt-1">اسألني عن التقييم أو المنصة</p>
+                  <div className="text-center py-4 text-muted-foreground">
+                    <MessageCircle className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm font-medium">مرحباً! أنا مساعد بروفت الذكي</p>
+                    <p className="text-xs mt-1 mb-4">اسألني عن التقييم أو المنصة</p>
+                    <QuickQuestions onSelect={sendMessage} disabled={isLoading} />
                   </div>
                 )}
                 {messages.map((msg, idx) => (
