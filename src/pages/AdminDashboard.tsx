@@ -20,6 +20,7 @@ import {
 } from "@/components/admin/AdminMobileCards";
 import { EditOrganizationButton } from "@/components/admin/EditOrganizationButton";
 import { EditOrganizationForm } from "@/components/admin/EditOrganizationForm";
+import { GenerateReportButton } from "@/components/admin/GenerateReportButton";
 import {
   Building2,
   ClipboardCheck,
@@ -918,6 +919,11 @@ export default function AdminDashboard() {
                                   <Eye className="h-4 w-4 ml-1" />
                                   التفاصيل
                                 </Button>
+                                <GenerateReportButton
+                                  evaluationId={evaluation.id}
+                                  organizationName={evaluation.organization?.name || "غير معروف"}
+                                  isCompleted={evaluation.is_completed || false}
+                                />
                                 <Button
                                   variant="ghost"
                                   size="sm"

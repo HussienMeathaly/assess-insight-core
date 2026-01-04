@@ -247,6 +247,47 @@ export type Database = {
         }
         Relationships: []
       }
+      evaluation_reports: {
+        Row: {
+          created_at: string
+          created_by: string
+          evaluation_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          share_token: string
+          view_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          evaluation_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          share_token?: string
+          view_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          evaluation_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          share_token?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_reports_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evaluations: {
         Row: {
           completed_at: string | null
@@ -492,6 +533,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_report_answers_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          criterion_id: string
+          criterion_name: string
+          criterion_weight: number
+          main_element_id: string
+          main_element_name: string
+          main_element_weight: number
+          score: number
+          selected_option_label: string
+          sub_element_id: string
+          sub_element_name: string
+        }[]
+      }
+      get_report_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          completed_at: string
+          evaluation_id: string
+          expires_at: string
+          is_active: boolean
+          is_completed: boolean
+          max_score: number
+          org_contact_person: string
+          org_email: string
+          org_name: string
+          org_phone: string
+          report_id: string
+          total_score: number
+        }[]
+      }
       has_role:
         | {
             Args: { _role: Database["public"]["Enums"]["app_role"] }
