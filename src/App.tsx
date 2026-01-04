@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import FreeEvaluation from "./pages/FreeEvaluation";
+import EvaluationReport from "./pages/EvaluationReport";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./hooks/useAuth";
 
@@ -60,6 +61,7 @@ const App = () => (
                   <FreeEvaluation />
                 </ProtectedRoute>
               } />
+              <Route path="/report/:token" element={<EvaluationReport />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Chatbot />

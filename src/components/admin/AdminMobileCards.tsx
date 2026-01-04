@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, Loader2, Trash2, Pencil } from "lucide-react";
+import { GenerateReportButton } from "@/components/admin/GenerateReportButton";
 
 export type AdminMobileAssessment = {
   id: string;
@@ -306,6 +307,11 @@ export function EvaluationsMobileCards({
                 <Eye className="h-4 w-4 ml-2" />
                 التفاصيل
               </Button>
+              <GenerateReportButton
+                evaluationId={e.id}
+                organizationName={e.organization?.name || "غير معروف"}
+                isCompleted={e.is_completed || false}
+              />
               {onDelete && (
                 <Button
                   variant="ghost"
