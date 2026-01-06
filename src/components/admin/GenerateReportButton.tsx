@@ -5,6 +5,7 @@ import { FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import profitLogo from '@/assets/profit-logo.png';
 
 interface GenerateReportButtonProps {
   evaluationId: string;
@@ -44,9 +45,15 @@ export function GenerateReportButton({
 }: GenerateReportButtonProps) {
   const [generating, setGenerating] = useState(false);
 
+  // Profit brand colors
+  const BRAND_NAVY = '#1e3a5f';
+  const BRAND_GREEN = '#7cb342';
+  const BRAND_NAVY_LIGHT = '#2d4a6f';
+  const BRAND_GREEN_LIGHT = '#8bc34a';
+
   const getScoreColor = (score: number) => {
-    if (score >= 80) return '#16a34a';
-    if (score >= 60) return '#2563eb';
+    if (score >= 80) return BRAND_GREEN;
+    if (score >= 60) return BRAND_NAVY;
     if (score >= 40) return '#ca8a04';
     return '#dc2626';
   };
@@ -192,25 +199,30 @@ export function GenerateReportButton({
             }
             .header {
               text-align: center;
-              padding-bottom: 20px;
-              border-bottom: 3px solid #2563eb;
-              margin-bottom: 25px;
+              padding-bottom: 25px;
+              border-bottom: 4px solid ${BRAND_NAVY};
+              margin-bottom: 30px;
+              background: linear-gradient(135deg, ${BRAND_NAVY}08 0%, ${BRAND_GREEN}08 100%);
+              padding: 25px;
+              border-radius: 12px;
             }
-            .logo-text {
-              font-size: 32px;
-              font-weight: 700;
-              color: #2563eb;
-              margin-bottom: 5px;
+            .logo-container {
+              margin-bottom: 15px;
+            }
+            .logo-img {
+              max-width: 180px;
+              height: auto;
             }
             .report-title {
-              font-size: 24px;
-              color: #374151;
-              margin-top: 10px;
+              font-size: 26px;
+              color: ${BRAND_NAVY};
+              margin-top: 15px;
+              font-weight: 700;
             }
             .report-date {
-              font-size: 12px;
+              font-size: 13px;
               color: #6b7280;
-              margin-top: 5px;
+              margin-top: 8px;
             }
             .section {
               margin-bottom: 25px;
@@ -219,27 +231,31 @@ export function GenerateReportButton({
               font-size: 16px;
               font-weight: 700;
               color: white;
-              background: #2563eb;
-              padding: 10px 15px;
-              border-radius: 8px 8px 0 0;
+              background: linear-gradient(135deg, ${BRAND_NAVY} 0%, ${BRAND_NAVY_LIGHT} 100%);
+              padding: 12px 18px;
+              border-radius: 10px 10px 0 0;
               margin-bottom: 0;
             }
             .section-content {
-              border: 1px solid #e5e7eb;
+              border: 2px solid ${BRAND_NAVY}20;
               border-top: none;
-              border-radius: 0 0 8px 8px;
+              border-radius: 0 0 10px 10px;
               padding: 20px;
-              background: #f9fafb;
+              background: linear-gradient(180deg, #f9fafb 0%, white 100%);
             }
             .info-grid {
               display: grid;
               grid-template-columns: 1fr 1fr;
-              gap: 15px;
+              gap: 18px;
             }
             .info-item {
               display: flex;
               align-items: center;
-              gap: 10px;
+              gap: 12px;
+              padding: 12px;
+              background: white;
+              border-radius: 8px;
+              border: 1px solid ${BRAND_NAVY}15;
             }
             .info-label {
               font-size: 12px;
@@ -248,41 +264,42 @@ export function GenerateReportButton({
             .info-value {
               font-size: 14px;
               font-weight: 600;
-              color: #1f2937;
+              color: ${BRAND_NAVY};
             }
             .score-box {
               text-align: center;
-              padding: 30px;
-              border-radius: 12px;
-              background: ${isQualified ? '#dcfce7' : '#fee2e2'};
-              border: 2px solid ${isQualified ? '#16a34a' : '#dc2626'};
+              padding: 35px;
+              border-radius: 15px;
+              background: ${isQualified ? `linear-gradient(135deg, ${BRAND_GREEN}15 0%, ${BRAND_GREEN}25 100%)` : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'};
+              border: 3px solid ${isQualified ? BRAND_GREEN : '#dc2626'};
             }
             .score-circle {
-              width: 120px;
-              height: 120px;
+              width: 140px;
+              height: 140px;
               border-radius: 50%;
               background: white;
               display: inline-flex;
               align-items: center;
               justify-content: center;
               flex-direction: column;
-              border: 6px solid ${isQualified ? '#16a34a' : '#dc2626'};
-              margin-bottom: 15px;
+              border: 8px solid ${isQualified ? BRAND_GREEN : '#dc2626'};
+              margin-bottom: 20px;
+              box-shadow: 0 4px 20px ${isQualified ? BRAND_GREEN : '#dc2626'}30;
             }
             .score-value {
-              font-size: 36px;
+              font-size: 42px;
               font-weight: 700;
-              color: ${isQualified ? '#16a34a' : '#dc2626'};
+              color: ${isQualified ? BRAND_GREEN : '#dc2626'};
             }
             .score-percent {
-              font-size: 16px;
+              font-size: 18px;
               color: #6b7280;
             }
             .score-status {
-              font-size: 20px;
+              font-size: 22px;
               font-weight: 700;
-              color: ${isQualified ? '#16a34a' : '#dc2626'};
-              margin-bottom: 5px;
+              color: ${isQualified ? BRAND_GREEN : '#dc2626'};
+              margin-bottom: 8px;
             }
             .score-message {
               font-size: 14px;
@@ -293,69 +310,75 @@ export function GenerateReportButton({
               border-collapse: collapse;
             }
             .summary-table th {
-              background: #e5e7eb;
-              padding: 12px;
+              background: linear-gradient(135deg, ${BRAND_NAVY} 0%, ${BRAND_NAVY_LIGHT} 100%);
+              color: white;
+              padding: 14px;
               text-align: right;
               font-weight: 600;
               font-size: 13px;
-              border-bottom: 2px solid #d1d5db;
             }
             .summary-table td {
-              padding: 12px;
-              border-bottom: 1px solid #e5e7eb;
+              padding: 14px;
+              border-bottom: 1px solid ${BRAND_NAVY}15;
               font-size: 13px;
             }
             .summary-table tr:nth-child(even) {
-              background: #f3f4f6;
+              background: ${BRAND_NAVY}05;
+            }
+            .summary-table tr:hover {
+              background: ${BRAND_GREEN}10;
             }
             .status-badge {
               display: inline-block;
-              padding: 4px 12px;
+              padding: 5px 14px;
               border-radius: 20px;
               font-size: 11px;
               font-weight: 600;
             }
             .main-element-header {
-              background: linear-gradient(135deg, #2563eb, #1d4ed8);
+              background: linear-gradient(135deg, ${BRAND_NAVY} 0%, ${BRAND_NAVY_LIGHT} 100%);
               color: white;
-              padding: 12px 15px;
-              border-radius: 8px;
-              margin-bottom: 10px;
+              padding: 14px 18px;
+              border-radius: 10px;
+              margin-bottom: 12px;
               display: flex;
               justify-content: space-between;
               align-items: center;
             }
             .main-element-title {
-              font-size: 15px;
+              font-size: 16px;
               font-weight: 700;
             }
             .main-element-score {
               font-size: 14px;
-              background: rgba(255,255,255,0.2);
-              padding: 4px 12px;
+              background: ${BRAND_GREEN};
+              color: white;
+              padding: 6px 14px;
               border-radius: 20px;
+              font-weight: 600;
             }
             .sub-element {
-              background: #f3f4f6;
-              border-radius: 6px;
-              padding: 12px;
-              margin-bottom: 10px;
-              margin-right: 15px;
+              background: linear-gradient(180deg, ${BRAND_NAVY}08 0%, white 100%);
+              border-radius: 8px;
+              padding: 15px;
+              margin-bottom: 12px;
+              margin-right: 20px;
+              border: 1px solid ${BRAND_NAVY}15;
             }
             .sub-element-title {
-              font-size: 13px;
+              font-size: 14px;
               font-weight: 600;
-              color: #374151;
-              margin-bottom: 10px;
-              padding-bottom: 8px;
-              border-bottom: 1px solid #e5e7eb;
+              color: ${BRAND_NAVY};
+              margin-bottom: 12px;
+              padding-bottom: 10px;
+              border-bottom: 2px solid ${BRAND_GREEN}40;
             }
             .criterion-row {
               display: flex;
               justify-content: space-between;
               align-items: flex-start;
-              padding: 8px 0;
-              border-bottom: 1px dashed #e5e7eb;
+              padding: 10px 0;
+              border-bottom: 1px dashed ${BRAND_NAVY}20;
             }
             .criterion-row:last-child {
               border-bottom: none;
@@ -380,11 +403,21 @@ export function GenerateReportButton({
             }
             .footer {
               text-align: center;
-              padding-top: 20px;
-              border-top: 2px solid #e5e7eb;
-              margin-top: 30px;
-              color: #9ca3af;
-              font-size: 11px;
+              padding-top: 25px;
+              border-top: 3px solid ${BRAND_NAVY}20;
+              margin-top: 35px;
+              background: linear-gradient(135deg, ${BRAND_NAVY}05 0%, ${BRAND_GREEN}05 100%);
+              padding: 25px;
+              border-radius: 12px;
+            }
+            .footer p {
+              color: ${BRAND_NAVY};
+              font-size: 12px;
+              margin-bottom: 5px;
+            }
+            .footer-logo {
+              max-width: 100px;
+              margin-bottom: 10px;
             }
             .page-break {
               page-break-before: always;
@@ -395,7 +428,9 @@ export function GenerateReportButton({
           <div class="container">
             <!-- Header -->
             <div class="header">
-              <div class="logo-text">PROFIT</div>
+              <div class="logo-container">
+                <img src="${profitLogo}" alt="Profit Logo" class="logo-img" />
+              </div>
               <div class="report-title">تقرير ${domainName}</div>
               <div class="report-date">تاريخ إصدار التقرير: ${new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
             </div>
@@ -523,6 +558,7 @@ export function GenerateReportButton({
 
             <!-- Footer -->
             <div class="footer">
+              <img src="${profitLogo}" alt="Profit Logo" class="footer-logo" />
               <p>تم إنشاء هذا التقرير بواسطة نظام PROFIT للتقييم</p>
               <p>جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
             </div>
