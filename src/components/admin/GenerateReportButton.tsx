@@ -120,22 +120,54 @@ export function GenerateReportButton({
 
       if (answersError) throw answersError;
 
-      // Transform answers
-      const transformedAnswers: ReportAnswer[] = (answers || []).map((answer: any) => ({
-        criterion_id: answer.criteria?.id || '',
-        criterion_name: answer.criteria?.name || '',
-        criterion_weight: answer.criteria?.weight_percentage || 0,
-        selected_option_label: answer.criteria_options?.label || '',
-        score: answer.score || 0,
-        sub_element_id: answer.criteria?.sub_elements?.id || '',
-        sub_element_name: answer.criteria?.sub_elements?.name || '',
-        main_element_id: answer.criteria?.sub_elements?.main_elements?.id || '',
-        main_element_name: answer.criteria?.sub_elements?.main_elements?.name || '',
-        main_element_weight: answer.criteria?.sub_elements?.main_elements?.weight_percentage || 0,
-      }));
+      // Fetch ALL criteria to ensure we have complete data
+      const { data: allCriteria, error: criteriaError } = await supabase
+        .from('criteria')
+        .select(`
+          id,
+          name,
+          weight_percentage,
+          description,
+          sub_elements (
+            id,
+            name,
+            display_order,
+            main_elements (
+              id,
+              name,
+              weight_percentage,
+              display_order
+            )
+          )
+        `)
+        .eq('is_active', true);
+
+      if (criteriaError) throw criteriaError;
+
+      // Create a map of criteria for quick lookup
+      const criteriaMap = new Map(allCriteria?.map(c => [c.id, c]) || []);
+
+      // Transform answers with complete criteria data
+      const transformedAnswers: ReportAnswer[] = (answers || []).map((answer: any) => {
+        const criteriaData = answer.criteria || criteriaMap.get(answer.criterion_id);
+        return {
+          criterion_id: criteriaData?.id || '',
+          criterion_name: criteriaData?.name || '',
+          criterion_weight: criteriaData?.weight_percentage || 0,
+          selected_option_label: answer.criteria_options?.label || '',
+          score: answer.score || 0,
+          sub_element_id: criteriaData?.sub_elements?.id || '',
+          sub_element_name: criteriaData?.sub_elements?.name || '',
+          main_element_id: criteriaData?.sub_elements?.main_elements?.id || '',
+          main_element_name: criteriaData?.sub_elements?.main_elements?.name || '',
+          main_element_weight: criteriaData?.sub_elements?.main_elements?.weight_percentage || 0,
+        };
+      });
 
       // Group answers by main element
       const groupedAnswers = transformedAnswers.reduce<GroupedElement[]>((acc, answer) => {
+        if (!answer.main_element_id) return acc;
+        
         let mainElement = acc.find(g => g.mainElementId === answer.main_element_id);
         
         if (!mainElement) {
@@ -171,262 +203,399 @@ export function GenerateReportButton({
       const isQualified = percentage >= 60;
       const orgName = evaluation.organizations?.name || organizationName;
       const domainName = evaluation.evaluation_domains?.name || 'تقييم المنتج';
+      const totalAnswers = transformedAnswers.length;
 
-      // Create HTML content for PDF
+      // Generate separate pages for better PDF formatting
+      const generateMainElementPages = () => {
+        return groupedAnswers.map((mainElement, index) => {
+          const elemPercentage = mainElement.mainElementWeight > 0 
+            ? Math.round((mainElement.totalScore / mainElement.mainElementWeight) * 100) 
+            : 0;
+          
+          return `
+            <div class="page ${index > 0 ? 'page-break' : ''}">
+              <div class="page-header">
+                <img src="${profitLogo}" alt="Profit Logo" class="page-header-logo" />
+                <div class="page-header-info">
+                  <span>${orgName}</span>
+                  <span class="separator">|</span>
+                  <span>${domainName}</span>
+                </div>
+              </div>
+              
+              <div class="main-element-section">
+                <div class="main-element-header">
+                  <div class="main-element-title">${mainElement.mainElementName}</div>
+                  <div class="main-element-score">${mainElement.totalScore.toFixed(1)} / ${mainElement.mainElementWeight} (${elemPercentage}%)</div>
+                </div>
+                
+                ${mainElement.subElements.map(subElement => `
+                  <div class="sub-element">
+                    <div class="sub-element-title">${subElement.subElementName}</div>
+                    <table class="criteria-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 50%;">المعيار</th>
+                          <th style="width: 30%;">الإجابة</th>
+                          <th style="width: 10%;">الوزن</th>
+                          <th style="width: 10%;">النتيجة</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${subElement.answers.map(answer => {
+                          const scoreColor = getScoreColor(answer.score);
+                          return `
+                            <tr>
+                              <td class="criterion-name">${answer.criterion_name}</td>
+                              <td class="criterion-answer">${answer.selected_option_label}</td>
+                              <td class="criterion-weight">${answer.criterion_weight}%</td>
+                              <td class="criterion-score" style="color: ${scoreColor};">${answer.score}%</td>
+                            </tr>
+                          `;
+                        }).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                `).join('')}
+              </div>
+              
+              <div class="page-footer">
+                <span>صفحة ${index + 2}</span>
+                <span class="separator">|</span>
+                <span>نظام PROFIT للتقييم</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      };
+
+      // Create HTML content for PDF with Readex Pro font
       const htmlContent = `
         <!DOCTYPE html>
         <html dir="rtl" lang="ar">
         <head>
           <meta charset="UTF-8">
-          <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+          <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
           <style>
+            @page {
+              size: A4;
+              margin: 0;
+            }
             * {
               margin: 0;
               padding: 0;
               box-sizing: border-box;
             }
             body {
-              font-family: 'Cairo', 'Arial', sans-serif;
+              font-family: 'Readex Pro', 'Arial', sans-serif;
               background: white;
               color: #1f2937;
-              line-height: 1.6;
+              line-height: 1.7;
               direction: rtl;
+              font-size: 12px;
             }
-            .container {
+            .page {
               width: 210mm;
+              min-height: 297mm;
               padding: 15mm;
               background: white;
+              position: relative;
+              padding-bottom: 25mm;
+            }
+            .page-break {
+              page-break-before: always;
+            }
+            .page-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding-bottom: 12px;
+              border-bottom: 2px solid ${BRAND_NAVY};
+              margin-bottom: 20px;
+            }
+            .page-header-logo {
+              height: 35px;
+              width: auto;
+            }
+            .page-header-info {
+              font-size: 11px;
+              color: ${BRAND_NAVY};
+              font-weight: 500;
+            }
+            .page-header-info .separator {
+              margin: 0 8px;
+              color: ${BRAND_GREEN};
+            }
+            .page-footer {
+              position: absolute;
+              bottom: 10mm;
+              left: 15mm;
+              right: 15mm;
+              text-align: center;
+              font-size: 10px;
+              color: #6b7280;
+              border-top: 1px solid ${BRAND_NAVY}20;
+              padding-top: 8px;
+            }
+            .page-footer .separator {
+              margin: 0 10px;
+              color: ${BRAND_GREEN};
             }
             .header {
               text-align: center;
-              padding-bottom: 25px;
-              border-bottom: 4px solid ${BRAND_NAVY};
-              margin-bottom: 30px;
-              background: linear-gradient(135deg, ${BRAND_NAVY}08 0%, ${BRAND_GREEN}08 100%);
               padding: 25px;
-              border-radius: 12px;
+              border: 3px solid ${BRAND_NAVY};
+              border-radius: 15px;
+              margin-bottom: 25px;
+              background: linear-gradient(135deg, ${BRAND_NAVY}05 0%, ${BRAND_GREEN}05 100%);
             }
             .logo-container {
               margin-bottom: 15px;
             }
             .logo-img {
-              max-width: 180px;
+              max-width: 160px;
               height: auto;
             }
             .report-title {
-              font-size: 26px;
+              font-size: 24px;
               color: ${BRAND_NAVY};
-              margin-top: 15px;
+              margin-top: 12px;
               font-weight: 700;
             }
             .report-date {
-              font-size: 13px;
+              font-size: 12px;
               color: #6b7280;
               margin-top: 8px;
             }
             .section {
-              margin-bottom: 25px;
+              margin-bottom: 20px;
             }
             .section-title {
-              font-size: 16px;
-              font-weight: 700;
+              font-size: 14px;
+              font-weight: 600;
               color: white;
               background: linear-gradient(135deg, ${BRAND_NAVY} 0%, ${BRAND_NAVY_LIGHT} 100%);
-              padding: 12px 18px;
-              border-radius: 10px 10px 0 0;
+              padding: 10px 15px;
+              border-radius: 8px 8px 0 0;
               margin-bottom: 0;
             }
             .section-content {
               border: 2px solid ${BRAND_NAVY}20;
               border-top: none;
-              border-radius: 0 0 10px 10px;
-              padding: 20px;
-              background: linear-gradient(180deg, #f9fafb 0%, white 100%);
+              border-radius: 0 0 8px 8px;
+              padding: 15px;
+              background: #fafafa;
             }
             .info-grid {
               display: grid;
               grid-template-columns: 1fr 1fr;
-              gap: 18px;
+              gap: 12px;
             }
             .info-item {
-              display: flex;
-              align-items: center;
-              gap: 12px;
-              padding: 12px;
+              padding: 10px;
               background: white;
-              border-radius: 8px;
-              border: 1px solid ${BRAND_NAVY}15;
+              border-radius: 6px;
+              border: 1px solid ${BRAND_NAVY}10;
             }
             .info-label {
-              font-size: 12px;
+              font-size: 10px;
               color: #6b7280;
+              margin-bottom: 3px;
             }
             .info-value {
-              font-size: 14px;
+              font-size: 13px;
               font-weight: 600;
               color: ${BRAND_NAVY};
             }
             .score-box {
               text-align: center;
-              padding: 35px;
-              border-radius: 15px;
-              background: ${isQualified ? `linear-gradient(135deg, ${BRAND_GREEN}15 0%, ${BRAND_GREEN}25 100%)` : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'};
+              padding: 25px;
+              border-radius: 12px;
+              background: ${isQualified ? `linear-gradient(135deg, ${BRAND_GREEN}10 0%, ${BRAND_GREEN}20 100%)` : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'};
               border: 3px solid ${isQualified ? BRAND_GREEN : '#dc2626'};
             }
             .score-circle {
-              width: 140px;
-              height: 140px;
+              width: 100px;
+              height: 100px;
               border-radius: 50%;
               background: white;
               display: inline-flex;
               align-items: center;
               justify-content: center;
               flex-direction: column;
-              border: 8px solid ${isQualified ? BRAND_GREEN : '#dc2626'};
-              margin-bottom: 20px;
-              box-shadow: 0 4px 20px ${isQualified ? BRAND_GREEN : '#dc2626'}30;
+              border: 6px solid ${isQualified ? BRAND_GREEN : '#dc2626'};
+              margin-bottom: 15px;
             }
             .score-value {
-              font-size: 42px;
+              font-size: 32px;
               font-weight: 700;
               color: ${isQualified ? BRAND_GREEN : '#dc2626'};
             }
             .score-percent {
-              font-size: 18px;
+              font-size: 14px;
               color: #6b7280;
             }
             .score-status {
-              font-size: 22px;
+              font-size: 18px;
               font-weight: 700;
               color: ${isQualified ? BRAND_GREEN : '#dc2626'};
-              margin-bottom: 8px;
+              margin-bottom: 5px;
             }
             .score-message {
-              font-size: 14px;
+              font-size: 12px;
               color: #4b5563;
+            }
+            .stats-row {
+              display: flex;
+              justify-content: center;
+              gap: 30px;
+              margin-top: 15px;
+              padding-top: 15px;
+              border-top: 1px dashed ${BRAND_NAVY}30;
+            }
+            .stat-item {
+              text-align: center;
+            }
+            .stat-value {
+              font-size: 20px;
+              font-weight: 700;
+              color: ${BRAND_NAVY};
+            }
+            .stat-label {
+              font-size: 10px;
+              color: #6b7280;
             }
             .summary-table {
               width: 100%;
               border-collapse: collapse;
+              font-size: 11px;
             }
             .summary-table th {
               background: linear-gradient(135deg, ${BRAND_NAVY} 0%, ${BRAND_NAVY_LIGHT} 100%);
               color: white;
-              padding: 14px;
+              padding: 10px;
               text-align: right;
               font-weight: 600;
-              font-size: 13px;
             }
             .summary-table td {
-              padding: 14px;
+              padding: 10px;
               border-bottom: 1px solid ${BRAND_NAVY}15;
-              font-size: 13px;
             }
             .summary-table tr:nth-child(even) {
-              background: ${BRAND_NAVY}05;
-            }
-            .summary-table tr:hover {
-              background: ${BRAND_GREEN}10;
+              background: ${BRAND_NAVY}03;
             }
             .status-badge {
               display: inline-block;
-              padding: 5px 14px;
-              border-radius: 20px;
-              font-size: 11px;
+              padding: 4px 10px;
+              border-radius: 15px;
+              font-size: 10px;
               font-weight: 600;
+            }
+            .main-element-section {
+              margin-bottom: 20px;
             }
             .main-element-header {
               background: linear-gradient(135deg, ${BRAND_NAVY} 0%, ${BRAND_NAVY_LIGHT} 100%);
               color: white;
-              padding: 14px 18px;
-              border-radius: 10px;
+              padding: 12px 15px;
+              border-radius: 8px;
               margin-bottom: 12px;
               display: flex;
               justify-content: space-between;
               align-items: center;
             }
             .main-element-title {
-              font-size: 16px;
+              font-size: 14px;
               font-weight: 700;
             }
             .main-element-score {
-              font-size: 14px;
+              font-size: 12px;
               background: ${BRAND_GREEN};
               color: white;
-              padding: 6px 14px;
-              border-radius: 20px;
+              padding: 5px 12px;
+              border-radius: 15px;
               font-weight: 600;
             }
             .sub-element {
-              background: linear-gradient(180deg, ${BRAND_NAVY}08 0%, white 100%);
+              background: #fafafa;
               border-radius: 8px;
-              padding: 15px;
+              padding: 12px;
               margin-bottom: 12px;
-              margin-right: 20px;
-              border: 1px solid ${BRAND_NAVY}15;
+              border: 1px solid ${BRAND_NAVY}10;
             }
             .sub-element-title {
-              font-size: 14px;
+              font-size: 13px;
               font-weight: 600;
               color: ${BRAND_NAVY};
-              margin-bottom: 12px;
-              padding-bottom: 10px;
+              margin-bottom: 10px;
+              padding-bottom: 8px;
               border-bottom: 2px solid ${BRAND_GREEN}40;
             }
-            .criterion-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              padding: 10px 0;
-              border-bottom: 1px dashed ${BRAND_NAVY}20;
+            .criteria-table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 10px;
             }
-            .criterion-row:last-child {
-              border-bottom: none;
+            .criteria-table th {
+              background: ${BRAND_NAVY}10;
+              color: ${BRAND_NAVY};
+              padding: 8px;
+              text-align: right;
+              font-weight: 600;
+              border-bottom: 2px solid ${BRAND_NAVY}20;
+            }
+            .criteria-table td {
+              padding: 8px;
+              border-bottom: 1px solid ${BRAND_NAVY}10;
+              vertical-align: top;
+            }
+            .criteria-table tr:nth-child(even) {
+              background: white;
+            }
+            .criteria-table tr:hover {
+              background: ${BRAND_GREEN}05;
             }
             .criterion-name {
-              font-size: 12px;
-              color: #4b5563;
-              flex: 1;
-              padding-left: 15px;
+              font-size: 11px;
+              color: #374151;
+              line-height: 1.5;
             }
             .criterion-answer {
-              font-size: 11px;
+              font-size: 10px;
               color: #6b7280;
-              max-width: 150px;
-              text-align: left;
+            }
+            .criterion-weight {
+              font-size: 10px;
+              color: ${BRAND_NAVY};
+              text-align: center;
             }
             .criterion-score {
-              font-size: 12px;
+              font-size: 11px;
               font-weight: 600;
-              min-width: 50px;
-              text-align: left;
+              text-align: center;
             }
             .footer {
               text-align: center;
-              padding-top: 25px;
-              border-top: 3px solid ${BRAND_NAVY}20;
-              margin-top: 35px;
+              padding: 20px;
+              border-top: 3px solid ${BRAND_NAVY};
+              margin-top: 20px;
               background: linear-gradient(135deg, ${BRAND_NAVY}05 0%, ${BRAND_GREEN}05 100%);
-              padding: 25px;
               border-radius: 12px;
+            }
+            .footer-logo {
+              max-width: 80px;
+              margin-bottom: 10px;
             }
             .footer p {
               color: ${BRAND_NAVY};
-              font-size: 12px;
-              margin-bottom: 5px;
-            }
-            .footer-logo {
-              max-width: 100px;
-              margin-bottom: 10px;
-            }
-            .page-break {
-              page-break-before: always;
+              font-size: 11px;
+              margin-bottom: 3px;
             }
           </style>
         </head>
         <body>
-          <div class="container">
-            <!-- Header -->
+          <!-- Cover Page -->
+          <div class="page">
             <div class="header">
               <div class="logo-container">
                 <img src="${profitLogo}" alt="Profit Logo" class="logo-img" />
@@ -441,28 +610,20 @@ export function GenerateReportButton({
               <div class="section-content">
                 <div class="info-grid">
                   <div class="info-item">
-                    <div>
-                      <div class="info-label">اسم الجهة</div>
-                      <div class="info-value">${orgName}</div>
-                    </div>
+                    <div class="info-label">اسم الجهة</div>
+                    <div class="info-value">${orgName}</div>
                   </div>
                   <div class="info-item">
-                    <div>
-                      <div class="info-label">المسؤول</div>
-                      <div class="info-value">${evaluation.organizations?.contact_person || '-'}</div>
-                    </div>
+                    <div class="info-label">المسؤول</div>
+                    <div class="info-value">${evaluation.organizations?.contact_person || '-'}</div>
                   </div>
                   <div class="info-item">
-                    <div>
-                      <div class="info-label">البريد الإلكتروني</div>
-                      <div class="info-value">${evaluation.organizations?.email || '-'}</div>
-                    </div>
+                    <div class="info-label">البريد الإلكتروني</div>
+                    <div class="info-value">${evaluation.organizations?.email || '-'}</div>
                   </div>
                   <div class="info-item">
-                    <div>
-                      <div class="info-label">رقم الهاتف</div>
-                      <div class="info-value">${evaluation.organizations?.phone || '-'}</div>
-                    </div>
+                    <div class="info-label">رقم الهاتف</div>
+                    <div class="info-value">${evaluation.organizations?.phone || '-'}</div>
                   </div>
                 </div>
               </div>
@@ -479,6 +640,20 @@ export function GenerateReportButton({
                   </div>
                   <div class="score-status">${isQualified ? 'مؤهل للتصنيف' : 'يحتاج تحسينات'}</div>
                   <div class="score-message">${isQualified ? 'حقق المنتج الحد الأدنى المطلوب للتأهل' : 'لم يحقق المنتج الحد الأدنى المطلوب (60%)'}</div>
+                  <div class="stats-row">
+                    <div class="stat-item">
+                      <div class="stat-value">${totalAnswers}</div>
+                      <div class="stat-label">إجمالي المعايير</div>
+                    </div>
+                    <div class="stat-item">
+                      <div class="stat-value">${groupedAnswers.length}</div>
+                      <div class="stat-label">العناصر الرئيسية</div>
+                    </div>
+                    <div class="stat-item">
+                      <div class="stat-value">${evaluation.max_score || 100}</div>
+                      <div class="stat-label">الدرجة القصوى</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -490,10 +665,10 @@ export function GenerateReportButton({
                 <table class="summary-table">
                   <thead>
                     <tr>
-                      <th style="width: 50%;">العنصر الرئيسي</th>
+                      <th style="width: 45%;">العنصر الرئيسي</th>
                       <th style="width: 20%;">النتيجة</th>
                       <th style="width: 15%;">النسبة</th>
-                      <th style="width: 15%;">التقييم</th>
+                      <th style="width: 20%;">التقييم</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -509,7 +684,7 @@ export function GenerateReportButton({
                           <td>${element.totalScore.toFixed(1)} / ${element.mainElementWeight}</td>
                           <td style="font-weight: 600; color: ${color};">${elemPercentage}%</td>
                           <td>
-                            <span class="status-badge" style="background: ${color}20; color: ${color};">
+                            <span class="status-badge" style="background: ${color}15; color: ${color};">
                               ${label}
                             </span>
                           </td>
@@ -521,46 +696,38 @@ export function GenerateReportButton({
               </div>
             </div>
 
-            <!-- Detailed Results -->
-            <div class="section">
-              <div class="section-title">التفاصيل الكاملة للتقييم</div>
-              <div class="section-content">
-                ${groupedAnswers.map(mainElement => {
-                  const elemPercentage = mainElement.mainElementWeight > 0 
-                    ? Math.round((mainElement.totalScore / mainElement.mainElementWeight) * 100) 
-                    : 0;
-                  return `
-                    <div style="margin-bottom: 20px;">
-                      <div class="main-element-header">
-                        <div class="main-element-title">${mainElement.mainElementName}</div>
-                        <div class="main-element-score">${mainElement.totalScore.toFixed(1)} / ${mainElement.mainElementWeight} (${elemPercentage}%)</div>
-                      </div>
-                      ${mainElement.subElements.map(subElement => `
-                        <div class="sub-element">
-                          <div class="sub-element-title">${subElement.subElementName}</div>
-                          ${subElement.answers.map(answer => {
-                            const scoreColor = getScoreColor(answer.score);
-                            return `
-                              <div class="criterion-row">
-                                <div class="criterion-name">${answer.criterion_name}</div>
-                                <div class="criterion-answer">${answer.selected_option_label}</div>
-                                <div class="criterion-score" style="color: ${scoreColor};">${answer.score}%</div>
-                              </div>
-                            `;
-                          }).join('')}
-                        </div>
-                      `).join('')}
-                    </div>
-                  `;
-                }).join('')}
+            <div class="page-footer">
+              <span>صفحة 1</span>
+              <span class="separator">|</span>
+              <span>نظام PROFIT للتقييم</span>
+            </div>
+          </div>
+
+          <!-- Detail Pages for each Main Element -->
+          ${generateMainElementPages()}
+
+          <!-- Final Page with Footer -->
+          <div class="page page-break">
+            <div class="page-header">
+              <img src="${profitLogo}" alt="Profit Logo" class="page-header-logo" />
+              <div class="page-header-info">
+                <span>${orgName}</span>
+                <span class="separator">|</span>
+                <span>${domainName}</span>
               </div>
             </div>
-
-            <!-- Footer -->
-            <div class="footer">
+            
+            <div class="footer" style="margin-top: 50px;">
               <img src="${profitLogo}" alt="Profit Logo" class="footer-logo" />
+              <p style="font-size: 16px; font-weight: 700; margin-bottom: 10px;">شكراً لاستخدامكم نظام PROFIT</p>
               <p>تم إنشاء هذا التقرير بواسطة نظام PROFIT للتقييم</p>
               <p>جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
+            </div>
+            
+            <div class="page-footer">
+              <span>صفحة ${groupedAnswers.length + 2}</span>
+              <span class="separator">|</span>
+              <span>نظام PROFIT للتقييم</span>
             </div>
           </div>
         </body>
