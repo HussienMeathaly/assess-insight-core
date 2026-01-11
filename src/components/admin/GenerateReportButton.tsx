@@ -752,20 +752,11 @@ export function GenerateReportButton({
       iframeDoc.close();
 
       // Wait for fonts and content to load
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Get the container element
-      const container = iframeDoc.querySelector('.container') as HTMLElement;
-      if (!container) throw new Error('Container not found');
-
-      // Generate canvas from HTML
-      const canvas = await html2canvas(container, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
+      // Get all page elements
+      const pages = iframeDoc.querySelectorAll('.page');
+      if (!pages || pages.length === 0) throw new Error('Pages not found');
 
       // Create PDF
       const pdf = new jsPDF({
@@ -774,25 +765,31 @@ export function GenerateReportButton({
         format: 'a4',
       });
 
-      const imgData = canvas.toDataURL('image/png');
       const pageWidth = 210;
       const pageHeight = 297;
-      const imgWidth = pageWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      let heightLeft = imgHeight;
-      let position = 0;
 
-      // First page
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Process each page separately
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i] as HTMLElement;
+        
+        // Generate canvas from page
+        const canvas = await html2canvas(page, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+        });
 
-      // Additional pages if needed
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
       }
 
       // Clean up iframe
