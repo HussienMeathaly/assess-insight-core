@@ -686,37 +686,37 @@ export default function AdminDashboard() {
 
         {/* Data Tables */}
         <Tabs defaultValue="assessments" className="space-y-4 md:space-y-10" dir="rtl">
-          <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0">
-            <TabsList className="w-max min-w-full md:w-full justify-start">
-              <TabsTrigger value="users" className="flex items-center gap-1 text-xs md:text-sm">
-                <UserCog className="h-3 w-3 md:h-4 md:w-4" />
-                <span className="hidden xs:inline">إدارة</span> المستخدمين
+          <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0 pb-2">
+            <TabsList className="inline-flex w-auto min-w-max md:w-full gap-1 p-1">
+              <TabsTrigger value="users" className="flex items-center gap-1.5 text-xs md:text-sm px-3 py-2 whitespace-nowrap">
+                <UserCog className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" />
+                <span>المستخدمين</span>
               </TabsTrigger>
-              <TabsTrigger value="organizations" className="text-xs md:text-sm">
+              <TabsTrigger value="organizations" className="text-xs md:text-sm px-3 py-2 whitespace-nowrap">
                 الجهات
               </TabsTrigger>
-              <TabsTrigger value="assessments" className="text-xs md:text-sm">
+              <TabsTrigger value="assessments" className="text-xs md:text-sm px-3 py-2 whitespace-nowrap">
                 التقييم الأولي
               </TabsTrigger>
-              <TabsTrigger value="evaluations" className="flex items-center gap-1 text-xs md:text-sm">
-                <FileCheck2 className="h-3 w-3 md:h-4 md:w-4" />
-                التقييم المجاني
+              <TabsTrigger value="evaluations" className="flex items-center gap-1.5 text-xs md:text-sm px-3 py-2 whitespace-nowrap">
+                <FileCheck2 className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" />
+                <span>التقييم المجاني</span>
               </TabsTrigger>
             </TabsList>
           </div>
 
           <TabsContent value="assessments">
             <Card>
-              <CardHeader className="flex flex-col gap-3">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <CardTitle className="text-right">جميع التقييمات</CardTitle>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm text-muted-foreground">الحالة:</span>
+              <CardHeader className="flex flex-col gap-4">
+                <CardTitle className="text-right">جميع التقييمات</CardTitle>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-sm text-muted-foreground">الحالة</Label>
                     <Select
                       value={qualificationFilter}
                       onValueChange={(v) => setQualificationFilter(v as "all" | "qualified" | "not_qualified")}
                     >
-                      <SelectTrigger className="w-[130px]">
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -725,12 +725,14 @@ export default function AdminDashboard() {
                         <SelectItem value="not_qualified">غير مؤهل ({assessments.length - qualifiedCount})</SelectItem>
                       </SelectContent>
                     </Select>
-                    <span className="text-sm text-muted-foreground">الفترة:</span>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-sm text-muted-foreground">الفترة</Label>
                     <Select
                       value={dateFilter}
                       onValueChange={(v) => setDateFilter(v as "all" | "today" | "week" | "month")}
                     >
-                      <SelectTrigger className="w-[120px]">
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -746,7 +748,7 @@ export default function AdminDashboard() {
                   placeholder="بحث باسم الجهة أو المسؤول..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="max-w-sm"
+                  className="w-full sm:max-w-sm"
                 />
               </CardHeader>
               <CardContent>
@@ -830,19 +832,19 @@ export default function AdminDashboard() {
 
           <TabsContent value="evaluations">
             <Card>
-              <CardHeader className="flex flex-col gap-3">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <CardTitle className="text-right flex items-center gap-2">
-                    <FileCheck2 className="h-5 w-5" />
-                    تقارير التقييم المجاني
-                  </CardTitle>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm text-muted-foreground">الحالة:</span>
+              <CardHeader className="flex flex-col gap-4">
+                <CardTitle className="text-right flex items-center gap-2">
+                  <FileCheck2 className="h-5 w-5" />
+                  تقارير التقييم المجاني
+                </CardTitle>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-sm text-muted-foreground">الحالة</Label>
                     <Select
                       value={evaluationStatusFilter}
                       onValueChange={(v) => setEvaluationStatusFilter(v as "all" | "completed" | "in_progress")}
                     >
-                      <SelectTrigger className="w-[130px]">
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -859,7 +861,7 @@ export default function AdminDashboard() {
                   placeholder="بحث باسم الجهة أو المسؤول..."
                   value={evaluationSearchQuery}
                   onChange={(e) => setEvaluationSearchQuery(e.target.value)}
-                  className="max-w-sm"
+                  className="w-full sm:max-w-sm"
                 />
               </CardHeader>
               <CardContent>
@@ -1149,24 +1151,24 @@ export default function AdminDashboard() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">معلومات الجهة</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">الاسم:</span>
-                    <span className="mr-2 font-medium">{selectedAssessment.organization?.name}</span>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-muted-foreground text-xs">الاسم</span>
+                    <span className="font-medium">{selectedAssessment.organization?.name}</span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">المسؤول:</span>
-                    <span className="mr-2 font-medium">{selectedAssessment.organization?.contact_person}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-muted-foreground text-xs">المسؤول</span>
+                    <span className="font-medium">{selectedAssessment.organization?.contact_person}</span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">البريد:</span>
-                    <span className="mr-2 font-medium" dir="ltr">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-muted-foreground text-xs">البريد الإلكتروني</span>
+                    <span className="font-medium break-all" dir="ltr">
                       {selectedAssessment.organization?.email}
                     </span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">الهاتف:</span>
-                    <span className="mr-2 font-medium" dir="ltr">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-muted-foreground text-xs">الهاتف</span>
+                    <span className="font-medium" dir="ltr">
                       {selectedAssessment.organization?.phone}
                     </span>
                   </div>
@@ -1243,24 +1245,24 @@ export default function AdminDashboard() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">معلومات الجهة</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">الاسم:</span>
-                    <span className="mr-2 font-medium">{selectedEvaluation.organization?.name}</span>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-muted-foreground text-xs">الاسم</span>
+                    <span className="font-medium">{selectedEvaluation.organization?.name}</span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">المسؤول:</span>
-                    <span className="mr-2 font-medium">{selectedEvaluation.organization?.contact_person}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-muted-foreground text-xs">المسؤول</span>
+                    <span className="font-medium">{selectedEvaluation.organization?.contact_person}</span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">البريد:</span>
-                    <span className="mr-2 font-medium" dir="ltr">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-muted-foreground text-xs">البريد الإلكتروني</span>
+                    <span className="font-medium break-all" dir="ltr">
                       {selectedEvaluation.organization?.email}
                     </span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">الهاتف:</span>
-                    <span className="mr-2 font-medium" dir="ltr">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-muted-foreground text-xs">الهاتف</span>
+                    <span className="font-medium" dir="ltr">
                       {selectedEvaluation.organization?.phone}
                     </span>
                   </div>
