@@ -577,6 +577,7 @@ export type Database = {
             }
             Returns: boolean
           }
+      request_header: { Args: { p_name: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
