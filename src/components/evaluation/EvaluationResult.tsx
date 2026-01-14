@@ -29,10 +29,9 @@ export function EvaluationResult({
   const isQualified = percentage >= 60;
 
   const getScoreLabel = (score: number) => {
-    if (score >= 80) return { label: 'ممتاز', color: 'text-green-500' };
-    if (score >= 60) return { label: 'جيد جداً', color: 'text-primary' };
-    if (score >= 40) return { label: 'جيد', color: 'text-yellow-500' };
-    return { label: 'يحتاج تحسين', color: 'text-destructive' };
+    if (score >= 80) return { label: 'جيد', color: 'text-green-500' };
+    if (score > 65) return { label: 'متوسط', color: 'text-yellow-500' };
+    return { label: 'ضعيف', color: 'text-destructive' };
   };
 
   const scoreInfo = getScoreLabel(percentage);
