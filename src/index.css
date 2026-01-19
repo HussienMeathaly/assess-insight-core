@@ -66,61 +66,61 @@
   }
 
   .dark {
-    --background: 220 25% 18%;
-    --foreground: 210 20% 96%;
+    --background: 218 18% 25%;
+    --foreground: 210 15% 95%;
 
-    --card: 220 22% 22%;
-    --card-foreground: 210 20% 96%;
+    --card: 218 16% 30%;
+    --card-foreground: 210 15% 95%;
 
-    --popover: 220 22% 22%;
-    --popover-foreground: 210 20% 96%;
+    --popover: 218 16% 30%;
+    --popover-foreground: 210 15% 95%;
 
     /* Primary - Profit+ Lime Green for dark mode */
-    --primary: 82 65% 52%;
-    --primary-foreground: 220 30% 12%;
+    --primary: 82 60% 55%;
+    --primary-foreground: 218 25% 15%;
 
-    --secondary: 220 20% 28%;
-    --secondary-foreground: 210 18% 90%;
+    --secondary: 218 14% 35%;
+    --secondary-foreground: 210 12% 92%;
 
-    --muted: 220 18% 26%;
-    --muted-foreground: 210 12% 62%;
+    --muted: 218 12% 33%;
+    --muted-foreground: 210 10% 68%;
 
     /* Accent - Lime Green */
-    --accent: 82 65% 52%;
-    --accent-foreground: 220 30% 12%;
+    --accent: 82 60% 55%;
+    --accent-foreground: 218 25% 15%;
 
-    --destructive: 0 65% 55%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 0 60% 58%;
+    --destructive-foreground: 210 15% 98%;
 
-    --success: 82 65% 52%;
-    --success-foreground: 220 30% 12%;
+    --success: 82 60% 55%;
+    --success-foreground: 218 25% 15%;
 
-    --border: 220 18% 32%;
-    --input: 220 18% 28%;
-    --ring: 82 65% 52%;
+    --border: 218 12% 40%;
+    --input: 218 14% 35%;
+    --ring: 82 60% 55%;
 
     /* Brand colors - Dark */
-    --brand-navy: 220 25% 18%;
-    --brand-lime: 82 65% 52%;
-    --brand-gray: 210 12% 62%;
+    --brand-navy: 218 18% 25%;
+    --brand-lime: 82 60% 55%;
+    --brand-gray: 210 10% 68%;
 
-    /* Enhanced gradient tokens - Dark - softer and more comfortable */
-    --gradient-bg: linear-gradient(145deg, hsl(220 25% 18%) 0%, hsl(220 22% 20%) 50%, hsl(220 25% 18%) 100%);
-    --gradient-card: linear-gradient(165deg, hsl(220 22% 24%) 0%, hsl(220 24% 21%) 100%);
-    --gradient-card-hover: linear-gradient(165deg, hsl(220 20% 26%) 0%, hsl(220 22% 23%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(82 65% 52%) 0%, hsl(82 60% 45%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(82 65% 55%) 0%, hsl(82 62% 48%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(220 25% 18%) 0%, hsl(220 28% 16%) 100%);
-    --gradient-subtle: linear-gradient(135deg, hsl(220 20% 24%) 0%, hsl(220 22% 21%) 100%);
+    /* Enhanced gradient tokens - Dark - comfortable and elegant */
+    --gradient-bg: linear-gradient(145deg, hsl(218 18% 25%) 0%, hsl(218 16% 27%) 50%, hsl(218 18% 25%) 100%);
+    --gradient-card: linear-gradient(165deg, hsl(218 16% 32%) 0%, hsl(218 17% 29%) 100%);
+    --gradient-card-hover: linear-gradient(165deg, hsl(218 14% 35%) 0%, hsl(218 15% 32%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(82 60% 55%) 0%, hsl(82 55% 48%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(82 60% 58%) 0%, hsl(82 58% 50%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(218 18% 25%) 0%, hsl(218 20% 23%) 100%);
+    --gradient-subtle: linear-gradient(135deg, hsl(218 14% 32%) 0%, hsl(218 16% 29%) 100%);
     
-    /* Enhanced shadows - Dark - softer */
-    --shadow-glow: 0 0 40px hsl(82 65% 52% / 0.1);
-    --shadow-card: 0 2px 16px hsl(0 0% 0% / 0.18), 0 1px 4px hsl(0 0% 0% / 0.1);
-    --shadow-card-hover: 0 6px 24px hsl(0 0% 0% / 0.25), 0 3px 8px hsl(0 0% 0% / 0.15);
-    --shadow-elevated: 0 12px 36px hsl(0 0% 0% / 0.22), 0 5px 16px hsl(0 0% 0% / 0.12);
-    --shadow-button: 0 3px 12px hsl(82 65% 52% / 0.18);
-    --shadow-button-hover: 0 5px 18px hsl(82 65% 52% / 0.25);
-    --shadow-inner: inset 0 2px 4px hsl(0 0% 0% / 0.1);
+    /* Enhanced shadows - Dark - soft */
+    --shadow-glow: 0 0 35px hsl(82 60% 55% / 0.08);
+    --shadow-card: 0 2px 12px hsl(0 0% 0% / 0.12), 0 1px 3px hsl(0 0% 0% / 0.08);
+    --shadow-card-hover: 0 5px 20px hsl(0 0% 0% / 0.18), 0 2px 6px hsl(0 0% 0% / 0.1);
+    --shadow-elevated: 0 10px 30px hsl(0 0% 0% / 0.16), 0 4px 12px hsl(0 0% 0% / 0.08);
+    --shadow-button: 0 3px 10px hsl(82 60% 55% / 0.15);
+    --shadow-button-hover: 0 4px 14px hsl(82 60% 55% / 0.22);
+    --shadow-inner: inset 0 1px 3px hsl(0 0% 0% / 0.08);
   }
 
   * {
