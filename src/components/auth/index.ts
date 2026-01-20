@@ -11,3 +11,4 @@ export {
 } from "./AuthMessages";
 export { ForgotPasswordForm } from "./ForgotPasswordForm";
 export { ResetPasswordForm } from "./ResetPasswordForm";
+export { RememberMeCheckbox } from "./RememberMeCheckbox";
