@@ -486,7 +486,13 @@ export default function AdminDashboard() {
   if (authLoading || roleLoading || loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">
-        <div className="text-muted-foreground">جاري التحميل...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+          </div>
+          <p className="text-muted-foreground font-medium">جاري التحميل...</p>
+        </div>
       </div>
     );
   }
@@ -555,168 +561,211 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-3 md:py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/assessment")}>
-                <ChevronLeft className="h-4 w-4 ml-1" />
-                <span className="hidden xs:inline">الرئيسية</span>
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left: Back Button + Title (Mobile) */}
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => navigate("/assessment")}
+                className="h-10 w-10 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/30 transition-all"
+              >
+                <ChevronLeft className="h-5 w-5" />
               </Button>
-              <h1 className="text-lg md:text-xl font-bold text-foreground sm:hidden">لوحة التحكم</h1>
-              <div className="flex items-center gap-1 sm:hidden">
-                <ThemeToggle />
-                <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4" />
-                </Button>
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold text-foreground">لوحة التحكم</h1>
+                <p className="text-xs text-muted-foreground">إدارة النظام والتقارير</p>
               </div>
             </div>
-            <h1 className="hidden sm:block text-xl font-bold text-foreground">لوحة التحكم</h1>
-            <div className="hidden sm:flex items-center gap-2">
+            
+            {/* Center: Title (Mobile Only) */}
+            <h1 className="sm:hidden text-lg font-bold text-foreground">لوحة التحكم</h1>
+            
+            {/* Right: Actions */}
+            <div className="flex items-center gap-2">
               <ThemeToggle />
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 ml-2" />
-                تسجيل الخروج
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="hidden sm:flex items-center gap-2 rounded-xl border-border/50 hover:bg-destructive/10 hover:border-destructive/30 hover:text-destructive transition-all"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>تسجيل الخروج</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleSignOut}
+                className="sm:hidden h-10 w-10 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all"
+              >
+                <LogOut className="h-5 w-5" />
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-3 md:px-4 py-4 md:py-8">
+      <main className="container mx-auto px-4 py-6 md:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
           {/* بطاقة الجهات */}
-          <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/80">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="group relative overflow-hidden border-border/30 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
               <CardTitle className="text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Building2 className="h-5 w-5 text-primary" />
+              <div className="p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Building2 className="h-6 w-6 text-primary" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground mb-2">{organizations.length}</div>
-              <p className="text-xs text-muted-foreground">
-                جهة مسجلة في النظام
-              </p>
+            <CardContent className="relative">
+              <div className="text-4xl font-bold text-foreground mb-1">{organizations.length}</div>
+              <p className="text-sm text-muted-foreground">جهة مسجلة في النظام</p>
             </CardContent>
           </Card>
 
           {/* بطاقة التقييم الأولي */}
-          <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/80">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500/50 via-blue-500 to-blue-500/50" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="group relative overflow-hidden border-border/30 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-accent/5 transition-all duration-300">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-accent/30 via-accent to-accent/30" />
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
               <CardTitle className="text-sm font-medium text-muted-foreground">التقييم الأولي</CardTitle>
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <ClipboardCheck className="h-5 w-5 text-blue-500" />
+              <div className="p-3 rounded-2xl bg-accent/10 group-hover:bg-accent/20 transition-colors">
+                <ClipboardCheck className="h-6 w-6 text-accent" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground mb-1">{assessments.length}</div>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/30">
-                  {qualifiedCount} مؤهل
+            <CardContent className="relative">
+              <div className="text-4xl font-bold text-foreground mb-2">{assessments.length}</div>
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20">
+                  ✓ {qualifiedCount} مؤهل
                 </Badge>
                 <Badge variant="outline" className="text-xs bg-orange-500/10 text-orange-600 border-orange-500/30">
                   {assessments.length - qualifiedCount} غير مؤهل
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${avgScoreNum >= 75 ? "bg-green-500" : avgScoreNum >= 50 ? "bg-yellow-500" : "bg-red-500"}`} />
-                <span className="text-xs text-muted-foreground">متوسط: {avgScore}</span>
+                <div className={`w-2.5 h-2.5 rounded-full ${avgScoreNum >= 75 ? "bg-green-500" : avgScoreNum >= 50 ? "bg-amber-500" : "bg-red-500"}`} />
+                <span className="text-sm text-muted-foreground">المتوسط: <span className="font-semibold text-foreground">{avgScore}</span></span>
               </div>
             </CardContent>
           </Card>
 
           {/* بطاقة التقييم المجاني */}
-          <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/80">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/50 via-purple-500 to-purple-500/50" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="group relative overflow-hidden border-border/30 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-secondary/30 via-secondary to-secondary/30" />
+            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
               <CardTitle className="text-sm font-medium text-muted-foreground">التقييم المجاني</CardTitle>
-              <div className="p-2 rounded-lg bg-purple-500/10">
-                <FileCheck2 className="h-5 w-5 text-purple-500" />
+              <div className="p-3 rounded-2xl bg-secondary/10 group-hover:bg-secondary/20 transition-colors">
+                <FileCheck2 className="h-6 w-6 text-secondary-foreground" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground mb-1">{evaluations.length}</div>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/30">
-                  {completedEvaluations} مكتمل
+            <CardContent className="relative">
+              <div className="text-4xl font-bold text-foreground mb-2">{evaluations.length}</div>
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20">
+                  ✓ {completedEvaluations} مكتمل
                 </Badge>
-                <Badge variant="outline" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">
+                <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
                   {evaluations.length - completedEvaluations} قيد التنفيذ
                 </Badge>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  متوسط: {evaluations.length > 0 
+              <p className="text-sm text-muted-foreground">
+                المتوسط: <span className="font-semibold text-foreground">
+                  {evaluations.length > 0 
                     ? (evaluations.filter(e => e.is_completed && e.total_score !== null).reduce((sum, e) => sum + (e.total_score || 0), 0) / (completedEvaluations || 1)).toFixed(1)
                     : 0}%
                 </span>
-              </div>
+              </p>
             </CardContent>
           </Card>
 
           {/* بطاقة معدل التأهيل */}
-          <Card className="relative overflow-hidden border-border/50 bg-gradient-to-br from-card to-card/80">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500/50 via-green-500 to-green-500/50" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="group relative overflow-hidden border-border/30 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-green-500/5 transition-all duration-300">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-green-500/30 via-green-500 to-green-500/30" />
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
               <CardTitle className="text-sm font-medium text-muted-foreground">معدل التأهيل</CardTitle>
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <Users className="h-5 w-5 text-green-500" />
+              <div className="p-3 rounded-2xl bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
+                <Users className="h-6 w-6 text-green-600" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600 mb-2">
+            <CardContent className="relative">
+              <div className="text-4xl font-bold text-green-600 mb-3">
                 {assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%
               </div>
-              <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-2">
+              <div className="w-full h-2.5 bg-muted/50 rounded-full overflow-hidden mb-2">
                 <div
-                  className="h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-700 ease-out"
                   style={{
                     width: `${assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%`,
                   }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">نسبة الجهات المؤهلة</p>
+              <p className="text-sm text-muted-foreground">نسبة الجهات المؤهلة</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Data Tables */}
-        <Tabs defaultValue="assessments" className="space-y-4 md:space-y-10" dir="rtl">
-          <div className="overflow-x-auto -mx-3 px-3 md:mx-0 md:px-0 pb-2">
-            <TabsList className="inline-flex w-auto min-w-max md:w-full gap-1 p-1">
-              <TabsTrigger value="users" className="flex items-center gap-1.5 text-xs md:text-sm px-3 py-2 whitespace-nowrap">
-                <UserCog className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" />
+        <Tabs defaultValue="assessments" className="space-y-6" dir="rtl">
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-2">
+            <TabsList className="inline-flex w-auto min-w-max md:w-full gap-1.5 p-1.5 bg-muted/50 backdrop-blur-sm rounded-2xl">
+              <TabsTrigger 
+                value="users" 
+                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <UserCog className="h-4 w-4 shrink-0" />
                 <span>المستخدمين</span>
               </TabsTrigger>
-              <TabsTrigger value="organizations" className="text-xs md:text-sm px-3 py-2 whitespace-nowrap">
-                الجهات
+              <TabsTrigger 
+                value="organizations" 
+                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <Building2 className="h-4 w-4 shrink-0" />
+                <span>الجهات</span>
               </TabsTrigger>
-              <TabsTrigger value="assessments" className="text-xs md:text-sm px-3 py-2 whitespace-nowrap">
-                التقييم الأولي
+              <TabsTrigger 
+                value="assessments" 
+                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <ClipboardCheck className="h-4 w-4 shrink-0" />
+                <span>التقييم الأولي</span>
               </TabsTrigger>
-              <TabsTrigger value="evaluations" className="flex items-center gap-1.5 text-xs md:text-sm px-3 py-2 whitespace-nowrap">
-                <FileCheck2 className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" />
+              <TabsTrigger 
+                value="evaluations" 
+                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <FileCheck2 className="h-4 w-4 shrink-0" />
                 <span>التقييم المجاني</span>
               </TabsTrigger>
             </TabsList>
           </div>
 
           <TabsContent value="assessments">
-            <Card>
-              <CardHeader className="flex flex-col gap-4">
-                <CardTitle className="text-right">جميع التقييمات</CardTitle>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Card className="border-border/30 bg-card/50 backdrop-blur-sm shadow-xl">
+              <CardHeader className="flex flex-col gap-4 border-b border-border/30 pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ClipboardCheck className="h-5 w-5 text-accent" />
+                    جميع التقييمات الأولية
+                  </CardTitle>
+                  <Badge variant="outline" className="text-sm">
+                    {filteredAssessments.length} نتيجة
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <Label className="text-sm text-muted-foreground">الحالة</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">الحالة</Label>
                     <Select
                       value={qualificationFilter}
                       onValueChange={(v) => setQualificationFilter(v as "all" | "qualified" | "not_qualified")}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full rounded-xl border-border/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -727,12 +776,12 @@ export default function AdminDashboard() {
                     </Select>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <Label className="text-sm text-muted-foreground">الفترة</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">الفترة</Label>
                     <Select
                       value={dateFilter}
                       onValueChange={(v) => setDateFilter(v as "all" | "today" | "week" | "month")}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full rounded-xl border-border/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -743,15 +792,18 @@ export default function AdminDashboard() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">البحث</Label>
+                    <Input
+                      placeholder="اسم الجهة أو المسؤول..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="rounded-xl border-border/50"
+                    />
+                  </div>
                 </div>
-                <Input
-                  placeholder="بحث باسم الجهة أو المسؤول..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:max-w-sm"
-                />
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
                   <AssessmentsMobileCards
@@ -831,20 +883,25 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="evaluations">
-            <Card>
-              <CardHeader className="flex flex-col gap-4">
-                <CardTitle className="text-right flex items-center gap-2">
-                  <FileCheck2 className="h-5 w-5" />
-                  تقارير التقييم المجاني
-                </CardTitle>
+            <Card className="border-border/30 bg-card/50 backdrop-blur-sm shadow-xl">
+              <CardHeader className="flex flex-col gap-4 border-b border-border/30 pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <FileCheck2 className="h-5 w-5 text-secondary-foreground" />
+                    تقارير التقييم المجاني
+                  </CardTitle>
+                  <Badge variant="outline" className="text-sm">
+                    {filteredEvaluations.length} نتيجة
+                  </Badge>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <Label className="text-sm text-muted-foreground">الحالة</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">الحالة</Label>
                     <Select
                       value={evaluationStatusFilter}
                       onValueChange={(v) => setEvaluationStatusFilter(v as "all" | "completed" | "in_progress")}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full rounded-xl border-border/50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -856,15 +913,18 @@ export default function AdminDashboard() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground">البحث</Label>
+                    <Input
+                      placeholder="اسم الجهة أو المسؤول..."
+                      value={evaluationSearchQuery}
+                      onChange={(e) => setEvaluationSearchQuery(e.target.value)}
+                      className="rounded-xl border-border/50"
+                    />
+                  </div>
                 </div>
-                <Input
-                  placeholder="بحث باسم الجهة أو المسؤول..."
-                  value={evaluationSearchQuery}
-                  onChange={(e) => setEvaluationSearchQuery(e.target.value)}
-                  className="w-full sm:max-w-sm"
-                />
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
                   <EvaluationsMobileCards
@@ -959,11 +1019,19 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="organizations">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-right">جميع الجهات</CardTitle>
+            <Card className="border-border/30 bg-card/50 backdrop-blur-sm shadow-xl">
+              <CardHeader className="border-b border-border/30 pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    جميع الجهات المسجلة
+                  </CardTitle>
+                  <Badge variant="outline" className="text-sm">
+                    {organizations.length} جهة
+                  </Badge>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
                   <OrganizationsMobileCards
@@ -1026,22 +1094,26 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="users">
-            <Card>
-              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <CardTitle className="flex items-center gap-2 text-right text-base md:text-lg">
-                  <Shield className="h-4 w-4 md:h-5 md:w-5" />
-                  إدارة المستخدمين والصلاحيات
-                </CardTitle>
+            <Card className="border-border/30 bg-card/50 backdrop-blur-sm shadow-xl">
+              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/30 pb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-primary/10">
+                    <Shield className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">إدارة المستخدمين</CardTitle>
+                    <p className="text-sm text-muted-foreground">إدارة الصلاحيات والأدوار</p>
+                  </div>
+                </div>
                 <Button
                   onClick={() => setShowAddUserDialog(true)}
-                  size="sm"
-                  className="flex items-center gap-2 w-full sm:w-auto"
+                  className="flex items-center gap-2 w-full sm:w-auto rounded-xl"
                 >
                   <UserPlus className="h-4 w-4" />
                   إضافة مستخدم
                 </Button>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {/* Mobile (cards) */}
                 <div className="md:hidden">
                   <UsersMobileCards
