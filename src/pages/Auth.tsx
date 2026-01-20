@@ -29,6 +29,7 @@ import {
   EmailConfirmationMessage,
   PasswordResetSentMessage,
   PasswordResetSuccessMessage,
+  RememberMeCheckbox,
 } from "@/components/auth";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
@@ -123,6 +124,7 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(true);
 
   // 3D card effect
   const mouseX = useMotionValue(0);
@@ -284,7 +286,7 @@ export default function Auth() {
     setIsSubmitting(true);
     try {
       if (isLogin) {
-        const { error } = await signIn(formData.email, formData.password);
+        const { error } = await signIn(formData.email, formData.password, rememberMe);
         if (error) handleAuthError(error);
       } else {
         const { data, error } = await signUp(formData.email, formData.password);
@@ -508,13 +510,17 @@ export default function Auth() {
           {!isLogin && <PasswordStrength password={formData.password} />}
         </div>
 
-        {/* Forgot Password Link - Only for Login */}
+        {/* Remember Me & Forgot Password - Only for Login */}
         {isLogin && (
           <motion.div 
-            className="text-center"
+            className="flex items-center justify-between"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
+            <RememberMeCheckbox 
+              checked={rememberMe} 
+              onChange={setRememberMe} 
+            />
             <button
               type="button"
               onClick={() => setIsForgotPassword(true)}
