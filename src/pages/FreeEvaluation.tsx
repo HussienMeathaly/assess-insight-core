@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useEvaluation } from '@/hooks/useEvaluation';
 import { RegistrationForm, type RegistrationData } from '@/components/assessment/RegistrationForm';
 import { EvaluationProgress } from '@/components/evaluation/EvaluationProgress';
+import { MobileProgressSummary } from '@/components/evaluation/MobileProgressSummary';
 import { MainElementView } from '@/components/evaluation/MainElementView';
 import { EvaluationResult } from '@/components/evaluation/EvaluationResult';
 import { Button } from '@/components/ui/button';
@@ -223,21 +224,22 @@ export default function FreeEvaluation() {
 
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Button 
                 variant="ghost" 
                 size="icon"
+                className="h-8 w-8 sm:h-10 sm:w-10"
                 onClick={handleBackToAssessment}
               >
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
-              <img src={profitLogo} alt="PROFIT" className="h-10" />
+              <img src={profitLogo} alt="PROFIT" className="h-8 sm:h-10" />
             </div>
-            <div className="text-left">
-              <div className="text-sm text-muted-foreground">التقدم</div>
-              <div className="font-bold text-foreground">
+            <div className="text-left bg-primary/10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg">
+              <div className="text-xs sm:text-sm text-muted-foreground">التقدم</div>
+              <div className="font-bold text-foreground text-sm sm:text-base">
                 {progress.current} / {progress.total}
               </div>
             </div>
@@ -246,10 +248,10 @@ export default function FreeEvaluation() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Progress Sidebar */}
-          <aside className="lg:col-span-4 order-2 lg:order-1">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
+          {/* Progress Sidebar - Hidden on mobile, shown in sheet */}
+          <aside className="hidden lg:block lg:col-span-4 lg:order-1">
             <EvaluationProgress
               elements={elementsProgress}
               currentIndex={currentMainElementIndex}
@@ -259,8 +261,19 @@ export default function FreeEvaluation() {
             />
           </aside>
 
+          {/* Mobile Progress Summary */}
+          <div className="lg:hidden order-1">
+            <MobileProgressSummary 
+              elements={elementsProgress}
+              currentIndex={currentMainElementIndex}
+              onElementClick={goToElement}
+              overallProgress={progress.percentage}
+              totalScore={scores.total}
+            />
+          </div>
+
           {/* Main Content Area */}
-          <div className="lg:col-span-8 order-1 lg:order-2">
+          <div className="lg:col-span-8 order-2">
             <MainElementView
               element={currentMainElement}
               answers={answers}
