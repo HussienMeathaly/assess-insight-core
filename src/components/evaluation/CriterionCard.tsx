@@ -32,18 +32,18 @@ export function CriterionCard({
 
   return (
     <div className={cn(
-      "card-elevated rounded-xl p-5 transition-all duration-300",
+      "card-elevated rounded-xl p-3 sm:p-5 transition-all duration-300",
       isAnswered && "ring-2 ring-primary/30"
     )}>
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
             {isAnswered && (
-              <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
             )}
-            <h4 className="font-semibold text-foreground">{name}</h4>
+            <h4 className="font-semibold text-foreground text-sm sm:text-base leading-tight">{name}</h4>
           </div>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-[10px] sm:text-xs text-muted-foreground">
             الوزن: {weight}%
           </span>
         </div>
@@ -53,10 +53,10 @@ export function CriterionCard({
               e.stopPropagation();
               onClear(id);
             }}
-            className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+            className="p-1 sm:p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0"
             title="مسح الاختيار"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         )}
       </div>
@@ -69,7 +69,7 @@ export function CriterionCard({
             onSelect(value, option.score_percentage);
           }
         }}
-        className="space-y-2"
+        className="space-y-1.5 sm:space-y-2"
       >
         {options.map((option) => {
           const isSelected = selectedOptionId === option.id;
@@ -88,7 +88,7 @@ export function CriterionCard({
             <div
               key={option.id}
               className={cn(
-                "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200",
+                "flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg cursor-pointer transition-all duration-200",
                 "border-2 flex-row-reverse",
                 isSelected
                   ? `border-primary bg-primary/10`
@@ -96,18 +96,18 @@ export function CriterionCard({
               )}
               onClick={() => onSelect(option.id, option.score_percentage)}
             >
-              <RadioGroupItem value={option.id} id={`${id}-${option.id}`} />
+              <RadioGroupItem value={option.id} id={`${id}-${option.id}`} className="shrink-0" />
               <Label
                 htmlFor={`${id}-${option.id}`}
                 className={cn(
-                  "flex-1 cursor-pointer text-sm text-right",
+                  "flex-1 cursor-pointer text-xs sm:text-sm text-right leading-relaxed",
                   isSelected ? "text-primary font-medium" : "text-foreground"
                 )}
               >
                 {option.label}
               </Label>
               <span className={cn(
-                "text-xs px-2 py-1 rounded-full min-w-[2rem] text-center font-medium",
+                "text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full min-w-[1.5rem] sm:min-w-[2rem] text-center font-medium shrink-0",
                 isSelected
                   ? `${scoreColor.bg} text-white`
                   : `${scoreColor.bg}/20 ${scoreColor.text}`

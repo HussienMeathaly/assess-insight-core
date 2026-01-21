@@ -33,11 +33,11 @@ export function SubElementSection({
   const sortedCriteria = [...criteria].sort((a, b) => a.display_order - b.display_order);
 
   return (
-    <div className="mb-8">
-      <h3 className="text-lg font-semibold text-foreground mb-4 pb-2 border-b border-border">
+    <div className="mb-6 sm:mb-8">
+      <h3 className="text-sm sm:text-lg font-semibold text-foreground mb-3 sm:mb-4 pb-2 border-b border-border">
         {name}
       </h3>
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {sortedCriteria.map((criterion) => {
           const answer = answers.get(criterion.id);
           return (
