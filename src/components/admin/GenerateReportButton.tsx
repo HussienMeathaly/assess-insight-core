@@ -89,38 +89,15 @@ export function GenerateReportButton({
 
       if (evalError) throw evalError;
 
-      // Fetch evaluation answers with all related data
+      // Fetch evaluation answers with criterion and option IDs
       const { data: answers, error: answersError } = await supabase
         .from('evaluation_answers')
-        .select(`
-          score,
-          criteria (
-            id,
-            name,
-            weight_percentage,
-            description,
-            sub_elements (
-              id,
-              name,
-              display_order,
-              main_elements (
-                id,
-                name,
-                weight_percentage,
-                display_order
-              )
-            )
-          ),
-          criteria_options (
-            label,
-            score_percentage
-          )
-        `)
+        .select('criterion_id, selected_option_id, score')
         .eq('evaluation_id', evaluationId);
 
       if (answersError) throw answersError;
 
-      // Fetch ALL criteria to ensure we have complete data
+      // Fetch all criteria with nested relations
       const { data: allCriteria, error: criteriaError } = await supabase
         .from('criteria')
         .select(`
@@ -128,11 +105,12 @@ export function GenerateReportButton({
           name,
           weight_percentage,
           description,
-          sub_elements (
+          display_order,
+          sub_elements!inner (
             id,
             name,
             display_order,
-            main_elements (
+            main_elements!inner (
               id,
               name,
               weight_percentage,
@@ -140,21 +118,32 @@ export function GenerateReportButton({
             )
           )
         `)
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .order('display_order');
 
       if (criteriaError) throw criteriaError;
 
-      // Create a map of criteria for quick lookup
+      // Fetch all criteria options
+      const { data: allOptions, error: optionsError } = await supabase
+        .from('criteria_options')
+        .select('id, criterion_id, label, score_percentage');
+
+      if (optionsError) throw optionsError;
+
+      // Create maps for quick lookup
       const criteriaMap = new Map(allCriteria?.map(c => [c.id, c]) || []);
+      const optionsMap = new Map(allOptions?.map(o => [o.id, o]) || []);
 
       // Transform answers with complete criteria data
       const transformedAnswers: ReportAnswer[] = (answers || []).map((answer: any) => {
-        const criteriaData = answer.criteria || criteriaMap.get(answer.criterion_id);
+        const criteriaData = criteriaMap.get(answer.criterion_id);
+        const optionData = optionsMap.get(answer.selected_option_id);
+        
         return {
-          criterion_id: criteriaData?.id || '',
+          criterion_id: criteriaData?.id || answer.criterion_id || '',
           criterion_name: criteriaData?.name || '',
           criterion_weight: criteriaData?.weight_percentage || 0,
-          selected_option_label: answer.criteria_options?.label || '',
+          selected_option_label: optionData?.label || '',
           score: answer.score || 0,
           sub_element_id: criteriaData?.sub_elements?.id || '',
           sub_element_name: criteriaData?.sub_elements?.name || '',
@@ -164,10 +153,11 @@ export function GenerateReportButton({
         };
       });
 
+      // Filter out invalid answers and group by main element
+      const validAnswers = transformedAnswers.filter(a => a.main_element_id && a.criterion_name);
+      
       // Group answers by main element
-      const groupedAnswers = transformedAnswers.reduce<GroupedElement[]>((acc, answer) => {
-        if (!answer.main_element_id) return acc;
-        
+      const groupedAnswers = validAnswers.reduce<GroupedElement[]>((acc, answer) => {
         let mainElement = acc.find(g => g.mainElementId === answer.main_element_id);
         
         if (!mainElement) {
@@ -198,12 +188,30 @@ export function GenerateReportButton({
 
         return acc;
       }, []);
+      
+      // Sort groups by main element display order
+      groupedAnswers.sort((a, b) => {
+        const aOrder = allCriteria?.find(c => c.sub_elements?.main_elements?.id === a.mainElementId)?.sub_elements?.main_elements?.display_order || 0;
+        const bOrder = allCriteria?.find(c => c.sub_elements?.main_elements?.id === b.mainElementId)?.sub_elements?.main_elements?.display_order || 0;
+        return aOrder - bOrder;
+      });
 
       const percentage = evaluation.total_score || 0;
       const isQualified = percentage >= 60;
       const orgName = evaluation.organizations?.name || organizationName;
       const domainName = evaluation.evaluation_domains?.name || 'تقييم المنتج';
-      const totalAnswers = transformedAnswers.length;
+      const totalAnswers = validAnswers.length;
+      
+      // Debug: Log data to verify
+      console.log('PDF Report Data:', {
+        totalAnswers,
+        groupedAnswersCount: groupedAnswers.length,
+        groupedAnswers: groupedAnswers.map(g => ({
+          name: g.mainElementName,
+          subElements: g.subElements.length,
+          answers: g.subElements.reduce((sum, s) => sum + s.answers.length, 0)
+        }))
+      });
 
       // Generate separate pages for better PDF formatting
       const generateMainElementPages = () => {
