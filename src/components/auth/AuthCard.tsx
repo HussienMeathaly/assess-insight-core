@@ -82,7 +82,7 @@ export function AuthCard({
             <img 
               src={profitLogo} 
               alt="Profit+" 
-              className="h-20 md:h-24 mx-auto mb-4 relative z-10 drop-shadow-2xl" 
+              className="h-16 sm:h-20 md:h-24 mx-auto mb-4 relative z-10 drop-shadow-2xl" 
             />
           </div>
           <motion.p 

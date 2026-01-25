@@ -259,7 +259,7 @@ export default function EvaluationReport() {
             <img
               src={profitLogo}
               alt="PROFIT Logo"
-              className="h-20 mx-auto mb-6"
+              className="h-16 sm:h-20 md:h-24 mx-auto mb-6"
             />
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-4">
               <FileText className="h-5 w-5" />

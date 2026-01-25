@@ -21,7 +21,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           <img 
             src={profitLogo} 
             alt="Profit+" 
-            className="h-14 md:h-18 lg:h-20 mx-auto mb-3 relative z-10" 
+            className="h-16 sm:h-20 md:h-24 mx-auto mb-3 relative z-10" 
           />
         </div>
         <p className="text-muted-foreground text-sm md:text-base">منصة التقييم المؤسسي</p>

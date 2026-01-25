@@ -27,7 +27,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
         transition={{ duration: 0.5 }}
         className="mb-6 md:mb-8"
       >
-        <img src={profitLogo} alt="Profit+" className="h-12 md:h-14 lg:h-16 mx-auto" />
+        <img src={profitLogo} alt="Profit+" className="h-16 sm:h-20 md:h-24 mx-auto" />
       </motion.div>
 
       {/* Main Card */}

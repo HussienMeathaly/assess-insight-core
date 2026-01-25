@@ -35,7 +35,7 @@ function MessageCard({
         >
           <div className="relative inline-block">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-            <img src={profitLogo} alt="Profit+" className="h-20 md:h-24 mx-auto mb-4 relative z-10" />
+            <img src={profitLogo} alt="Profit+" className="h-16 sm:h-20 md:h-24 mx-auto mb-4 relative z-10" />
           </div>
         </motion.div>
 

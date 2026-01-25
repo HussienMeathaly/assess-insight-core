@@ -235,7 +235,7 @@ export default function FreeEvaluation() {
               >
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
-              <img src={profitLogo} alt="PROFIT" className="h-8 sm:h-10" />
+              <img src={profitLogo} alt="PROFIT" className="h-10 sm:h-12" />
             </div>
             <div className="text-left bg-primary/10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg">
               <div className="text-xs sm:text-sm text-muted-foreground">التقدم</div>

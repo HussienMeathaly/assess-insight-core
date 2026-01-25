@@ -43,7 +43,7 @@ export function EvaluationResult({
         <img
           src={profitLogo}
           alt="PROFIT Logo"
-          className="h-12 sm:h-16 mx-auto mb-4 sm:mb-6"
+          className="h-16 sm:h-20 md:h-24 mx-auto mb-4 sm:mb-6"
         />
         <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
           نتائج التقييم
