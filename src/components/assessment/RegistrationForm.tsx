@@ -175,7 +175,7 @@ export function RegistrationForm({ onSubmit, onBack }: RegistrationFormProps) {
           <img 
             src={profitLogo} 
             alt="Profit+" 
-            className="h-16 md:h-20 mx-auto mb-4 relative z-10"
+            className="h-16 sm:h-20 md:h-24 mx-auto mb-4 relative z-10"
           />
         </div>
         <p className="text-muted-foreground text-lg font-medium">منصة التقييم المؤسسي</p>

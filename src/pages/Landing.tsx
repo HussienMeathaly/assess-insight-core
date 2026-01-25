@@ -122,7 +122,7 @@ const Landing = () => {
               <img 
                 src={profitLogo} 
                 alt="Profit+ Logo" 
-                className="h-12 sm:h-16 md:h-24 lg:h-28 w-auto relative z-10" 
+                className="h-16 sm:h-20 md:h-24 lg:h-28 w-auto relative z-10" 
               />
             </div>
           </motion.div>
