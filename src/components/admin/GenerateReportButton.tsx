@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { FileText, Loader2 } from 'lucide-react';
+import { FileText, Loader2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import profitLogo from '@/assets/profit-logo.png';
+import { ReportPreviewModal } from './ReportPreviewModal';
 
 interface GenerateReportButtonProps {
   evaluationId: string;
@@ -38,12 +39,29 @@ interface GroupedElement {
   }[];
 }
 
+interface ReportData {
+  orgName: string;
+  domainName: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  percentage: number;
+  isQualified: boolean;
+  totalAnswers: number;
+  maxScore: number;
+  groupedAnswers: GroupedElement[];
+  completedAt?: string;
+}
+
 export function GenerateReportButton({ 
   evaluationId, 
   organizationName,
   isCompleted 
 }: GenerateReportButtonProps) {
   const [generating, setGenerating] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [reportData, setReportData] = useState<ReportData | null>(null);
 
   // Profit brand colors
   const BRAND_NAVY = '#1e3a5f';
@@ -65,9 +83,8 @@ export function GenerateReportButton({
     return 'يحتاج تحسين';
   };
 
-  const handleGeneratePDF = async () => {
-    setGenerating(true);
-
+  // Fetch report data
+  const fetchReportData = async (): Promise<ReportData | null> => {
     try {
       // Fetch evaluation data with domain info
       const { data: evaluation, error: evalError } = await supabase
@@ -201,17 +218,54 @@ export function GenerateReportButton({
       const orgName = evaluation.organizations?.name || organizationName;
       const domainName = evaluation.evaluation_domains?.name || 'تقييم المنتج';
       const totalAnswers = validAnswers.length;
-      
-      // Debug: Log data to verify
-      console.log('PDF Report Data:', {
+
+      return {
+        orgName,
+        domainName,
+        contactPerson: evaluation.organizations?.contact_person || '',
+        email: evaluation.organizations?.email || '',
+        phone: evaluation.organizations?.phone || '',
+        percentage,
+        isQualified,
         totalAnswers,
-        groupedAnswersCount: groupedAnswers.length,
-        groupedAnswers: groupedAnswers.map(g => ({
-          name: g.mainElementName,
-          subElements: g.subElements.length,
-          answers: g.subElements.reduce((sum, s) => sum + s.answers.length, 0)
-        }))
-      });
+        maxScore: evaluation.max_score || 100,
+        groupedAnswers,
+        completedAt: evaluation.completed_at
+      };
+    } catch (error) {
+      console.error('Error fetching report data:', error);
+      toast.error('حدث خطأ أثناء جلب بيانات التقرير');
+      return null;
+    }
+  };
+
+  // Handle preview click
+  const handlePreview = async () => {
+    setLoading(true);
+    const data = await fetchReportData();
+    if (data) {
+      setReportData(data);
+      setPreviewOpen(true);
+    }
+    setLoading(false);
+  };
+
+  // Handle PDF generation (reuse cached data if available)
+  const handleGeneratePDF = async () => {
+    setGenerating(true);
+
+    try {
+      // Use cached data or fetch new
+      let data = reportData;
+      if (!data) {
+        data = await fetchReportData();
+        if (!data) {
+          setGenerating(false);
+          return;
+        }
+      }
+
+      const { orgName, domainName, percentage, isQualified, totalAnswers, maxScore, groupedAnswers, contactPerson, email, phone } = data;
 
       // Generate separate pages for better PDF formatting
       const generateMainElementPages = () => {
@@ -623,15 +677,15 @@ export function GenerateReportButton({
                   </div>
                   <div class="info-item">
                     <div class="info-label">المسؤول</div>
-                    <div class="info-value">${evaluation.organizations?.contact_person || '-'}</div>
+                    <div class="info-value">${contactPerson || '-'}</div>
                   </div>
                   <div class="info-item">
                     <div class="info-label">البريد الإلكتروني</div>
-                    <div class="info-value">${evaluation.organizations?.email || '-'}</div>
+                    <div class="info-value">${email || '-'}</div>
                   </div>
                   <div class="info-item">
                     <div class="info-label">رقم الهاتف</div>
-                    <div class="info-value">${evaluation.organizations?.phone || '-'}</div>
+                    <div class="info-value">${phone || '-'}</div>
                   </div>
                 </div>
               </div>
@@ -658,7 +712,7 @@ export function GenerateReportButton({
                       <div class="stat-label">العناصر الرئيسية</div>
                     </div>
                     <div class="stat-item">
-                      <div class="stat-value">${evaluation.max_score || 100}</div>
+                      <div class="stat-value">${maxScore}</div>
                       <div class="stat-label">الدرجة القصوى</div>
                     </div>
                   </div>
@@ -817,20 +871,54 @@ export function GenerateReportButton({
   };
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleGeneratePDF}
-      disabled={!isCompleted || generating}
-      className="gap-2"
-      title={!isCompleted ? 'التقييم غير مكتمل' : 'تحميل التقرير PDF'}
-    >
-      {generating ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <FileText className="h-4 w-4" />
-      )}
-      <span className="hidden sm:inline">{generating ? 'جاري التحميل...' : 'تقرير'}</span>
-    </Button>
+    <>
+      <div className="flex gap-1">
+        {/* Preview Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handlePreview}
+          disabled={!isCompleted || loading}
+          className="gap-1.5"
+          title={!isCompleted ? 'التقييم غير مكتمل' : 'معاينة التقرير'}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
+          <span className="hidden sm:inline">معاينة</span>
+        </Button>
+
+        {/* Download Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleGeneratePDF}
+          disabled={!isCompleted || generating}
+          className="gap-1.5"
+          title={!isCompleted ? 'التقييم غير مكتمل' : 'تحميل التقرير PDF'}
+        >
+          {generating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileText className="h-4 w-4" />
+          )}
+          <span className="hidden sm:inline">PDF</span>
+        </Button>
+      </div>
+
+      {/* Report Preview Modal */}
+      <ReportPreviewModal
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        onDownload={() => {
+          setPreviewOpen(false);
+          handleGeneratePDF();
+        }}
+        downloading={generating}
+        reportData={reportData}
+      />
+    </>
   );
 }
