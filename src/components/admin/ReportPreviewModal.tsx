@@ -1,8 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Download, X } from 'lucide-react';
+import { Download, FileSpreadsheet } from 'lucide-react';
 import profitLogo from '@/assets/profit-logo.png';
+import * as XLSX from 'xlsx';
+import { toast } from 'sonner';
 
 interface ReportAnswer {
   criterion_id: string;
@@ -58,6 +60,119 @@ export function ReportPreviewModal({
 }: ReportPreviewModalProps) {
   if (!reportData) return null;
 
+  const handleExportExcel = () => {
+    try {
+      const {
+        orgName,
+        domainName,
+        contactPerson,
+        email,
+        phone,
+        percentage,
+        isQualified,
+        totalAnswers,
+        maxScore,
+        groupedAnswers
+      } = reportData;
+
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+
+      // Sheet 1: Summary
+      const summaryData = [
+        ['تقرير التقييم - نظام PROFIT'],
+        [],
+        ['معلومات الجهة'],
+        ['اسم الجهة', orgName],
+        ['المسؤول', contactPerson || '-'],
+        ['البريد الإلكتروني', email || '-'],
+        ['رقم الهاتف', phone || '-'],
+        [],
+        ['ملخص النتيجة'],
+        ['النتيجة النهائية', `${percentage}%`],
+        ['الحالة', isQualified ? 'مؤهل للتصنيف' : 'يحتاج تحسينات'],
+        ['إجمالي المعايير', totalAnswers],
+        ['الدرجة القصوى', maxScore],
+        [],
+        ['نتائج العناصر الرئيسية'],
+        ['العنصر الرئيسي', 'النتيجة', 'الوزن', 'النسبة', 'التقييم'],
+        ...groupedAnswers.map(element => {
+          const elemPercentage = element.mainElementWeight > 0 
+            ? Math.round((element.totalScore / element.mainElementWeight) * 100) 
+            : 0;
+          let label = 'يحتاج تحسين';
+          if (elemPercentage >= 80) label = 'ممتاز';
+          else if (elemPercentage >= 60) label = 'جيد جداً';
+          else if (elemPercentage >= 40) label = 'جيد';
+          return [
+            element.mainElementName,
+            element.totalScore.toFixed(1),
+            element.mainElementWeight,
+            `${elemPercentage}%`,
+            label
+          ];
+        })
+      ];
+
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+      
+      // Set column widths
+      summarySheet['!cols'] = [
+        { wch: 35 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 10 },
+        { wch: 15 }
+      ];
+      
+      XLSX.utils.book_append_sheet(wb, summarySheet, 'الملخص');
+
+      // Sheet 2: Detailed Results
+      const detailsData: (string | number)[][] = [
+        ['التفاصيل الكاملة للتقييم'],
+        [],
+        ['العنصر الرئيسي', 'العنصر الفرعي', 'المعيار', 'الإجابة', 'الوزن', 'النتيجة']
+      ];
+
+      groupedAnswers.forEach(mainElement => {
+        mainElement.subElements.forEach(subElement => {
+          subElement.answers.forEach(answer => {
+            detailsData.push([
+              mainElement.mainElementName,
+              subElement.subElementName,
+              answer.criterion_name,
+              answer.selected_option_label,
+              `${answer.criterion_weight}%`,
+              `${answer.score}%`
+            ]);
+          });
+        });
+      });
+
+      const detailsSheet = XLSX.utils.aoa_to_sheet(detailsData);
+      
+      // Set column widths for details
+      detailsSheet['!cols'] = [
+        { wch: 30 },
+        { wch: 25 },
+        { wch: 50 },
+        { wch: 30 },
+        { wch: 10 },
+        { wch: 10 }
+      ];
+      
+      XLSX.utils.book_append_sheet(wb, detailsSheet, 'التفاصيل');
+
+      // Generate and download
+      const fileName = `تقرير-التقييم-${orgName.replace(/\s+/g, '-')}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+      toast.success('تم تحميل ملف Excel بنجاح');
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      toast.error('حدث خطأ أثناء تصدير الملف');
+    }
+  };
+
   const {
     orgName,
     domainName,
@@ -110,13 +225,21 @@ export function ReportPreviewModal({
             </div>
             <div className="flex items-center gap-2">
               <Button
+                variant="outline"
+                onClick={handleExportExcel}
+                className="gap-2"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                <span className="hidden sm:inline">Excel</span>
+              </Button>
+              <Button
                 onClick={onDownload}
                 disabled={downloading}
                 className="gap-2"
               >
                 <Download className="h-4 w-4" />
                 <span className="hidden sm:inline">
-                  {downloading ? 'جاري التحميل...' : 'تحميل PDF'}
+                  {downloading ? 'جاري التحميل...' : 'PDF'}
                 </span>
               </Button>
             </div>
