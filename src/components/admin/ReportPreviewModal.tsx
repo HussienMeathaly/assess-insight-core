@@ -67,26 +67,34 @@ export function ReportPreviewModal({
       // Create workbook
       const wb = XLSX.utils.book_new();
 
-      // Raw Data Table only (without percentage and result columns)
+      // Raw Data Table with weight and score columns
       const rawData: (string | number)[][] = [
-        ['رقم', 'العنصر الرئيسي', 'العنصر الفرعي', 'المعيار', 'الإجابة', 'الوزن']
+        ['رقم', 'العنصر الرئيسي', 'العنصر الفرعي', 'المعيار', 'الإجابة', 'الوزن', 'الدرجة']
       ];
 
       let rawRowNum = 1;
+      let totalScore = 0;
       groupedAnswers.forEach(mainElement => {
         mainElement.subElements.forEach(subElement => {
           subElement.answers.forEach(answer => {
+            totalScore += answer.score;
             rawData.push([
               rawRowNum++,
               mainElement.mainElementName,
               subElement.subElementName,
               answer.criterion_name,
               answer.selected_option_label,
-              answer.criterion_weight
+              answer.criterion_weight,
+              answer.score
             ]);
           });
         });
       });
+
+      // Add total row
+      rawData.push([]);
+      rawData.push(['', '', '', '', 'المجموع', maxScore, totalScore]);
+      rawData.push(['', '', '', '', 'النسبة المئوية', '', `${percentage}%`]);
 
       const rawSheet = XLSX.utils.aoa_to_sheet(rawData);
       
@@ -96,7 +104,8 @@ export function ReportPreviewModal({
         { wch: 30 },
         { wch: 50 },
         { wch: 30 },
-        { wch: 8 }
+        { wch: 8 },
+        { wch: 10 }
       ];
       
       XLSX.utils.book_append_sheet(wb, rawSheet, 'البيانات');
