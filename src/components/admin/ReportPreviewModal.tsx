@@ -62,234 +62,27 @@ export function ReportPreviewModal({
 
   const handleExportExcel = () => {
     try {
-      const {
-        orgName,
-        contactPerson,
-        email,
-        phone,
-        percentage,
-        isQualified,
-        totalAnswers,
-        maxScore,
-        groupedAnswers,
-        completedAt
-      } = reportData;
+      const { orgName, groupedAnswers } = reportData;
 
       // Create workbook
       const wb = XLSX.utils.book_new();
 
-      // Calculate total criteria count
-      const totalCriteria = groupedAnswers.reduce((acc, me) => 
-        acc + me.subElements.reduce((subAcc, se) => subAcc + se.answers.length, 0), 0
-      );
-
-      // Sheet 1: Summary - Enhanced
-      const summaryData: (string | number)[][] = [
-        [''],
-        ['تقرير التقييم الشامل'],
-        ['نظام PROFIT للتقييم والتصنيف'],
-        [''],
-        ['═══════════════════════════════════════════════════════════════'],
-        [''],
-        ['▌ معلومات الجهة'],
-        [''],
-        ['البيان', 'التفاصيل'],
-        ['اسم الجهة', orgName],
-        ['المسؤول', contactPerson || '-'],
-        ['البريد الإلكتروني', email || '-'],
-        ['رقم الهاتف', phone || '-'],
-        ['تاريخ التقييم', completedAt ? new Date(completedAt).toLocaleDateString('ar-SA') : new Date().toLocaleDateString('ar-SA')],
-        [''],
-        ['═══════════════════════════════════════════════════════════════'],
-        [''],
-        ['▌ ملخص النتيجة النهائية'],
-        [''],
-        ['البيان', 'القيمة'],
-        ['النتيجة النهائية', `${percentage}%`],
-        ['حالة التأهيل', isQualified ? '✓ مؤهل للتصنيف' : '✗ يحتاج تحسينات'],
-        ['إجمالي المعايير المقيّمة', totalCriteria],
-        ['الدرجة القصوى الممكنة', maxScore],
-        [''],
-        ['═══════════════════════════════════════════════════════════════'],
-        [''],
-        ['▌ نتائج العناصر الرئيسية'],
-        [''],
-        ['#', 'العنصر الرئيسي', 'النتيجة المحققة', 'الوزن الكلي', 'النسبة المئوية', 'التقييم'],
-      ];
-
-      groupedAnswers.forEach((element, index) => {
-        const elemPercentage = element.mainElementWeight > 0 
-          ? Math.round((element.totalScore / element.mainElementWeight) * 100) 
-          : 0;
-        let label = 'يحتاج تحسين';
-        let emoji = '⚠';
-        if (elemPercentage >= 80) { label = 'ممتاز'; emoji = '★'; }
-        else if (elemPercentage >= 60) { label = 'جيد جداً'; emoji = '●'; }
-        else if (elemPercentage >= 40) { label = 'جيد'; emoji = '○'; }
-        
-        summaryData.push([
-          index + 1,
-          element.mainElementName,
-          element.totalScore.toFixed(2),
-          element.mainElementWeight,
-          `${elemPercentage}%`,
-          `${emoji} ${label}`
-        ]);
-      });
-
-      // Add footer to summary
-      summaryData.push(
-        [''],
-        ['═══════════════════════════════════════════════════════════════'],
-        [''],
-        ['تم إنشاء هذا التقرير بواسطة نظام PROFIT للتقييم'],
-        [`تاريخ الإصدار: ${new Date().toLocaleDateString('ar-SA')} - ${new Date().toLocaleTimeString('ar-SA')}`]
-      );
-
-      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-      
-      // Set column widths for summary
-      summarySheet['!cols'] = [
-        { wch: 5 },
-        { wch: 40 },
-        { wch: 18 },
-        { wch: 15 },
-        { wch: 18 },
-        { wch: 18 }
-      ];
-
-      // Merge cells for header
-      summarySheet['!merges'] = [
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } }, // Title
-        { s: { r: 2, c: 0 }, e: { r: 2, c: 5 } }, // Subtitle
-      ];
-      
-      XLSX.utils.book_append_sheet(wb, summarySheet, 'الملخص');
-
-      // Sheet 2: Detailed Results by Main Element
-      const detailsData: (string | number | null)[][] = [
-        [''],
-        ['التفاصيل الكاملة للتقييم - جميع المعايير'],
-        [''],
-      ];
-
-      let rowNumber = 1;
-
-      groupedAnswers.forEach((mainElement, meIndex) => {
-        const elemPercentage = mainElement.mainElementWeight > 0 
-          ? Math.round((mainElement.totalScore / mainElement.mainElementWeight) * 100) 
-          : 0;
-
-        // Add main element header
-        detailsData.push(['']);
-        detailsData.push([`▌ ${meIndex + 1}. ${mainElement.mainElementName}`]);
-        detailsData.push([`   النتيجة: ${mainElement.totalScore.toFixed(2)} / ${mainElement.mainElementWeight} (${elemPercentage}%)`]);
-        detailsData.push(['']);
-        
-        mainElement.subElements.forEach((subElement, seIndex) => {
-          // Calculate sub-element score
-          const subElementScore = subElement.answers.reduce((acc, a) => acc + a.score, 0);
-          const subElementMaxScore = subElement.answers.reduce((acc, a) => acc + a.criterion_weight, 0);
-          const subElemPercentage = subElementMaxScore > 0 
-            ? Math.round((subElementScore / subElementMaxScore) * 100) 
-            : 0;
-
-          // Add sub-element header
-          detailsData.push([`   ○ ${seIndex + 1}.${meIndex + 1} ${subElement.subElementName} (${subElemPercentage}%)`]);
-          detailsData.push(['']);
-          
-          // Add criteria table header
-          detailsData.push(['#', 'المعيار', 'الإجابة المختارة', 'الوزن', 'النتيجة', 'النسبة']);
-          
-          // Add each criterion
-          subElement.answers.forEach((answer, aIndex) => {
-            const criterionPercentage = answer.criterion_weight > 0 
-              ? Math.round((answer.score / answer.criterion_weight) * 100) 
-              : 0;
-            
-            detailsData.push([
-              rowNumber++,
-              answer.criterion_name,
-              answer.selected_option_label,
-              answer.criterion_weight,
-              answer.score.toFixed(2),
-              `${criterionPercentage}%`
-            ]);
-          });
-          
-          // Add sub-element subtotal
-          detailsData.push([
-            '',
-            `إجمالي ${subElement.subElementName}`,
-            '',
-            subElementMaxScore,
-            subElementScore.toFixed(2),
-            `${subElemPercentage}%`
-          ]);
-          detailsData.push(['']);
-        });
-
-        // Add main element total
-        detailsData.push([
-          '',
-          `═══ إجمالي ${mainElement.mainElementName} ═══`,
-          '',
-          mainElement.mainElementWeight,
-          mainElement.totalScore.toFixed(2),
-          `${elemPercentage}%`
-        ]);
-        detailsData.push(['']);
-        detailsData.push(['───────────────────────────────────────────────────────────────────────────────────']);
-      });
-
-      // Add final total
-      detailsData.push(['']);
-      detailsData.push([
-        '',
-        '★★★ الإجمالي النهائي ★★★',
-        '',
-        maxScore,
-        groupedAnswers.reduce((acc, me) => acc + me.totalScore, 0).toFixed(2),
-        `${percentage}%`
-      ]);
-
-      const detailsSheet = XLSX.utils.aoa_to_sheet(detailsData);
-      
-      // Set column widths for details
-      detailsSheet['!cols'] = [
-        { wch: 5 },
-        { wch: 55 },
-        { wch: 35 },
-        { wch: 10 },
-        { wch: 12 },
-        { wch: 12 }
-      ];
-      
-      XLSX.utils.book_append_sheet(wb, detailsSheet, 'التفاصيل الكاملة');
-
-      // Sheet 3: Raw Data Table (for analysis)
+      // Raw Data Table only (without percentage and result columns)
       const rawData: (string | number)[][] = [
-        ['جدول البيانات الخام للتحليل'],
-        [''],
-        ['رقم', 'العنصر الرئيسي', 'العنصر الفرعي', 'المعيار', 'الإجابة', 'الوزن', 'النتيجة', 'النسبة']
+        ['رقم', 'العنصر الرئيسي', 'العنصر الفرعي', 'المعيار', 'الإجابة', 'الوزن']
       ];
 
       let rawRowNum = 1;
       groupedAnswers.forEach(mainElement => {
         mainElement.subElements.forEach(subElement => {
           subElement.answers.forEach(answer => {
-            const pct = answer.criterion_weight > 0 
-              ? Math.round((answer.score / answer.criterion_weight) * 100) 
-              : 0;
             rawData.push([
               rawRowNum++,
               mainElement.mainElementName,
               subElement.subElementName,
               answer.criterion_name,
               answer.selected_option_label,
-              answer.criterion_weight,
-              answer.score,
-              `${pct}%`
+              answer.criterion_weight
             ]);
           });
         });
@@ -303,12 +96,10 @@ export function ReportPreviewModal({
         { wch: 30 },
         { wch: 50 },
         { wch: 30 },
-        { wch: 8 },
-        { wch: 10 },
-        { wch: 10 }
+        { wch: 8 }
       ];
       
-      XLSX.utils.book_append_sheet(wb, rawSheet, 'البيانات الخام');
+      XLSX.utils.book_append_sheet(wb, rawSheet, 'البيانات');
 
       // Generate and download
       const fileName = `تقرير-التقييم-${orgName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.xlsx`;
