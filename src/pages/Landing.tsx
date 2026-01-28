@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { ChevronDown, Sparkles, ArrowLeft, Shield, Target, TrendingUp, GripVertical } from "lucide-react";
+import { ChevronDown, Sparkles, ArrowLeft, Shield, Target, TrendingUp } from "lucide-react";
 import profitLogo from "@/assets/profit-logo.png";
 import {
   DropdownMenu,
@@ -12,11 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import {
-  ImageComparison,
-  ImageComparisonImage,
-  ImageComparisonSlider,
-} from "@/components/ui/image-comparison";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -196,59 +191,6 @@ const Landing = () => {
             ))}
           </motion.div>
 
-          {/* Before/After Comparison Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.75 }}
-            className="mt-12 sm:mt-16 md:mt-20 w-full max-w-4xl px-2 sm:px-4"
-          >
-            <div className="text-center mb-6 sm:mb-8">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2 sm:mb-3">
-                شاهد الفرق قبل وبعد التقييم
-              </h2>
-              <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                اسحب للمقارنة بين حالة المنشأة قبل وبعد تطبيق توصياتنا
-              </p>
-            </div>
-            
-            <div className="card-elevated rounded-xl overflow-hidden p-1 sm:p-2">
-              <ImageComparison 
-                className="aspect-[16/10] sm:aspect-video w-full rounded-lg cursor-ew-resize"
-                springOptions={{ bounce: 0.1, duration: 0.3 }}
-              >
-                <ImageComparisonImage 
-                  src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&h=675&fit=crop" 
-                  alt="بعد التقييم - مكتب منظم وحديث" 
-                  position="right" 
-                />
-                <ImageComparisonImage 
-                  src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1200&h=675&fit=crop" 
-                  alt="قبل التقييم - مكتب تقليدي" 
-                  position="left" 
-                />
-                <ImageComparisonSlider className="bg-primary w-1">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-                                  w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary shadow-lg 
-                                  flex items-center justify-center">
-                    <GripVertical className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
-                  </div>
-                </ImageComparisonSlider>
-              </ImageComparison>
-              
-              {/* Labels */}
-              <div className="flex justify-between mt-3 sm:mt-4 px-2 sm:px-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-destructive/70" />
-                  <span className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">قبل التقييم</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-success" />
-                  <span className="text-[10px] sm:text-xs md:text-sm text-muted-foreground">بعد التقييم</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </main>
 
         {/* Footer */}
