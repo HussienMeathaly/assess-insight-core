@@ -65,45 +65,48 @@ const Landing = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="fixed top-0 left-0 right-0 z-50 p-3 sm:p-4 md:p-6"
+          className="fixed top-0 left-0 right-0 z-50 p-4 sm:p-5 md:p-6"
         >
-          <div className="flex justify-between items-center max-w-7xl mx-auto gap-2">
-            <ThemeToggle />
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            {/* Login Button - Right side in RTL */}
             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="flex items-center gap-1.5 sm:gap-2 bg-card/80 backdrop-blur-sm border-border/50 
-                           hover:bg-card hover:border-primary/30 text-foreground px-3 sm:px-5 md:px-8 py-2 sm:py-2.5 
-                           text-xs sm:text-sm md:text-base shadow-md transition-all duration-300"
+                  className="flex items-center gap-2 bg-card/80 backdrop-blur-sm border-border/50 
+                           hover:bg-card hover:border-primary/30 text-foreground px-4 sm:px-6 md:px-8 py-2.5 
+                           text-sm md:text-base shadow-md transition-all duration-300"
                 >
                   <span>تسجيل الدخول</span>
                   <ChevronDown
-                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                    className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
                   />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                align="end" 
-                className="w-44 sm:w-48 md:w-52 bg-card border-border shadow-lg z-50"
+                align="start" 
+                className="w-48 md:w-52 bg-card border-border shadow-lg z-50"
               >
                 <DropdownMenuItem
                   onClick={handleFreeAssessment}
                   className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10 text-foreground 
-                           text-xs sm:text-sm md:text-base text-right py-2.5 sm:py-3 transition-colors"
+                           text-sm md:text-base text-right py-3 transition-colors"
                 >
                   التقييم المجاني
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleComprehensiveAssessment}
                   className="cursor-pointer hover:bg-secondary focus:bg-secondary text-muted-foreground 
-                           text-xs sm:text-sm md:text-base text-right py-2.5 sm:py-3"
+                           text-sm md:text-base text-right py-3"
                   disabled
                 >
                   التقييم الشامل (قريباً)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Theme Toggle - Left side in RTL */}
+            <ThemeToggle />
           </div>
         </motion.header>
 
