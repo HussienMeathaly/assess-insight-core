@@ -68,7 +68,10 @@ const Landing = () => {
           className="fixed top-0 left-0 right-0 z-50 p-4 sm:p-5 md:p-6"
         >
           <div className="flex items-center justify-between max-w-7xl mx-auto">
-            {/* Login Button - Right side in RTL */}
+            {/* Theme Toggle - Right side in RTL */}
+            <ThemeToggle />
+
+            {/* Login Button - Left side in RTL */}
             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -84,7 +87,7 @@ const Landing = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                align="start" 
+                align="end" 
                 className="w-48 md:w-52 bg-card border-border shadow-lg z-50"
               >
                 <DropdownMenuItem
@@ -104,9 +107,6 @@ const Landing = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* Theme Toggle - Left side in RTL */}
-            <ThemeToggle />
           </div>
         </motion.header>
 
