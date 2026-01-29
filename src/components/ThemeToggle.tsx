@@ -1,6 +1,6 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
@@ -12,57 +12,42 @@ export function ThemeToggle() {
   };
 
   return (
-    <button
+    <motion.button
       onClick={toggleTheme}
       className={cn(
-        "relative flex items-center w-16 h-8 rounded-full cursor-pointer select-none",
-        "bg-secondary/80 backdrop-blur-sm border border-border/50",
+        "relative flex items-center justify-center w-10 h-10 rounded-xl",
+        "bg-card/80 backdrop-blur-sm border border-border/50",
         "shadow-sm hover:shadow-md transition-all duration-300",
+        "hover:border-primary/30 hover:bg-card",
         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background"
       )}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       aria-label="تبديل الثيم"
     >
-      {/* Background icons */}
-      <div className="absolute inset-0 flex items-center justify-between px-1.5">
-        <Moon className={cn(
-          "h-4 w-4 transition-opacity duration-300",
-          isDark ? "opacity-100 text-primary" : "opacity-30 text-muted-foreground"
-        )} />
-        <Sun className={cn(
-          "h-4 w-4 transition-opacity duration-300",
-          isDark ? "opacity-30 text-muted-foreground" : "opacity-100 text-amber-500"
-        )} />
-      </div>
-      
-      {/* Sliding thumb */}
-      <motion.div
-        className={cn(
-          "absolute w-6 h-6 rounded-full",
-          "bg-card shadow-md border border-border/30",
-          "flex items-center justify-center"
+      <AnimatePresence mode="wait" initial={false}>
+        {isDark ? (
+          <motion.div
+            key="moon"
+            initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+            animate={{ opacity: 1, rotate: 0, scale: 1 }}
+            exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Moon className="h-5 w-5 text-primary" />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="sun"
+            initial={{ opacity: 0, rotate: 90, scale: 0.5 }}
+            animate={{ opacity: 1, rotate: 0, scale: 1 }}
+            exit={{ opacity: 0, rotate: -90, scale: 0.5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Sun className="h-5 w-5 text-amber-500" />
+          </motion.div>
         )}
-        initial={false}
-        animate={{ 
-          x: isDark ? 4 : 36,
-        }}
-        transition={{ 
-          type: "spring", 
-          stiffness: 500, 
-          damping: 30 
-        }}
-      >
-        <motion.div
-          initial={false}
-          animate={{ rotate: isDark ? 0 : 180 }}
-          transition={{ duration: 0.3 }}
-        >
-          {isDark ? (
-            <Moon className="h-3.5 w-3.5 text-primary" />
-          ) : (
-            <Sun className="h-3.5 w-3.5 text-amber-500" />
-          )}
-        </motion.div>
-      </motion.div>
-    </button>
+      </AnimatePresence>
+    </motion.button>
   );
 }
