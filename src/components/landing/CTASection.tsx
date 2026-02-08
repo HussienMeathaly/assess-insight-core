@@ -7,58 +7,84 @@ import { Button } from "@/components/ui/button";
 const features = [
   { icon: Target, title: "تقييم دقيق", desc: "تحليل شامل لجاهزية منشأتك" },
   { icon: Shield, title: "بيانات آمنة", desc: "حماية كاملة لمعلوماتك" },
-  { icon: TrendingUp, title: "نتائج فورية", desc: "تقارير تفصيلية وتوصيات" },
+  { icon: TrendingUp, title: "نتائج فورية", desc: "تقارير تفصيلية وتوصيات عملية" },
 ];
 
 export function CTASection() {
   const navigate = useNavigate();
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section className="py-20 sm:py-28 px-4 relative" ref={ref}>
-      <div className="max-w-4xl mx-auto text-center">
-        {/* CTA */}
+    <section className="relative py-24 sm:py-32 overflow-hidden" ref={ref}>
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-l from-transparent via-border to-transparent" />
+      </div>
+
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-20">
+        {/* CTA Card */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
+          className="relative rounded-[2rem] overflow-hidden"
         >
-          <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6">
-            جاهز لتحويل تجاربك إلى مكاسب؟
-          </h2>
-          <p className="text-muted-foreground text-sm sm:text-base mb-8 sm:mb-10 max-w-xl mx-auto">
-            ابدأ الآن بتقييم مجاني لمنشأتك واكتشف فرص التحسين والنمو
-          </p>
-          <Button
-            onClick={() => navigate("/auth?type=free")}
-            size="lg"
-            className="btn-primary-enhanced px-8 sm:px-14 py-5 sm:py-6 text-sm sm:text-lg font-medium rounded-xl gap-2.5 group"
-          >
-            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:scale-110" />
-            <span>ابدأ التقييم المجاني</span>
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:-translate-x-1" />
-          </Button>
-        </motion.div>
+          {/* Card background */}
+          <div className="absolute inset-0 bg-gradient-to-bl from-primary via-primary to-primary/90 dark:from-card dark:via-card dark:to-card" />
+          <div className="absolute inset-0 opacity-10">
+            <div style={{
+              backgroundImage: `radial-gradient(circle at 2px 2px, hsl(var(--primary-foreground) / 0.15) 1px, transparent 0)`,
+              backgroundSize: '24px 24px',
+            }} className="absolute inset-0" />
+          </div>
 
-        {/* Features */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12 sm:mt-16">
-          {features.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: 0.3 + i * 0.1 }}
-              className="card-interactive rounded-xl p-5 sm:p-6 text-center group border border-border/50"
-            >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-accent/10 dark:bg-primary/10 flex items-center justify-center mx-auto mb-3 transition-all duration-300 group-hover:bg-accent/15 dark:group-hover:bg-primary/15">
-                <f.icon className="w-5 h-5 sm:w-6 sm:h-6 text-accent dark:text-primary" />
+          <div className="relative z-10 px-8 sm:px-12 lg:px-20 py-16 sm:py-20">
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+              {/* Text */}
+              <div className="flex-1 text-center lg:text-right">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-foreground dark:text-foreground mb-6 leading-tight">
+                  جاهز لتحويل تجاربك
+                  <br />
+                  <span className="text-accent dark:text-primary">إلى مكاسب حقيقية؟</span>
+                </h2>
+                <p className="text-primary-foreground/70 dark:text-muted-foreground text-base sm:text-lg mb-8 max-w-xl mx-auto lg:mx-0 lg:me-0">
+                  ابدأ الآن بتقييم مجاني لمنشأتك واكتشف فرص التحسين والنمو
+                </p>
+                <Button
+                  onClick={() => navigate("/auth?type=free")}
+                  size="lg"
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground dark:bg-primary dark:hover:bg-primary/90 dark:text-primary-foreground px-10 py-6 text-base sm:text-lg font-medium rounded-2xl gap-3 group shadow-lg"
+                >
+                  <Sparkles className="w-5 h-5 transition-transform group-hover:scale-110" />
+                  <span>ابدأ التقييم المجاني</span>
+                  <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+                </Button>
               </div>
-              <h3 className="font-medium text-foreground text-sm sm:text-base mb-1">{f.title}</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">{f.desc}</p>
-            </motion.div>
-          ))}
-        </div>
+
+              {/* Features */}
+              <div className="flex flex-col gap-5 w-full lg:w-auto">
+                {features.map((f, i) => (
+                  <motion.div
+                    key={f.title}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={inView ? { opacity: 1, x: 0 } : {}}
+                    transition={{ duration: 0.4, delay: 0.4 + i * 0.1 }}
+                    className="flex items-center gap-4 bg-primary-foreground/5 dark:bg-muted/30 backdrop-blur-sm rounded-2xl p-5 border border-primary-foreground/10 dark:border-border/30"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-accent/20 dark:bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <f.icon className="w-6 h-6 text-accent dark:text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-primary-foreground dark:text-foreground text-base">{f.title}</h3>
+                      <p className="text-primary-foreground/60 dark:text-muted-foreground text-sm">{f.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
