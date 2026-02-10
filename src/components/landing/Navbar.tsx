@@ -47,19 +47,19 @@ export function Navbar() {
             : "py-5"
         }`}
       >
-        <div className="flex items-center justify-between max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-20">
+        <div className="flex items-center justify-between max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16">
           {/* Logo */}
           <div className="flex items-center">
-            <img src={profitLogo} alt="Profit+" className={`transition-all duration-300 ${scrolled ? 'h-8 sm:h-9' : 'h-10 sm:h-11'} w-auto`} />
+            <img src={profitLogo} alt="Profit+" className={`transition-all duration-300 ${scrolled ? 'h-10 sm:h-12' : 'h-12 sm:h-14'} w-auto`} />
           </div>
 
           {/* Center: Nav links (desktop) */}
-          <nav className="hidden md:flex items-center gap-10">
+          <nav className="hidden md:flex items-center gap-8 lg:gap-12">
             {navLinks.map((item) => (
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group py-2"
+                className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors relative group py-2"
               >
                 {item.label}
                 <span className="absolute -bottom-0.5 right-0 w-0 h-0.5 bg-accent dark:bg-primary group-hover:w-full transition-all duration-300 rounded-full" />
@@ -77,12 +77,11 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    size="sm"
                     className="flex items-center gap-2 bg-card/60 backdrop-blur-sm border-border/50 
-                             hover:bg-card hover:border-accent/30 dark:hover:border-primary/30 text-foreground text-sm rounded-xl px-5 py-2.5"
+                             hover:bg-card hover:border-accent/30 dark:hover:border-primary/30 text-foreground text-base rounded-xl px-6 py-2.5"
                   >
                     <span>تسجيل الدخول</span>
-                    <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52 bg-card/95 backdrop-blur-xl border-border/50 shadow-xl rounded-xl z-50">
@@ -118,7 +117,7 @@ export function Navbar() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed inset-0 z-40 pt-20 bg-background/95 backdrop-blur-xl md:hidden"
+          className="fixed inset-0 z-40 pt-24 bg-background/95 backdrop-blur-xl md:hidden"
         >
           <div className="flex flex-col items-center gap-6 p-8">
             {navLinks.map((item) => (
