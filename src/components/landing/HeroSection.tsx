@@ -8,10 +8,7 @@ export function HeroSection() {
   const navigate = useNavigate();
 
   return (
-    <section
-      id="hero"
-      className="relative min-h-screen flex items-center overflow-hidden"
-    >
+    <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
       {/* Subtle background elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
@@ -29,7 +26,6 @@ export function HeroSection() {
       {/* Main content */}
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 py-32">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-          
           {/* Right side (RTL) - Text content */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
@@ -45,9 +41,6 @@ export function HeroSection() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 dark:bg-primary/10 border border-accent/20 dark:border-primary/20 mb-8"
             >
               <span className="w-2 h-2 rounded-full bg-accent dark:bg-primary animate-pulse-soft" />
-              <span className="text-sm font-medium text-accent-foreground dark:text-primary">
-                استوديو استثماري متكامل
-              </span>
             </motion.div>
 
             {/* Main heading - balanced sizing */}
@@ -59,8 +52,8 @@ export function HeroSection() {
 
             {/* Description - proportional to heading */}
             <p className="text-muted-foreground text-lg sm:text-xl max-w-xl leading-relaxed mb-10 mx-auto lg:mx-0 lg:me-0">
-              <span className="font-semibold text-foreground">PROFIT+</span>{" "}
-              استديو متخصص في تقديم حلول متكاملة للمستثمرين، من التقييم والتخطيط إلى التنفيذ والتشغيل
+              <span className="font-semibold text-foreground">PROFIT+</span> استديو متخصص في تقديم حلول متكاملة
+              للمستثمرين، من التقييم والتخطيط إلى التنفيذ والتشغيل
             </p>
 
             {/* CTA buttons */}
