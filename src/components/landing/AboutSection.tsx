@@ -39,9 +39,9 @@ export function AboutSection() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <span className="text-accent dark:text-primary text-base sm:text-lg font-bold tracking-wide mb-4 block">
+          <h3 className="text-accent dark:text-primary text-base sm:text-lg font-bold tracking-wide mb-4 block">
             من نحن
-          </span>
+          </h3>
 
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground leading-tight mb-6">
             نبني مشاريع <span className="text-muted-foreground">مدروسة ومستدامة</span>
