@@ -9,41 +9,38 @@ export function HeroSection() {
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Subtle background accents */}
+      {/* Background accents */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
-          animate={{ scale: [1, 1.15, 1], opacity: [0.04, 0.07, 0.04] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-accent"
+          animate={{ scale: [1, 1.12, 1], opacity: [0.035, 0.06, 0.035] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-32 -left-32 w-[520px] h-[520px] rounded-full bg-accent"
         />
         <motion.div
-          animate={{ scale: [1.1, 1, 1.1], opacity: [0.03, 0.05, 0.03] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -bottom-40 -right-32 w-[600px] h-[600px] rounded-full bg-primary"
+          animate={{ scale: [1.1, 1, 1.1], opacity: [0.025, 0.045, 0.025] }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-40 -right-32 w-[620px] h-[620px] rounded-full bg-primary"
         />
       </div>
 
       {/* Main content */}
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 py-32">
         <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
-          {/* Text content - Right side (RTL) */}
+          {/* Text content */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 32 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="flex-1 text-center lg:text-right order-2 lg:order-1"
           >
-            {/* Main heading */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] mb-8">
-              تحويل التجارب
-              <span className="text-accent dark:text-primary">الى مكاسب</span>
+            {/* Headline */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight mb-6">
+              تحويل التجارب <span className="text-accent dark:text-primary">إلى مكاسب</span>
             </h1>
 
             {/* Description */}
-            <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-lg leading-relaxed mb-12 mx-auto lg:mx-0 lg:me-0">
-              حلول متكاملة للمستثمرين، من التقييم والتخطيط
-              <br className="hidden sm:block" />
-              إلى التنفيذ والتشغيل
+            <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-xl leading-relaxed mb-10 mx-auto lg:mx-0">
+              حلول متكاملة للمستثمرين من التقييم والتخطيط إلى التنفيذ والتشغيل
             </p>
 
             {/* CTA buttons */}
@@ -57,34 +54,40 @@ export function HeroSection() {
                 <span>ابدأ التقييم المجاني</span>
                 <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
               </Button>
+
               <Button
                 variant="outline"
                 size="lg"
                 onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
-                className="px-8 py-6 text-base rounded-2xl border-border/60 hover:border-primary/30 w-full sm:w-auto"
+                className="px-8 py-6 text-base rounded-2xl border-border/50 hover:border-primary/30 text-muted-foreground w-full sm:w-auto"
               >
                 اكتشف المزيد
               </Button>
             </div>
           </motion.div>
 
-          {/* Logo - Left side (RTL) */}
+          {/* Logo */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.85 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            transition={{
+              duration: 0.8,
+              delay: 0.4,
+              ease: [0.16, 1, 0.3, 1],
+            }}
             className="flex-shrink-0 relative order-1 lg:order-2"
           >
-            <div className="absolute inset-0 bg-accent/5 dark:bg-primary/8 blur-3xl rounded-full scale-150" />
+            <div className="absolute inset-0 bg-accent/4 dark:bg-primary/6 blur-3xl rounded-full scale-140" />
+
             <motion.div
-              animate={{ y: [-6, 6, -6] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ y: [-5, 5, -5] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
               className="relative"
             >
               <img
                 src={profitLogo}
                 alt="Profit+ Logo"
-                className="h-32 sm:h-40 md:h-52 lg:h-64 w-auto relative z-10 drop-shadow-2xl"
+                className="h-32 sm:h-40 md:h-52 lg:h-60 w-auto relative z-10 drop-shadow-2xl"
               />
             </motion.div>
           </motion.div>
@@ -95,11 +98,10 @@ export function HeroSection() {
       <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
+        transition={{ delay: 1.6 }}
         onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-pointer"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors cursor-pointer"
       >
-        <span className="text-xs">اكتشف المزيد</span>
         <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
           <ChevronDown className="w-5 h-5" />
         </motion.div>
