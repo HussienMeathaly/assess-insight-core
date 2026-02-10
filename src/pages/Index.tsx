@@ -4,7 +4,7 @@ import { Sparkles, ArrowLeft, ChevronDown } from "lucide-react";
 import profitLogo from "@/assets/profit-logo.png";
 import { Button } from "@/components/ui/button";
 
-function HeroSection() {
+export function HeroSection() {
   const navigate = useNavigate();
 
   return (
@@ -114,5 +114,3 @@ function HeroSection() {
     </section>
   );
 }
-
-export default HeroSection;
