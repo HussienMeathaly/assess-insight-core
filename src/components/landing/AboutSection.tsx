@@ -27,19 +27,21 @@ export function AboutSection() {
 
   return (
     <section id="about" className="relative py-24 sm:py-32 overflow-hidden">
+      {/* divider */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-l from-transparent via-border to-transparent" />
       </div>
 
-      <div ref={ref} className="max-w-5xl mx-auto px-6 sm:px-10 text-center">
-        {/* Header */}
+      {/* ===== النص التعريفي (ضيق) ===== */}
+      <div ref={ref} className="max-w-5xl mx-auto px-6 sm:px-10 text-center mb-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="mb-16"
         >
-          <span className="text-accent dark:text-primary text-sm font-semibold tracking-widest mb-4 block">من نحن</span>
+          <span className="text-accent dark:text-primary text-base sm:text-lg font-bold tracking-wide mb-4 block">
+            من نحن
+          </span>
 
           <h3 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground leading-tight mb-6">
             نبني مشاريع <span className="text-muted-foreground">مدروسة ومستدامة</span>
@@ -51,8 +53,10 @@ export function AboutSection() {
             وقرارات مبنية على تحليل وواقع.
           </p>
         </motion.div>
+      </div>
 
-        {/* Cards */}
+      {/* ===== البطاقات (واسعة) ===== */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 text-right">
           {cards.map((card, i) => (
             <motion.div
