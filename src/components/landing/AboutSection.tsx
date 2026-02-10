@@ -43,21 +43,16 @@ export function AboutSection() {
             <span className="text-accent dark:text-primary text-base font-semibold tracking-wide mb-4 block">
               من نحن
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-[52px] font-extrabold text-foreground leading-[1.1]">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
               نبني مشاريع
               <br />
-              <span className="text-muted-foreground font-bold">مدروسة ومستدامة</span>
+              <span className="text-muted-foreground">مدروسة ومستدامة</span>
             </h2>
           </motion.div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-muted-foreground text-base sm:text-lg max-w-lg leading-relaxed lg:pt-10"
-          >
+          <motion.p className="text-muted-foreground text-[15px] sm:text-base leading-[1.8] max-w-xl lg:pt-12">
             <span className="font-semibold text-foreground">PROFIT+</span> استوديو متخصص في تقديم حلول استثمارية، تبدأ
-            من التقييم والتخطيط وتمتد الى التنفيذ والتشغيل. نعمل مع المستثمرين على بناء مشاريع قائمة على فهم عميق للسوق.
+            من التقييم والتخطيط وتمتد إلى التنفيذ والتشغيل. نعمل مع المستثمرين على بناء مشاريع قائمة على فهم عميق للسوق.
           </motion.p>
         </div>
 
