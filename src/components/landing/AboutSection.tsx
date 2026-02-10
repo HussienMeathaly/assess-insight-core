@@ -68,6 +68,10 @@ export function AboutSection() {
   </motion.p>
 </div>
 
+        {/* Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {cards.map((card, i) => (
+            <motion.div
               key={card.title}
               initial={{ opacity: 0, y: 40 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
