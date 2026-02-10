@@ -34,37 +34,40 @@ export function AboutSection() {
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16" ref={ref}>
         {/* Header - two column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 lg:gap-x-16 mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="lg:flex-shrink-0"
-          >
-            <span className="text-accent dark:text-primary text-base font-semibold tracking-wide mb-4 block">
-              من نحن
-            </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
-              نبني مشاريع
-              <br />
-              <span className="text-muted-foreground">مدروسة ومستدامة</span>
-            </h2>
-          </motion.div>
+  {/* Title */}
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={inView ? { opacity: 1, y: 0 } : {}}
+    transition={{ duration: 0.6 }}
+    className="lg:col-span-5"
+  >
+    <span className="text-accent dark:text-primary text-sm font-semibold tracking-widest mb-5 block">
+      من نحن
+    </span>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-muted-foreground text-base sm:text-lg max-w-lg leading-relaxed lg:pt-10"
-          >
-            <span className="font-semibold text-foreground">PROFIT+</span> استوديو متخصص في تقديم حلول استثمارية، تبدأ
-            من التقييم والتخطيط وتمتد الى التنفيذ والتشغيل. نعمل مع المستثمرين على بناء مشاريع قائمة على فهم عميق للسوق.
-          </motion.p>
-        </div>
+    <h2 className="text-3xl sm:text-4xl md:text-[52px] font-extrabold text-foreground leading-[1.1]">
+      نبني مشاريع
+      <br />
+      <span className="text-muted-foreground font-bold">
+        مدروسة ومستدامة
+      </span>
+    </h2>
+  </motion.div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
-          {cards.map((card, i) => (
-            <motion.div
+  {/* Description */}
+  <motion.p
+    initial={{ opacity: 0, y: 20 }}
+    animate={inView ? { opacity: 1, y: 0 } : {}}
+    transition={{ duration: 0.5, delay: 0.15 }}
+    className="lg:col-span-6 text-muted-foreground text-[15px] sm:text-base leading-[1.9] lg:pt-14"
+  >
+    <span className="font-semibold text-foreground">PROFIT+</span> استوديو
+    متخصص في تقديم حلول استثمارية، تبدأ من التقييم والتخطيط وتمتد إلى
+    التنفيذ والتشغيل. نعمل مع المستثمرين على بناء مشاريع قائمة على فهم
+    عميق للسوق، وقرارات مبنية على تحليل وواقع.
+  </motion.p>
+</div>
+
               key={card.title}
               initial={{ opacity: 0, y: 40 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -72,7 +75,7 @@ export function AboutSection() {
               className="group relative rounded-3xl p-8 sm:p-10 border border-border/40 card-interactive overflow-hidden"
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-b from-accent/5 dark:from-primary/5 to-transparent rounded-3xl" />
-
+              
               <div className="relative z-10">
                 <div className="w-14 h-14 rounded-2xl bg-accent/10 dark:bg-primary/10 flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110 group-hover:bg-accent/15 dark:group-hover:bg-primary/15">
                   <card.icon className="w-7 h-7 text-accent dark:text-primary" />
