@@ -33,7 +33,7 @@ export function AboutSection() {
 
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16" ref={ref}>
         {/* Header - two column layout */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-16 mb-16 sm:mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-10 lg:gap-x-16 mb-24">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -50,9 +50,14 @@ export function AboutSection() {
             </h2>
           </motion.div>
 
-          <motion.p className="text-muted-foreground text-[15px] sm:text-base leading-[1.8] max-w-xl lg:pt-12">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-muted-foreground text-base sm:text-lg max-w-lg leading-relaxed lg:pt-10"
+          >
             <span className="font-semibold text-foreground">PROFIT+</span> استوديو متخصص في تقديم حلول استثمارية، تبدأ
-            من التقييم والتخطيط وتمتد إلى التنفيذ والتشغيل. نعمل مع المستثمرين على بناء مشاريع قائمة على فهم عميق للسوق.
+            من التقييم والتخطيط وتمتد الى التنفيذ والتشغيل. نعمل مع المستثمرين على بناء مشاريع قائمة على فهم عميق للسوق.
           </motion.p>
         </div>
 
