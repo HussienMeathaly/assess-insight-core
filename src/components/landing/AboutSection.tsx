@@ -1,26 +1,23 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Eye, Compass, Award, ArrowLeft } from "lucide-react";
+import { Eye, Compass, Award } from "lucide-react";
 
 const cards = [
   {
     icon: Eye,
     title: "رؤيتنا",
     description: "أن نقود تحول الشركات في المنطقة من التعثر إلى الربحية المستدامة",
-    accent: "accent",
   },
   {
     icon: Compass,
     title: "رسالتنا",
     description:
       "نمكن الشركات من تجاوز التحديات وتحقيق التحول الربحي من خلال تحليل عميق، استراتيجيات مدروسة، وتنفيذ فعّال يحقق نتائج ملموسة",
-    accent: "primary",
   },
   {
     icon: Award,
     title: "قيمنا",
     description: "الشفافية، الاحترافية، الالتزام بتحقيق النتائج",
-    accent: "accent",
   },
 ];
 
@@ -30,24 +27,23 @@ export function AboutSection() {
 
   return (
     <section id="about" className="relative py-24 sm:py-32 overflow-hidden">
-      {/* Background accent */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-l from-transparent via-border to-transparent" />
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-20" ref={ref}>
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16 sm:mb-20">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16" ref={ref}>
+        {/* Header - two column layout */}
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-16 mb-16 sm:mb-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="max-w-2xl"
+            className="lg:flex-shrink-0"
           >
-            <span className="text-accent dark:text-primary text-sm font-semibold tracking-wide mb-3 block">
+            <span className="text-accent dark:text-primary text-base font-semibold tracking-wide mb-4 block">
               من نحن
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
               نبني مشاريع
               <br />
               <span className="text-muted-foreground">مدروسة ومستدامة</span>
@@ -58,7 +54,7 @@ export function AboutSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-muted-foreground text-base sm:text-lg max-w-xl leading-relaxed lg:text-left"
+            className="text-muted-foreground text-base sm:text-lg max-w-lg leading-relaxed lg:pt-10"
           >
             <span className="font-semibold text-foreground">PROFIT+</span> استوديو متخصص في تقديم حلول استثمارية، تبدأ من التقييم والتخطيط وتمتد الى التنفيذ والتشغيل.
             نعمل مع المستثمرين على بناء مشاريع قائمة على فهم عميق للسوق.
@@ -75,7 +71,6 @@ export function AboutSection() {
               transition={{ duration: 0.5, delay: 0.3 + i * 0.12 }}
               className="group relative rounded-3xl p-8 sm:p-10 border border-border/40 card-interactive overflow-hidden"
             >
-              {/* Hover gradient */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-b from-accent/5 dark:from-primary/5 to-transparent rounded-3xl" />
               
               <div className="relative z-10">
