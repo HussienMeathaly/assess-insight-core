@@ -9,7 +9,7 @@ export function HeroSection() {
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Subtle background elements */}
+      {/* Subtle background accents */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
           animate={{ scale: [1, 1.15, 1], opacity: [0.04, 0.07, 0.04] }}
@@ -25,35 +25,27 @@ export function HeroSection() {
 
       {/* Main content */}
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 py-32">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-          {/* Right side (RTL) - Text content */}
+        <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
+          
+          {/* Text content - Right side (RTL) */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="flex-1 text-center lg:text-right"
+            className="flex-1 text-center lg:text-right order-2 lg:order-1"
           >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 dark:bg-primary/10 border border-accent/20 dark:border-primary/20 mb-8"
-            >
-              <span className="w-2 h-2 rounded-full bg-accent dark:bg-primary animate-pulse-soft" />
-            </motion.div>
-
-            {/* Main heading - balanced sizing */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.15] mb-6">
+            {/* Main heading */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] mb-8">
               تحويل التجارب
               <br />
               <span className="text-accent dark:text-primary">الى مكاسب</span>
             </h1>
 
-            {/* Description - proportional to heading */}
-            <p className="text-muted-foreground text-lg sm:text-xl max-w-xl leading-relaxed mb-10 mx-auto lg:mx-0 lg:me-0">
-              <span className="font-semibold text-foreground">PROFIT+</span> استديو متخصص في تقديم حلول متكاملة
-              للمستثمرين، من التقييم والتخطيط إلى التنفيذ والتشغيل
+            {/* Description */}
+            <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-lg leading-relaxed mb-12 mx-auto lg:mx-0 lg:me-0">
+              حلول متكاملة للمستثمرين، من التقييم والتخطيط
+              <br className="hidden sm:block" />
+              إلى التنفيذ والتشغيل
             </p>
 
             {/* CTA buttons */}
@@ -78,26 +70,25 @@ export function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Left side (RTL) - Logo showcase */}
+          {/* Logo - Left side (RTL) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex-shrink-0 relative"
+            className="flex-shrink-0 relative order-1 lg:order-2"
           >
             <div className="absolute inset-0 bg-accent/5 dark:bg-primary/8 blur-3xl rounded-full scale-150" />
-            <div className="relative">
-              <motion.div
-                animate={{ y: [-6, 6, -6] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <img
-                  src={profitLogo}
-                  alt="Profit+ Logo"
-                  className="h-36 sm:h-44 md:h-52 lg:h-64 w-auto relative z-10 drop-shadow-2xl"
-                />
-              </motion.div>
-            </div>
+            <motion.div
+              animate={{ y: [-6, 6, -6] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="relative"
+            >
+              <img
+                src={profitLogo}
+                alt="Profit+ Logo"
+                className="h-32 sm:h-40 md:h-52 lg:h-64 w-auto relative z-10 drop-shadow-2xl"
+              />
+            </motion.div>
           </motion.div>
         </div>
       </div>
