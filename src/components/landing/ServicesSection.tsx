@@ -14,15 +14,13 @@ const services = [
     icon: Package,
     number: "02",
     title: "بناء وتطوير المنتجات",
-    description:
-      "من الفكرة إلى الإطلاق، نرافقك خطوة بخطوة لنحول أفكارك إلى منتجات ناجحة تحقق تأثيراً حقيقياً في السوق",
+    description: "من الفكرة إلى الإطلاق، نرافقك خطوة بخطوة لنحول أفكارك إلى منتجات ناجحة تحقق تأثيراً حقيقياً في السوق",
   },
   {
     icon: ShoppingCart,
     number: "03",
     title: "إدارة وتشغيل المبيعات",
-    description:
-      "ندير كل عمليات المبيعات والتسويق، من المستودع إلى العميل النهائي، لضمان وصول منتجاتك لأوسع جمهور",
+    description: "ندير كل عمليات المبيعات والتسويق، من المستودع إلى العميل النهائي، لضمان وصول منتجاتك لأوسع جمهور",
   },
 ];
 
@@ -47,9 +45,7 @@ export function ServicesSection() {
           <span className="text-accent dark:text-primary text-base font-semibold tracking-wide mb-4 block">
             خدماتنا
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-5">
-            حلول متكاملة لنمو أعمالك
-          </h2>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground mb-5">حلول متكاملة لنمو أعمالك</h2>
           <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
             تقديم حلول تدفع أعمالك نحو النمو والربحية المستدامة، مع تركيز على النتائج الملموسة
           </p>
@@ -66,12 +62,10 @@ export function ServicesSection() {
               className="group relative rounded-3xl border border-border/40 card-interactive overflow-hidden"
             >
               <div className="h-1 w-full bg-gradient-to-l from-accent/60 dark:from-primary/60 via-accent/30 dark:via-primary/30 to-transparent" />
-              
+
               <div className="p-8 sm:p-10">
                 <div className="flex items-center justify-between mb-8">
-                  <span className="text-5xl font-bold text-muted-foreground/20 select-none">
-                    {service.number}
-                  </span>
+                  <span className="text-5xl font-bold text-muted-foreground/20 select-none">{service.number}</span>
                   <div className="w-14 h-14 rounded-2xl bg-accent/10 dark:bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-accent/15 dark:group-hover:bg-primary/15">
                     <service.icon className="w-7 h-7 text-accent dark:text-primary" />
                   </div>
