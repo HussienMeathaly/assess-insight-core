@@ -45,11 +45,11 @@ export function AboutSection() {
               من نحن
             </span>
 
-            <h2 className="text-3xl sm:text-4xl md:text-[48px] font-extrabold text-foreground leading-[1.1]">
+            <h3 className="text-3xl sm:text-4xl md:text-[48px] font-extrabold text-foreground leading-[1.1]">
               نبني مشاريع
               <br />
               <span className="text-muted-foreground font-bold">مدروسة ومستدامة</span>
-            </h2>
+            </h3>
           </motion.div>
 
           {/* Description */}
