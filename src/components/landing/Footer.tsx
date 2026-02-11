@@ -7,17 +7,17 @@ export function Footer() {
 
   return (
     <footer className="relative border-t border-border/30">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 py-12 sm:py-16">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-4">
-            <img src={profitLogo} alt="Profit+" className="h-10 w-auto opacity-60" />
-            <div className="h-6 w-px bg-border" />
-            <p className="text-sm text-muted-foreground">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-10 lg:px-16 py-8 sm:py-12 md:py-16">
+        <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between sm:gap-8">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+            <img src={profitLogo} alt="Profit+" className="h-8 sm:h-10 w-auto opacity-60" />
+            <div className="hidden sm:block h-6 w-px bg-border" />
+            <p className="text-xs sm:text-sm text-muted-foreground">
               © {new Date().getFullYear()} جميع الحقوق محفوظة
             </p>
           </div>
 
-          <div className="flex items-center gap-6 sm:gap-8">
+          <div className="flex items-center gap-5 sm:gap-6 md:gap-8">
             {[
               { label: "الرئيسية", id: "hero" },
               { label: "من نحن", id: "about" },
@@ -26,7 +26,7 @@ export function Footer() {
               <button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 {item.label}
               </button>

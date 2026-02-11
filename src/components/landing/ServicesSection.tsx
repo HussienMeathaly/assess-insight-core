@@ -34,7 +34,7 @@ export function ServicesSection() {
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-l from-transparent via-border to-transparent" />
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 relative z-10" ref={ref}>
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-10 lg:px-16 relative z-10" ref={ref}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -51,7 +51,7 @@ export function ServicesSection() {
         </motion.div>
 
         {/* Service Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
           {services.map((service, i) => (
             <motion.div
               key={service.title}
@@ -62,7 +62,7 @@ export function ServicesSection() {
             >
               <div className="h-1 w-full bg-gradient-to-l from-accent/60 dark:from-primary/60 via-accent/30 dark:via-primary/30 to-transparent" />
 
-              <div className="p-8 sm:p-10">
+              <div className="p-6 sm:p-8 md:p-10">
                 <div className="flex items-center justify-between mb-8">
                   <span className="text-5xl font-bold text-muted-foreground/20 select-none">{service.number}</span>
                   <div className="w-14 h-14 rounded-2xl bg-accent/10 dark:bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-accent/15 dark:group-hover:bg-primary/15">

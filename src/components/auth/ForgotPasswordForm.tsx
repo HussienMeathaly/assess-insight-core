@@ -46,7 +46,7 @@ export function ForgotPasswordForm({ onBack, onSuccess }: ForgotPasswordFormProp
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-6">
+    <div className="min-h-[100svh] flex items-center justify-center px-4 py-8 sm:p-6">
       <div className="w-full max-w-md">
         {/* Logo */}
         <motion.div 
@@ -56,14 +56,14 @@ export function ForgotPasswordForm({ onBack, onSuccess }: ForgotPasswordFormProp
         >
           <div className="relative inline-block">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-            <img src={profitLogo} alt="Profit+" className="h-16 sm:h-20 md:h-24 mx-auto mb-4 relative z-10" />
+            <img src={profitLogo} alt="Profit+" className="h-14 sm:h-16 md:h-24 mx-auto mb-4 relative z-10" />
           </div>
           <p className="text-muted-foreground text-lg font-medium">منصة التقييم المؤسسي</p>
         </motion.div>
 
         {/* Card */}
         <motion.div 
-          className="bg-card/80 backdrop-blur-xl rounded-3xl p-8 md:p-10 shadow-2xl border border-border/30 relative overflow-hidden"
+          className="bg-card/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 shadow-2xl border border-border/30 relative overflow-hidden"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
