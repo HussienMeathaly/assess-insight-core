@@ -33,24 +33,21 @@ export function AboutSection() {
       </div>
 
       {/* ===== النص التعريفي (ضيق) ===== */}
-      <div ref={ref} className="max-w-5xl mx-auto px-6 sm:px-10 text-center mb-20">
+      <div ref={ref} className="max-w-4xl mx-auto px-6 sm:px-10 text-center mb-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <h3 className="text-accent dark:text-primary text-base sm:text-lg font-bold tracking-wide mb-4 block">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-8">
             من نحن
-          </h3>
+          </h2>
 
-          <h3 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground leading-tight mb-6">
-            نبني مشاريع <span className="text-muted-foreground">مدروسة ومستدامة</span>
-          </h3>
-
-          <p className="text-muted-foreground text-sm sm:text-base leading-[1.9] max-w-3xl mx-auto">
-            <span className="font-semibold text-foreground">PROFIT+</span> استوديو متخصص في تقديم حلول استثمارية تبدأ من
-            التقييم والتخطيط وتمتد إلى التنفيذ والتشغيل. نعمل مع المستثمرين على بناء مشاريع قائمة على فهم عميق للسوق،
-            وقرارات مبنية على تحليل وواقع.
+          <p className="text-muted-foreground text-sm sm:text-base leading-[2] max-w-3xl mx-auto">
+            <span className="font-semibold text-foreground">PROFIT+</span> استوديو متخصص في تقديم حلول استثمارية، تبدأ من
+            التقييم والتخطيط وتمتد إلى التنفيذ والتشغيل.
+            {" "}نعمل مع المستثمرين على بناء مشاريع مدروسة قائمة على فهم عميق للسوق واستراتيجيات عملية، ونحول الأفكار
+            الواعدة إلى منتجات مستدامة وقابلة للنمو.
           </p>
         </motion.div>
       </div>
