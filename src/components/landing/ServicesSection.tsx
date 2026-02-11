@@ -42,12 +42,11 @@ export function ServicesSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16 sm:mb-20"
         >
-          <span className="text-accent dark:text-primary text-base font-semibold tracking-wide mb-4 block">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-6">
             خدماتنا
-          </span>
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-foreground mb-5">حلول متكاملة لنمو أعمالك</h2>
-          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            تقديم حلول تدفع أعمالك نحو النمو والربحية المستدامة، مع تركيز على النتائج الملموسة
+          </h2>
+          <p className="text-muted-foreground text-sm sm:text-base max-w-3xl mx-auto leading-[2]">
+            تقديم حلول متكاملة تدفع أعمالك نحو النمو والربحية المستدامة، مع تركيز على النتائج الملموسة والتنفيذ الاحترافي
           </p>
         </motion.div>
 
