@@ -22,12 +22,12 @@ export function AuthCard({
   onMouseLeave 
 }: AuthCardProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-6 relative overflow-hidden">
+    <div className="min-h-[100svh] flex items-center justify-center px-4 py-8 sm:p-6 relative overflow-hidden">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* Gradient Orbs */}
         <motion.div
-          className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-primary/20 to-transparent blur-3xl"
+          className="absolute top-[-20%] right-[-10%] w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] rounded-full bg-gradient-to-br from-primary/20 to-transparent blur-3xl"
           animate={{
             scale: [1, 1.2, 1],
             x: [0, 50, 0],
@@ -40,7 +40,7 @@ export function AuthCard({
           }}
         />
         <motion.div
-          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-accent/15 to-transparent blur-3xl"
+          className="absolute bottom-[-20%] left-[-10%] w-[250px] sm:w-[500px] h-[250px] sm:h-[500px] rounded-full bg-gradient-to-tr from-accent/15 to-transparent blur-3xl"
           animate={{
             scale: [1.2, 1, 1.2],
             x: [0, -30, 0],
@@ -130,7 +130,7 @@ export function AuthCard({
             />
           </div>
 
-          <div className="bg-card/80 backdrop-blur-xl rounded-3xl p-8 md:p-10 relative overflow-hidden shadow-2xl border border-border/30">
+          <div className="bg-card/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 relative overflow-hidden shadow-2xl border border-border/30">
             {/* Traveling Light Beam */}
             <motion.div
               className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent pointer-events-none"

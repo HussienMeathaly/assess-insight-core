@@ -25,7 +25,7 @@ function MessageCard({
   accentColor = "primary",
 }: MessageCardProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-6">
+    <div className="min-h-[100svh] flex items-center justify-center px-4 py-8 sm:p-6">
       <div className="w-full max-w-md">
         {/* Logo */}
         <motion.div 
@@ -35,13 +35,13 @@ function MessageCard({
         >
           <div className="relative inline-block">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-            <img src={profitLogo} alt="Profit+" className="h-16 sm:h-20 md:h-24 mx-auto mb-4 relative z-10" />
+            <img src={profitLogo} alt="Profit+" className="h-14 sm:h-16 md:h-24 mx-auto mb-4 relative z-10" />
           </div>
         </motion.div>
 
         {/* Card */}
         <motion.div 
-          className="bg-card/80 backdrop-blur-xl rounded-3xl p-8 md:p-10 shadow-2xl border border-border/30 relative overflow-hidden text-center"
+          className="bg-card/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 shadow-2xl border border-border/30 relative overflow-hidden text-center"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
@@ -50,7 +50,7 @@ function MessageCard({
 
           {/* Icon */}
           <motion.div 
-            className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${iconColor} mb-6`}
+            className={`inline-flex items-center justify-center w-18 h-18 sm:w-24 sm:h-24 rounded-full ${iconColor} mb-5 sm:mb-6`}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
@@ -59,7 +59,7 @@ function MessageCard({
           </motion.div>
 
           {/* Title */}
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">{title}</h2>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-3 sm:mb-4">{title}</h2>
 
           {/* Description */}
           <div className="text-muted-foreground mb-6 leading-relaxed">
