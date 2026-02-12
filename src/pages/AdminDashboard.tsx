@@ -610,7 +610,7 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-4 py-6 md:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
           {/* بطاقة الجهات */}
           <Card className="group relative overflow-hidden border-border/30 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
             <div className="absolute top-0 left-0 w-full h-1 sm:h-1.5 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
@@ -713,38 +713,36 @@ export default function AdminDashboard() {
 
         {/* Data Tables */}
         <Tabs defaultValue="assessments" className="space-y-4 sm:space-y-6" dir="rtl">
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-2 scrollbar-hide">
-            <TabsList className="inline-flex w-auto min-w-max md:w-full gap-1 sm:gap-1.5 p-1 sm:p-1.5 bg-muted/50 backdrop-blur-sm rounded-xl sm:rounded-2xl">
+          <TabsList className="flex flex-wrap w-full gap-1 sm:gap-1.5 p-1 sm:p-1.5 h-auto bg-muted/50 backdrop-blur-sm rounded-xl sm:rounded-2xl">
               <TabsTrigger 
                 value="users" 
-                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                className="flex-1 min-w-[calc(50%-4px)] sm:min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
               >
                 <UserCog className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>المستخدمين</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="organizations" 
-                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                className="flex-1 min-w-[calc(50%-4px)] sm:min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
               >
                 <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>الجهات</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="assessments" 
-                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                className="flex-1 min-w-[calc(50%-4px)] sm:min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
               >
                 <ClipboardCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>التقييم الأولي</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="evaluations" 
-                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                className="flex-1 min-w-[calc(50%-4px)] sm:min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
               >
                 <FileCheck2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>التقييم المجاني</span>
               </TabsTrigger>
             </TabsList>
-          </div>
 
           <TabsContent value="assessments">
             <Card className="border-border/30 bg-card/50 backdrop-blur-sm shadow-xl">
