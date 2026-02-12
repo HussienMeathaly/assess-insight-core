@@ -610,71 +610,71 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-4 py-6 md:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
           {/* بطاقة الجهات */}
           <Card className="group relative overflow-hidden border-border/30 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
+            <div className="absolute top-0 left-0 w-full h-1 sm:h-1.5 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
-              <div className="p-3 rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                <Building2 className="h-6 w-6 text-primary" />
+            <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 relative p-3 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">إجمالي الجهات</CardTitle>
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Building2 className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
               </div>
             </CardHeader>
-            <CardContent className="relative">
-              <div className="text-4xl font-bold text-foreground mb-1">{organizations.length}</div>
-              <p className="text-sm text-muted-foreground">جهة مسجلة في النظام</p>
+            <CardContent className="relative p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-2xl sm:text-4xl font-bold text-foreground mb-0.5 sm:mb-1">{organizations.length}</div>
+              <p className="text-xs sm:text-sm text-muted-foreground">جهة مسجلة في النظام</p>
             </CardContent>
           </Card>
 
           {/* بطاقة التقييم الأولي */}
           <Card className="group relative overflow-hidden border-border/30 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-accent/5 transition-all duration-300">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-accent/30 via-accent to-accent/30" />
+            <div className="absolute top-0 left-0 w-full h-1 sm:h-1.5 bg-gradient-to-r from-accent/30 via-accent to-accent/30" />
             <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-medium text-muted-foreground">التقييم الأولي</CardTitle>
-              <div className="p-3 rounded-2xl bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                <ClipboardCheck className="h-6 w-6 text-accent" />
+            <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 relative p-3 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">التقييم الأولي</CardTitle>
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-accent/10 group-hover:bg-accent/20 transition-colors">
+                <ClipboardCheck className="h-4 w-4 sm:h-6 sm:w-6 text-accent" />
               </div>
             </CardHeader>
-            <CardContent className="relative">
-              <div className="text-4xl font-bold text-foreground mb-2">{assessments.length}</div>
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20">
+            <CardContent className="relative p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-2xl sm:text-4xl font-bold text-foreground mb-1 sm:mb-2">{assessments.length}</div>
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <Badge className="text-[10px] sm:text-xs bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20">
                   ✓ {qualifiedCount} مؤهل
                 </Badge>
-                <Badge variant="outline" className="text-xs bg-orange-500/10 text-orange-600 border-orange-500/30">
+                <Badge variant="outline" className="text-[10px] sm:text-xs bg-orange-500/10 text-orange-600 border-orange-500/30">
                   {assessments.length - qualifiedCount} غير مؤهل
                 </Badge>
               </div>
-              <div className="flex items-center gap-2">
-                <div className={`w-2.5 h-2.5 rounded-full ${avgScoreNum >= 75 ? "bg-green-500" : avgScoreNum >= 50 ? "bg-amber-500" : "bg-red-500"}`} />
-                <span className="text-sm text-muted-foreground">المتوسط: <span className="font-semibold text-foreground">{avgScore}</span></span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${avgScoreNum >= 75 ? "bg-green-500" : avgScoreNum >= 50 ? "bg-amber-500" : "bg-red-500"}`} />
+                <span className="text-xs sm:text-sm text-muted-foreground">المتوسط: <span className="font-semibold text-foreground">{avgScore}</span></span>
               </div>
             </CardContent>
           </Card>
 
           {/* بطاقة التقييم المجاني */}
           <Card className="group relative overflow-hidden border-border/30 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-secondary/30 via-secondary to-secondary/30" />
+            <div className="absolute top-0 left-0 w-full h-1 sm:h-1.5 bg-gradient-to-r from-secondary/30 via-secondary to-secondary/30" />
             <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-medium text-muted-foreground">التقييم المجاني</CardTitle>
-              <div className="p-3 rounded-2xl bg-secondary/10 group-hover:bg-secondary/20 transition-colors">
-                <FileCheck2 className="h-6 w-6 text-secondary-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 relative p-3 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">التقييم المجاني</CardTitle>
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-secondary/10 group-hover:bg-secondary/20 transition-colors">
+                <FileCheck2 className="h-4 w-4 sm:h-6 sm:w-6 text-secondary-foreground" />
               </div>
             </CardHeader>
-            <CardContent className="relative">
-              <div className="text-4xl font-bold text-foreground mb-2">{evaluations.length}</div>
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20">
+            <CardContent className="relative p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-2xl sm:text-4xl font-bold text-foreground mb-1 sm:mb-2">{evaluations.length}</div>
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <Badge className="text-[10px] sm:text-xs bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20">
                   ✓ {completedEvaluations} مكتمل
                 </Badge>
-                <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
+                <Badge variant="outline" className="text-[10px] sm:text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
                   {evaluations.length - completedEvaluations} قيد التنفيذ
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 المتوسط: <span className="font-semibold text-foreground">
                   {evaluations.length > 0 
                     ? (evaluations.filter(e => e.is_completed && e.total_score !== null).reduce((sum, e) => sum + (e.total_score || 0), 0) / (completedEvaluations || 1)).toFixed(1)
@@ -686,19 +686,19 @@ export default function AdminDashboard() {
 
           {/* بطاقة معدل التأهيل */}
           <Card className="group relative overflow-hidden border-border/30 bg-card/50 backdrop-blur-sm hover:shadow-xl hover:shadow-green-500/5 transition-all duration-300">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-green-500/30 via-green-500 to-green-500/30" />
+            <div className="absolute top-0 left-0 w-full h-1 sm:h-1.5 bg-gradient-to-r from-green-500/30 via-green-500 to-green-500/30" />
             <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-              <CardTitle className="text-sm font-medium text-muted-foreground">معدل التأهيل</CardTitle>
-              <div className="p-3 rounded-2xl bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
-                <Users className="h-6 w-6 text-green-600" />
+            <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 relative p-3 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">معدل التأهيل</CardTitle>
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-green-500/10 group-hover:bg-green-500/20 transition-colors">
+                <Users className="h-4 w-4 sm:h-6 sm:w-6 text-green-600" />
               </div>
             </CardHeader>
-            <CardContent className="relative">
-              <div className="text-4xl font-bold text-green-600 mb-3">
+            <CardContent className="relative p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-2xl sm:text-4xl font-bold text-green-600 mb-2 sm:mb-3">
                 {assessments.length > 0 ? Math.round((qualifiedCount / assessments.length) * 100) : 0}%
               </div>
-              <div className="w-full h-2.5 bg-muted/50 rounded-full overflow-hidden mb-2">
+              <div className="w-full h-2 sm:h-2.5 bg-muted/50 rounded-full overflow-hidden mb-1.5 sm:mb-2">
                 <div
                   className="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-700 ease-out"
                   style={{
@@ -706,41 +706,41 @@ export default function AdminDashboard() {
                   }}
                 />
               </div>
-              <p className="text-sm text-muted-foreground">نسبة الجهات المؤهلة</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">نسبة الجهات المؤهلة</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Data Tables */}
-        <Tabs defaultValue="assessments" className="space-y-6" dir="rtl">
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-2">
-            <TabsList className="inline-flex w-auto min-w-max md:w-full gap-1.5 p-1.5 bg-muted/50 backdrop-blur-sm rounded-2xl">
+        <Tabs defaultValue="assessments" className="space-y-4 sm:space-y-6" dir="rtl">
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-2 scrollbar-hide">
+            <TabsList className="inline-flex w-auto min-w-max md:w-full gap-1 sm:gap-1.5 p-1 sm:p-1.5 bg-muted/50 backdrop-blur-sm rounded-xl sm:rounded-2xl">
               <TabsTrigger 
                 value="users" 
-                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
               >
-                <UserCog className="h-4 w-4 shrink-0" />
+                <UserCog className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>المستخدمين</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="organizations" 
-                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
               >
-                <Building2 className="h-4 w-4 shrink-0" />
+                <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>الجهات</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="assessments" 
-                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
               >
-                <ClipboardCheck className="h-4 w-4 shrink-0" />
+                <ClipboardCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>التقييم الأولي</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="evaluations" 
-                className="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
               >
-                <FileCheck2 className="h-4 w-4 shrink-0" />
+                <FileCheck2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>التقييم المجاني</span>
               </TabsTrigger>
             </TabsList>
