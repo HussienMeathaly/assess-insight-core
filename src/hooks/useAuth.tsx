@@ -1,11 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
 const REMEMBER_ME_KEY = 'auth_remember_me';
 const SESSION_MARKER_KEY = 'auth_session_active';
 
-export function useAuth() {
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  signUp: (email: string, password: string) => Promise<{ data: any; error: any }>;
+  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ error: any }>;
+  signOut: () => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  isAuthenticated: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,14 +29,11 @@ export function useAuth() {
       const rememberMe = localStorage.getItem(REMEMBER_ME_KEY);
       const sessionMarker = sessionStorage.getItem(SESSION_MARKER_KEY);
       
-      // If Remember Me was explicitly set to false and session marker is gone (new browser session)
       if (rememberMe === 'false' && !sessionMarker) {
-        // Sign out the user
         await supabase.auth.signOut();
         localStorage.removeItem(REMEMBER_ME_KEY);
       }
       
-      // Set session marker for current browser session
       sessionStorage.setItem(SESSION_MARKER_KEY, 'true');
     };
     
@@ -31,7 +41,6 @@ export function useAuth() {
   }, []);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -40,7 +49,6 @@ export function useAuth() {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -64,10 +72,7 @@ export function useAuth() {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string, rememberMe: boolean = true) => {
-    // Store remember me preference
     localStorage.setItem(REMEMBER_ME_KEY, String(rememberMe));
-    
-    // Set session marker
     sessionStorage.setItem(SESSION_MARKER_KEY, 'true');
     
     const { error } = await supabase.auth.signInWithPassword({
@@ -78,7 +83,6 @@ export function useAuth() {
   }, []);
 
   const signOut = useCallback(async () => {
-    // Clear remember me preference on explicit sign out
     localStorage.removeItem(REMEMBER_ME_KEY);
     sessionStorage.removeItem(SESSION_MARKER_KEY);
     
@@ -95,14 +99,26 @@ export function useAuth() {
     return { error };
   }, []);
 
-  return {
-    user,
-    session,
-    loading,
-    signUp,
-    signIn,
-    signOut,
-    resetPassword,
-    isAuthenticated: !!session,
-  };
+  return (
+    <AuthContext.Provider value={{
+      user,
+      session,
+      loading,
+      signUp,
+      signIn,
+      signOut,
+      resetPassword,
+      isAuthenticated: !!session,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }

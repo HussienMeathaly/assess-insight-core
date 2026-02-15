@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useAnalysis } from "@/hooks/useAnalysis";
 import { useAuth } from "@/hooks/useAuth";
@@ -61,8 +61,11 @@ export function Assessment() {
     fetchOrganizationName();
   }, [user]);
 
+  const hasSavedRef = useRef(false);
+
   useEffect(() => {
-    if (currentStep === "result") {
+    if (currentStep === "result" && !hasSavedRef.current) {
+      hasSavedRef.current = true;
       const result = getResult();
       analyzeResult(result);
       saveAssessmentToDatabase();
