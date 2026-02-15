@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { ClipboardCheck, Package, ShoppingCart, ArrowLeft } from "lucide-react";
+import { ClipboardCheck, Package, ShoppingCart } from "lucide-react";
 
 const services = [
   {
@@ -71,12 +71,7 @@ export function ServicesSection() {
                 </div>
 
                 <h3 className="font-bold text-foreground text-xl sm:text-2xl mb-4">{service.title}</h3>
-                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-6">{service.description}</p>
-
-                <div className="flex items-center gap-2 text-accent dark:text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                  <span>اعرف المزيد</span>
-                  <ArrowLeft className="w-4 h-4" />
-                </div>
+                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">{service.description}</p>
               </div>
             </motion.div>
           ))}
