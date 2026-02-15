@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ interface AuthButtonProps {
   disabled?: boolean;
 }
 
-export function AuthButton({ 
+export const AuthButton = forwardRef<HTMLDivElement, AuthButtonProps>(function AuthButton({ 
   isSubmitting, 
   icon, 
   label, 
@@ -23,11 +23,12 @@ export function AuthButton({
   type = "submit",
   onClick,
   disabled,
-}: AuthButtonProps) {
+}, ref) {
   const isPrimary = variant === "primary";
 
   return (
     <motion.div 
+      ref={ref}
       className="relative"
       whileHover={{ scale: disabled ? 1 : 1.02 }}
       whileTap={{ scale: disabled ? 1 : 0.98 }}
@@ -96,4 +97,4 @@ export function AuthButton({
       </button>
     </motion.div>
   );
-}
+});

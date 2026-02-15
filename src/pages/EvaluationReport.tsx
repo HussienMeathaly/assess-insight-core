@@ -412,7 +412,7 @@ export default function EvaluationReport() {
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-foreground">{element.mainElementName}</span>
                         <div className="flex items-center gap-3">
-                          <Badge className={cn(scoreInfo.bgColor, scoreInfo.color, "border-0")}>
+                          <Badge className={cn(elementInfo.bgColor, elementInfo.color, "border-0")}>
                             {elementInfo.label}
                           </Badge>
                           <span className="font-bold text-foreground min-w-[80px] text-left">
