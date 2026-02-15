@@ -93,7 +93,11 @@ export default function Auth() {
   });
 
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  // Detect recovery token in URL hash on initial load
+  const [isResettingPassword, setIsResettingPassword] = useState(() => {
+    const hash = window.location.hash;
+    return hash.includes('type=recovery') || hash.includes('type=magiclink');
+  });
   const [resetSuccess, setResetSuccess] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showResetSent, setShowResetSent] = useState(false);
