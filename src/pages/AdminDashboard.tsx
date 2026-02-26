@@ -939,38 +939,38 @@ export default function AdminDashboard() {
                     <Table dir="rtl">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text-right">الجهة</TableHead>
-                          <TableHead className="text-right">المسؤول</TableHead>
-                          <TableHead className="text-right">النتيجة</TableHead>
-                          <TableHead className="text-right">الحالة</TableHead>
-                          <TableHead className="text-right">تاريخ البدء</TableHead>
-                          <TableHead className="text-right">الإجراءات</TableHead>
+                          <TableHead className="text-center">الجهة</TableHead>
+                          <TableHead className="text-center">المسؤول</TableHead>
+                          <TableHead className="text-center">النتيجة</TableHead>
+                          <TableHead className="text-center">الحالة</TableHead>
+                          <TableHead className="text-center">تاريخ البدء</TableHead>
+                          <TableHead className="text-center">الإجراءات</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredEvaluations.map((evaluation) => (
                           <TableRow key={evaluation.id}>
-                            <TableCell className="font-medium">
+                            <TableCell className="text-center font-medium">
                               {evaluation.organization?.name || "غير معروف"}
                             </TableCell>
-                            <TableCell>{evaluation.organization?.contact_person || "-"}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">{evaluation.organization?.contact_person || "-"}</TableCell>
+                            <TableCell className="text-center">
                               {evaluation.total_score !== null
                                 ? `${evaluation.total_score} / ${evaluation.max_score}`
                                 : "-"}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               <Badge variant={evaluation.is_completed ? "default" : "secondary"}>
                                 {evaluation.is_completed ? "مكتمل" : "قيد التنفيذ"}
                               </Badge>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               {evaluation.started_at
                                 ? new Date(evaluation.started_at).toLocaleDateString("en-GB")
                                 : "-"}
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center justify-center gap-1">
                                 <Button
                                   variant="ghost"
                                   size="sm"
