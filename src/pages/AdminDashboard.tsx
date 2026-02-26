@@ -818,32 +818,32 @@ export default function AdminDashboard() {
                     <Table dir="rtl">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text-right">الجهة</TableHead>
-                          <TableHead className="text-right">المسؤول</TableHead>
-                          <TableHead className="text-right">النتيجة</TableHead>
-                          <TableHead className="text-right">الحالة</TableHead>
-                          <TableHead className="text-right">التاريخ</TableHead>
-                          <TableHead className="text-right">الإجراءات</TableHead>
+                          <TableHead className="text-center">الجهة</TableHead>
+                          <TableHead className="text-center">المسؤول</TableHead>
+                          <TableHead className="text-center">النتيجة</TableHead>
+                          <TableHead className="text-center">الحالة</TableHead>
+                          <TableHead className="text-center">التاريخ</TableHead>
+                          <TableHead className="text-center">الإجراءات</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredAssessments.map((assessment) => (
                           <TableRow key={assessment.id}>
-                            <TableCell className="font-medium">
+                            <TableCell className="text-center font-medium">
                               {assessment.organization?.name || "غير معروف"}
                             </TableCell>
-                            <TableCell>{assessment.organization?.contact_person || "-"}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">{assessment.organization?.contact_person || "-"}</TableCell>
+                            <TableCell className="text-center">
                               {assessment.total_score} / {assessment.max_score}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               <Badge variant={assessment.is_qualified ? "default" : "secondary"}>
                                 {assessment.is_qualified ? "مؤهل" : "غير مؤهل"}
                               </Badge>
                             </TableCell>
-                            <TableCell>{new Date(assessment.completed_at).toLocaleDateString("en-GB")}</TableCell>
+                            <TableCell className="text-center">{new Date(assessment.completed_at).toLocaleDateString("en-GB")}</TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center justify-center gap-1">
                                 <Button variant="ghost" size="sm" onClick={() => handleViewDetails(assessment)}>
                                   <Eye className="h-4 w-4 ml-1" />
                                   التفاصيل
@@ -1044,27 +1044,27 @@ export default function AdminDashboard() {
                     <Table dir="rtl">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text-right">اسم الجهة</TableHead>
-                          <TableHead className="text-right">المسؤول</TableHead>
-                          <TableHead className="text-right">البريد الإلكتروني</TableHead>
-                          <TableHead className="text-right">الهاتف</TableHead>
-                          <TableHead className="text-right">تاريخ التسجيل</TableHead>
-                          <TableHead className="text-right">الإجراءات</TableHead>
+                          <TableHead className="text-center">اسم الجهة</TableHead>
+                          <TableHead className="text-center">المسؤول</TableHead>
+                          <TableHead className="text-center">البريد الإلكتروني</TableHead>
+                          <TableHead className="text-center">الهاتف</TableHead>
+                          <TableHead className="text-center">تاريخ التسجيل</TableHead>
+                          <TableHead className="text-center">الإجراءات</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {organizations.map((org) => (
                           <TableRow key={org.id}>
-                            <TableCell className="font-medium">{org.name}</TableCell>
-                            <TableCell>{org.contact_person}</TableCell>
-                            <TableCell dir="ltr" className="text-right">
+                            <TableCell className="text-center font-medium">{org.name}</TableCell>
+                            <TableCell className="text-center">{org.contact_person}</TableCell>
+                            <TableCell dir="ltr" className="text-center">
                               {org.email}
                             </TableCell>
-                            <TableCell dir="ltr" className="text-right">
+                            <TableCell dir="ltr" className="text-center">
                               {org.phone}
                             </TableCell>
-                            <TableCell>{new Date(org.created_at).toLocaleDateString("en-GB")}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">{new Date(org.created_at).toLocaleDateString("en-GB")}</TableCell>
+                            <TableCell className="text-center">
                               <EditOrganizationButton
                                 organization={org}
                                 onUpdate={(updatedOrg) => {
@@ -1130,27 +1130,27 @@ export default function AdminDashboard() {
                     <Table dir="rtl">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="text-right">البريد الإلكتروني</TableHead>
-                          <TableHead className="text-right">الصلاحية الحالية</TableHead>
-                          <TableHead className="text-right">تغيير الصلاحية</TableHead>
-                          <TableHead className="text-right">الإجراءات</TableHead>
+                          <TableHead className="text-center">البريد الإلكتروني</TableHead>
+                          <TableHead className="text-center">الصلاحية الحالية</TableHead>
+                          <TableHead className="text-center">تغيير الصلاحية</TableHead>
+                          <TableHead className="text-center">الإجراءات</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {users.map((u) => (
                           <TableRow key={u.id}>
-                            <TableCell className="font-medium text-right">
+                            <TableCell className="text-center font-medium">
                               <span dir="ltr" className="inline-flex items-center gap-2">
                                 {u.id === user?.id && <Badge variant="outline">أنت</Badge>}
                                 {u.email}
                               </span>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               <Badge variant={u.role === "admin" ? "default" : "secondary"}>
                                 {u.role === "admin" ? "مدير" : u.role === "user" ? "مستخدم" : "غير محدد"}
                               </Badge>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               {u.id === user?.id ? (
                                 <span className="text-muted-foreground text-sm">غير متاح</span>
                               ) : (
@@ -1159,7 +1159,7 @@ export default function AdminDashboard() {
                                   onValueChange={(value) => handleRoleChange(u.id, value as "admin" | "user" | "none")}
                                   disabled={updatingRole === u.id}
                                 >
-                                  <SelectTrigger className="w-32">
+                                  <SelectTrigger className="w-32 mx-auto">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -1169,7 +1169,7 @@ export default function AdminDashboard() {
                                 </Select>
                               )}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                               {u.id === user?.id ? (
                                 <span className="text-muted-foreground text-sm">-</span>
                               ) : (
