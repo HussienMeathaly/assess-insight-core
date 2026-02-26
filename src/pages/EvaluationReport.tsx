@@ -21,8 +21,6 @@ import {
 } from 'lucide-react';
 import profitLogo from '@/assets/profit-logo.png';
 import { cn } from '@/lib/utils';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 interface ReportData {
   report_id: string;
@@ -160,6 +158,8 @@ export default function EvaluationReport() {
     
     setExporting(true);
     try {
+      const { default: html2canvas } = await import('html2canvas');
+      const { default: jsPDF } = await import('jspdf');
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
         useCORS: true,

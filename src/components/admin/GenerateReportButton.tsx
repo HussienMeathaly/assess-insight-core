@@ -3,8 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { FileText, Loader2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import profitLogo from '@/assets/profit-logo.png';
 import { ReportPreviewModal } from './ReportPreviewModal';
 
@@ -821,6 +819,8 @@ export function GenerateReportButton({
       if (!pages || pages.length === 0) throw new Error('Pages not found');
 
       // Create PDF
+      const { default: jsPDF } = await import('jspdf');
+      const { default: html2canvas } = await import('html2canvas');
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',

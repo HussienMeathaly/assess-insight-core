@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Download, FileSpreadsheet } from 'lucide-react';
 import profitLogo from '@/assets/profit-logo.png';
-import * as XLSX from 'xlsx';
+
 import { toast } from 'sonner';
 
 interface ReportAnswer {
@@ -60,8 +60,9 @@ export function ReportPreviewModal({
 }: ReportPreviewModalProps) {
   if (!reportData) return null;
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
+      const XLSX = await import('xlsx');
       const { orgName, groupedAnswers } = reportData;
 
       // Create workbook
