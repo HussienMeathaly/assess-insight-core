@@ -84,7 +84,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           </p>
         </motion.div>
 
-        {/* Hidden: Score Circle and Detailed Scores 
+        {/* Score Circle Only - No Details */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -115,76 +115,12 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-3xl md:text-4xl font-bold text-foreground">{percentage}%</span>
-              <span className="text-xs text-muted-foreground">من الدرجة الكلية</span>
+              <span className="text-xs text-muted-foreground">نسبة التقييم</span>
             </div>
           </div>
         </motion.div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-secondary/50 rounded-xl p-4 md:p-6 mb-4 md:mb-6"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h3 className="text-base md:text-lg font-semibold text-foreground">تفصيل الدرجات</h3>
-          </div>
-
-          <div className="space-y-3 md:space-y-4">
-            {result.answers.map((answer, index) => {
-              const question = assessmentQuestions.find((q) => q.id === answer.questionId);
-              if (!question) return null;
-              const maxQuestionScore = question.weight;
-              const answerPercentage = (answer.score / maxQuestionScore) * 100;
-
-              return (
-                <motion.div 
-                  key={answer.questionId} 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + index * 0.05 }}
-                  className="text-right"
-                >
-                  <div className="flex flex-row-reverse justify-between items-center mb-1.5 gap-2">
-                    <span className="text-xs md:text-sm font-semibold text-foreground whitespace-nowrap">
-                      {Math.round(answer.score)} / {maxQuestionScore}
-                    </span>
-                    <span className="text-xs md:text-sm text-muted-foreground truncate max-w-[65%] md:max-w-[70%]">
-                      {question.text}
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 md:h-2.5 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${answerPercentage}%` }}
-                      transition={{ duration: 0.8, delay: 0.6 + index * 0.05 }}
-                      className={cn(
-                        "h-full rounded-full",
-                        answerPercentage >= 70 
-                          ? "bg-success" 
-                          : answerPercentage >= 40 
-                            ? "bg-primary" 
-                            : "bg-muted-foreground"
-                      )}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <div className="mt-4 md:mt-5 pt-4 border-t border-border">
-            <div className="flex flex-row-reverse justify-between items-center">
-              <span className="text-lg md:text-xl font-bold text-primary flex items-center gap-2">
-                <Award className="w-5 h-5" />
-                {Math.round(result.totalScore)} / {result.maxScore}
-              </span>
-              <span className="text-sm font-semibold text-foreground">المجموع الكلي</span>
-            </div>
-          </div>
-        </motion.div>
-        */}
+        
 
         {/* Analysis */}
         <motion.div 
