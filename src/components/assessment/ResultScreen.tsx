@@ -120,7 +120,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           </div>
         </motion.div>
 
-        {/* Hidden: Detailed Scores by Question
+        
 
         {/* Analysis */}
         <motion.div 
