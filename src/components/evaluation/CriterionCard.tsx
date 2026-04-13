@@ -41,11 +41,13 @@ export function CriterionCard({
             {isAnswered && (
               <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
             )}
-            <h4 className="font-semibold text-foreground text-sm sm:text-base leading-tight">{name}</h4>
+          <h4 className="font-semibold text-foreground text-sm sm:text-base leading-tight">{name}</h4>
           </div>
+          {/* Hidden: Weight display
           <span className="text-[10px] sm:text-xs text-muted-foreground">
             الوزن: {weight}%
           </span>
+          */}
         </div>
         {isAnswered && onClear && (
           <button

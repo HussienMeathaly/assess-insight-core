@@ -53,65 +53,31 @@ export function EvaluationResult({
         </p>
       </div>
 
-      {/* Main Score Card */}
+      {/* Main Score Card - Hidden Score Circle */}
       <div className="card-elevated rounded-xl sm:rounded-2xl p-5 sm:p-8 mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-          {/* Score Circle */}
-          <div className="relative w-28 h-28 sm:w-40 sm:h-40">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                fill="none"
-                stroke="hsl(var(--muted))"
-                strokeWidth="10"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                fill="none"
-                stroke={isQualified ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
-                strokeWidth="10"
-                strokeLinecap="round"
-                strokeDasharray={`${percentage * 2.83} 283`}
-                className="transition-all duration-1000"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl sm:text-4xl font-bold text-foreground">{percentage}%</span>
-              <span className={cn("text-xs sm:text-sm font-medium", scoreInfo.color)}>
-                {scoreInfo.label}
-              </span>
-            </div>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className={cn(
+            "inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-2",
+            isQualified ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
+          )}>
+            {isQualified ? (
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            ) : (
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
+            <span className="font-medium text-sm sm:text-base">
+              {isQualified ? 'المنتج مؤهل للتصنيف' : 'المنتج يحتاج تحسينات'}
+            </span>
           </div>
-
-          {/* Status */}
-          <div className="flex-1 text-center sm:text-right">
-            <div className={cn(
-              "inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-3 sm:mb-4",
-              isQualified ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
-            )}>
-              {isQualified ? (
-                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
-              ) : (
-                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-              )}
-              <span className="font-medium text-sm sm:text-base">
-                {isQualified ? 'المنتج مؤهل للتصنيف' : 'المنتج يحتاج تحسينات'}
-              </span>
-            </div>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              {isQualified
-                ? 'حقق المنتج الحد الأدنى المطلوب للتأهل. يمكنك الآن متابعة عملية التصنيف.'
-                : 'لم يحقق المنتج الحد الأدنى المطلوب. راجع التفاصيل أدناه لمعرفة نقاط التحسين.'}
-            </p>
-          </div>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-md">
+            {isQualified
+              ? 'حقق المنتج الحد الأدنى المطلوب للتأهل. يمكنك الآن متابعة عملية التصنيف.'
+              : 'لم يحقق المنتج الحد الأدنى المطلوب. راجع التفاصيل أدناه لمعرفة نقاط التحسين.'}
+          </p>
         </div>
       </div>
 
-      {/* Detailed Scores */}
+      {/* Hidden: Detailed Scores by Element
       <div className="card-elevated rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
         <h3 className="font-bold text-foreground mb-4 sm:mb-6 text-sm sm:text-base">
           تفاصيل النتائج حسب العناصر الرئيسية
@@ -145,6 +111,7 @@ export function EvaluationResult({
           })}
         </div>
       </div>
+      */}
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">

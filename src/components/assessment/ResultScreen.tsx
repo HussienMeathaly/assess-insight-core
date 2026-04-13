@@ -84,7 +84,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           </p>
         </motion.div>
 
-        {/* Score Circle */}
+        {/* Hidden: Score Circle and Detailed Scores 
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -120,7 +120,6 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           </div>
         </motion.div>
 
-        {/* Detailed Scores */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -175,7 +174,6 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
             })}
           </div>
 
-          {/* Total Score */}
           <div className="mt-4 md:mt-5 pt-4 border-t border-border">
             <div className="flex flex-row-reverse justify-between items-center">
               <span className="text-lg md:text-xl font-bold text-primary flex items-center gap-2">
@@ -186,6 +184,7 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
             </div>
           </div>
         </motion.div>
+        */}
 
         {/* Analysis */}
         <motion.div 

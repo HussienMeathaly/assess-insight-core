@@ -71,9 +71,11 @@ export function MainElementView({
             <h2 className="text-base sm:text-xl font-bold text-foreground mb-1 leading-tight">
               {element.name}
             </h2>
+            {/* Hidden: Weight display
             <p className="text-xs sm:text-sm text-muted-foreground">
               الوزن: {element.weight_percentage}% من إجمالي التقييم
             </p>
+            */}
           </div>
           <div className="text-left bg-primary/10 px-3 py-2 rounded-lg shrink-0">
             <div className="text-lg sm:text-2xl font-bold text-primary">
