@@ -53,11 +53,39 @@ export function EvaluationResult({
         </p>
       </div>
 
-      {/* Main Score Card - Hidden Score Circle */}
+      {/* Main Score Card - Shows Percentage Only */}
       <div className="card-elevated rounded-xl sm:rounded-2xl p-5 sm:p-8 mb-4 sm:mb-6">
         <div className="flex flex-col items-center gap-4 text-center">
+          {/* Score Circle */}
+          <div className="relative w-28 h-28 sm:w-32 sm:h-32">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke="hsl(var(--muted))"
+                strokeWidth="6"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke={isQualified ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeDasharray={`${percentage * 2.64} 264`}
+                className="transition-all duration-1000 ease-out"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl font-bold text-foreground">{percentage}%</span>
+            </div>
+          </div>
+
           <div className={cn(
-            "inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-2",
+            "inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full",
             isQualified ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
           )}>
             {isQualified ? (
@@ -72,7 +100,7 @@ export function EvaluationResult({
           <p className="text-sm sm:text-base text-muted-foreground max-w-md">
             {isQualified
               ? 'حقق المنتج الحد الأدنى المطلوب للتأهل. يمكنك الآن متابعة عملية التصنيف.'
-              : 'لم يحقق المنتج الحد الأدنى المطلوب. راجع التفاصيل أدناه لمعرفة نقاط التحسين.'}
+              : 'لم يحقق المنتج الحد الأدنى المطلوب. يمكنك إعادة التقييم لتحسين النتيجة.'}
           </p>
         </div>
       </div>
