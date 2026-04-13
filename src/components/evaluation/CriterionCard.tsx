@@ -22,7 +22,6 @@ interface CriterionCardProps {
 export function CriterionCard({
   id,
   name,
-  weight,
   options,
   selectedOptionId,
   onSelect,
@@ -43,9 +42,11 @@ export function CriterionCard({
             )}
             <h4 className="font-semibold text-foreground text-sm sm:text-base leading-tight">{name}</h4>
           </div>
+          {/* Hidden: Weight display
           <span className="text-[10px] sm:text-xs text-muted-foreground">
             الوزن: {weight}%
           </span>
+          */}
         </div>
         {isAnswered && onClear && (
           <button
@@ -73,16 +74,6 @@ export function CriterionCard({
       >
         {options.map((option) => {
           const isSelected = selectedOptionId === option.id;
-          const rawScore = ((option.score_percentage / 100) * weight).toFixed(1).replace(/\.0$/, '');
-          
-          // Color based on percentage: green (>=70%), yellow (40-69%), red (<40%)
-          const getScoreColor = (percentage: number) => {
-            if (percentage >= 70) return { bg: 'bg-green-500', text: 'text-green-500', border: 'border-green-500/30' };
-            if (percentage >= 40) return { bg: 'bg-yellow-500', text: 'text-yellow-500', border: 'border-yellow-500/30' };
-            return { bg: 'bg-red-500', text: 'text-red-500', border: 'border-red-500/30' };
-          };
-          
-          const scoreColor = getScoreColor(option.score_percentage);
           
           return (
             <div
@@ -92,7 +83,7 @@ export function CriterionCard({
                 "border-2 flex-row-reverse",
                 isSelected
                   ? `border-primary bg-primary/10`
-                  : `border-muted hover:${scoreColor.border} hover:bg-muted/50`
+                  : `border-muted hover:border-primary/30 hover:bg-muted/50`
               )}
               onClick={() => onSelect(option.id, option.score_percentage)}
             >
@@ -106,14 +97,6 @@ export function CriterionCard({
               >
                 {option.label}
               </Label>
-              <span className={cn(
-                "text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full min-w-[1.5rem] sm:min-w-[2rem] text-center font-medium shrink-0",
-                isSelected
-                  ? `${scoreColor.bg} text-white`
-                  : `${scoreColor.bg}/20 ${scoreColor.text}`
-              )}>
-                {rawScore}
-              </span>
             </div>
           );
         })}

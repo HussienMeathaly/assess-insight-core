@@ -106,7 +106,7 @@ export function RegistrationForm({ onSubmit, onBack }: RegistrationFormProps) {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof RegistrationData, string>>>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
+  const debounceTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const validateField = (field: keyof RegistrationData, value: string) => {
     const fieldSchema = {
