@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AssessmentResult } from "@/types/assessment";
 import { CheckCircle2, AlertCircle, ArrowLeft, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import profitLogo from "@/assets/profit-logo.png";
 import { useNavigate } from "react-router-dom";
-import { UpsellModal } from "@/components/evaluation/UpsellModal";
 
 interface ResultScreenProps {
   result: AssessmentResult;
