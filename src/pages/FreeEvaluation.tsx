@@ -116,11 +116,11 @@ export default function FreeEvaluation() {
         }
       });
     }
-    if (showResults && !showUpsell) {
+    if (showResults && upsellDismissCount < 2) {
       const timer = setTimeout(() => setShowUpsell(true), 1500);
       return () => clearTimeout(timer);
     }
-  }, [showResults, saved, saving, saveEvaluation, showUpsell]);
+  }, [showResults, saved, saving, saveEvaluation, upsellDismissCount]);
 
   const handleRetake = () => {
     window.location.reload();
