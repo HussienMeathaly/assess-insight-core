@@ -189,6 +189,15 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           </motion.p>
         )}
       </motion.div>
+
+      <UpsellModal
+        open={showUpsell}
+        onClose={() => setShowUpsell(false)}
+        onUpgrade={() => {
+          setShowUpsell(false);
+          navigate('/contact-sales');
+        }}
+      />
     </div>
   );
 }
