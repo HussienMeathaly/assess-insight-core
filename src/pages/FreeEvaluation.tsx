@@ -20,6 +20,7 @@ export default function FreeEvaluation() {
   const { user, loading: authLoading } = useAuth();
   const [showResults, setShowResults] = useState(false);
   const [showUpsell, setShowUpsell] = useState(false);
+  const [upsellDismissCount, setUpsellDismissCount] = useState(0);
   const [checkingOrg, setCheckingOrg] = useState(true);
   const [needsOrganization, setNeedsOrganization] = useState(false);
   
