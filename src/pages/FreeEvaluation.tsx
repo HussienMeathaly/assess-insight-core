@@ -9,6 +9,7 @@ import { EvaluationProgress } from '@/components/evaluation/EvaluationProgress';
 import { MobileProgressSummary } from '@/components/evaluation/MobileProgressSummary';
 import { MainElementView } from '@/components/evaluation/MainElementView';
 import { EvaluationResult } from '@/components/evaluation/EvaluationResult';
+import { UpsellModal } from '@/components/evaluation/UpsellModal';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -18,6 +19,7 @@ export default function FreeEvaluation() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [showResults, setShowResults] = useState(false);
+  const [showUpsell, setShowUpsell] = useState(false);
   const [checkingOrg, setCheckingOrg] = useState(true);
   const [needsOrganization, setNeedsOrganization] = useState(false);
   
@@ -102,7 +104,7 @@ export default function FreeEvaluation() {
     }
   };
 
-  // Save evaluation when showing results
+  // Save evaluation and show upsell when showing results
   useEffect(() => {
     if (showResults && !saved && !saving) {
       saveEvaluation().then((success) => {
@@ -113,7 +115,11 @@ export default function FreeEvaluation() {
         }
       });
     }
-  }, [showResults, saved, saving, saveEvaluation]);
+    if (showResults && !showUpsell) {
+      const timer = setTimeout(() => setShowUpsell(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [showResults, saved, saving, saveEvaluation, showUpsell]);
 
   const handleRetake = () => {
     window.location.reload();
@@ -198,6 +204,14 @@ export default function FreeEvaluation() {
           scoresByElement={scores.byMainElement}
           onRetake={handleRetake}
           onBack={handleBack}
+        />
+        <UpsellModal
+          open={showUpsell}
+          onClose={() => setShowUpsell(false)}
+          onUpgrade={() => {
+            setShowUpsell(false);
+            navigate('/contact-sales');
+          }}
         />
       </div>
     );
