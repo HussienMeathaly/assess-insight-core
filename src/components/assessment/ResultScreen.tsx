@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AssessmentResult } from "@/types/assessment";
 import { CheckCircle2, AlertCircle, ArrowLeft, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import profitLogo from "@/assets/profit-logo.png";
 import { useNavigate } from "react-router-dom";
-import { UpsellModal } from "@/components/evaluation/UpsellModal";
 
 interface ResultScreenProps {
   result: AssessmentResult;
@@ -18,12 +16,6 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
   const { isQualified } = result;
   const navigate = useNavigate();
   const percentage = Math.round((result.totalScore / result.maxScore) * 100);
-  const [showUpsell, setShowUpsell] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowUpsell(true), 2000);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="text-center max-w-2xl mx-auto px-1 pt-16 md:pt-0">
@@ -189,15 +181,6 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           </motion.p>
         )}
       </motion.div>
-
-      <UpsellModal
-        open={showUpsell}
-        onClose={() => setShowUpsell(false)}
-        onUpgrade={() => {
-          setShowUpsell(false);
-          navigate('/contact-sales');
-        }}
-      />
     </div>
   );
 }
