@@ -208,7 +208,7 @@ export default function FreeEvaluation() {
         />
         <UpsellModal
           open={showUpsell}
-          onClose={() => setShowUpsell(false)}
+          onClose={() => { setShowUpsell(false); setUpsellDismissCount(c => c + 1); }}
           onUpgrade={() => {
             setShowUpsell(false);
             navigate('/contact-sales');
