@@ -70,7 +70,7 @@ const comprehensiveDomains = [
 export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 overflow-hidden" dir="rtl">
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 overflow-hidden [direction:rtl]" dir="rtl">
         {/* Hero Section */}
         <div className="bg-gradient-to-bl from-primary/15 via-primary/5 to-transparent px-6 pt-6 pb-4">
           <DialogHeader className="text-center sm:text-center">
