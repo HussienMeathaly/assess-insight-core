@@ -9,6 +9,7 @@ import { EvaluationProgress } from '@/components/evaluation/EvaluationProgress';
 import { MobileProgressSummary } from '@/components/evaluation/MobileProgressSummary';
 import { MainElementView } from '@/components/evaluation/MainElementView';
 import { EvaluationResult } from '@/components/evaluation/EvaluationResult';
+import { UpsellModal } from '@/components/evaluation/UpsellModal';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -18,6 +19,7 @@ export default function FreeEvaluation() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [showResults, setShowResults] = useState(false);
+  const [showUpsell, setShowUpsell] = useState(false);
   const [checkingOrg, setCheckingOrg] = useState(true);
   const [needsOrganization, setNeedsOrganization] = useState(false);
   
