@@ -104,7 +104,7 @@ export default function FreeEvaluation() {
     }
   };
 
-  // Save evaluation when showing results
+  // Save evaluation and show upsell when showing results
   useEffect(() => {
     if (showResults && !saved && !saving) {
       saveEvaluation().then((success) => {
@@ -115,7 +115,11 @@ export default function FreeEvaluation() {
         }
       });
     }
-  }, [showResults, saved, saving, saveEvaluation]);
+    if (showResults && !showUpsell) {
+      const timer = setTimeout(() => setShowUpsell(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [showResults, saved, saving, saveEvaluation, showUpsell]);
 
   const handleRetake = () => {
     window.location.reload();
