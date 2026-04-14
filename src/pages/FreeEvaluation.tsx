@@ -20,6 +20,7 @@ export default function FreeEvaluation() {
   const { user, loading: authLoading } = useAuth();
   const [showResults, setShowResults] = useState(false);
   const [showUpsell, setShowUpsell] = useState(false);
+  const [upsellDismissCount, setUpsellDismissCount] = useState(0);
   const [checkingOrg, setCheckingOrg] = useState(true);
   const [needsOrganization, setNeedsOrganization] = useState(false);
   
@@ -115,11 +116,11 @@ export default function FreeEvaluation() {
         }
       });
     }
-    if (showResults && !showUpsell) {
+    if (showResults && upsellDismissCount < 2) {
       const timer = setTimeout(() => setShowUpsell(true), 1500);
       return () => clearTimeout(timer);
     }
-  }, [showResults, saved, saving, saveEvaluation, showUpsell]);
+  }, [showResults, saved, saving, saveEvaluation, upsellDismissCount]);
 
   const handleRetake = () => {
     window.location.reload();
@@ -207,7 +208,7 @@ export default function FreeEvaluation() {
         />
         <UpsellModal
           open={showUpsell}
-          onClose={() => setShowUpsell(false)}
+          onClose={() => { setShowUpsell(false); setUpsellDismissCount(c => c + 1); }}
           onUpgrade={() => {
             setShowUpsell(false);
             navigate('/contact-sales');
