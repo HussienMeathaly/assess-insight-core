@@ -205,6 +205,14 @@ export default function FreeEvaluation() {
           onRetake={handleRetake}
           onBack={handleBack}
         />
+        <UpsellModal
+          open={showUpsell}
+          onClose={() => setShowUpsell(false)}
+          onUpgrade={() => {
+            setShowUpsell(false);
+            navigate('/contact-sales');
+          }}
+        />
       </div>
     );
   }
