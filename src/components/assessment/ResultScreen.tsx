@@ -16,12 +16,6 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
   const { isQualified } = result;
   const navigate = useNavigate();
   const percentage = Math.round((result.totalScore / result.maxScore) * 100);
-  const [showUpsell, setShowUpsell] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowUpsell(true), 2000);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="text-center max-w-2xl mx-auto px-1 pt-16 md:pt-0">
@@ -187,15 +181,6 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           </motion.p>
         )}
       </motion.div>
-
-      <UpsellModal
-        open={showUpsell}
-        onClose={() => setShowUpsell(false)}
-        onUpgrade={() => {
-          setShowUpsell(false);
-          navigate('/contact-sales');
-        }}
-      />
     </div>
   );
 }
