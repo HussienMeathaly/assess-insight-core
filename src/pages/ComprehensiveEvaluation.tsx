@@ -129,7 +129,7 @@ export default function ComprehensiveEvaluation() {
       ? `إرسال (${selected.length})`
       : hasPendingRequest
         ? 'تم الإرسال'
-        : 'إرسال (0)`';
+        : 'إرسال (0)';
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
