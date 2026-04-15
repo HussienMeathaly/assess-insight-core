@@ -66,6 +66,14 @@ const comprehensiveDomains = [
   },
 ];
 
+const domainTeasers = [
+  'تفاصيل أعمق وتوصيات عملية عند الترقية',
+  'رؤية أوضح لفرص التحسين عند الانتقال للتقييم الشامل',
+  'تحليل أدق يساعدك على اتخاذ قرارات تطوير أفضل',
+  'مؤشرات أوسع وخطوات عملية تظهر لك بعد الترقية',
+  'قراءة أشمل للمحور مع توصيات قابلة للتنفيذ',
+];
+
 export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -124,7 +132,7 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
                   </div>
 
                   <p className="mt-2 text-right text-xs font-medium text-primary/80" dir="rtl">
-                    تفاصيل أعمق وتوصيات عملية عند الترقية
+                    {domainTeasers[i % domainTeasers.length]}
                   </p>
                 </div>
               ))}
