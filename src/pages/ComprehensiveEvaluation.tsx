@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Check, Lock, Send } from 'lucide-react';
@@ -29,31 +29,7 @@ export default function ComprehensiveEvaluation() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const { user } = useAuth();
-
-  const checkPendingRequest = useCallback(async () => {
-    if (!user) {
-      setHasPendingRequest(false);
-      return false;
-    }
-
-    const { data } = await supabase
-      .from('comprehensive_requests')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('status', 'pending')
-      .limit(1)
-      .maybeSingle();
-
-    const pending = Boolean(data);
-    setHasPendingRequest(pending);
-    return pending;
-  }, [user]);
-
-  useEffect(() => {
-    void checkPendingRequest();
-  }, [checkPendingRequest]);
 
   const toggleDomain = (domainName: string) => {
     setSelected((current) =>
@@ -73,17 +49,6 @@ export default function ComprehensiveEvaluation() {
 
     if (!user) {
       toast.error('يرجى تسجيل الدخول أولاً');
-      return;
-    }
-
-    if (hasPendingRequest) {
-      toast.error('لديك طلب شامل قيد المعالجة بالفعل');
-      return;
-    }
-
-    const pending = await checkPendingRequest();
-    if (pending) {
-      toast.error('لديك طلب شامل قيد المعالجة بالفعل');
       return;
     }
 
@@ -115,21 +80,18 @@ export default function ComprehensiveEvaluation() {
       }
 
       setSelected([]);
-      setHasPendingRequest(true);
       toast.success('تم إرسال طلبك بنجاح، سيتواصل معك فريقنا قريبًا');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const submitDisabled = selected.length === 0 || submitting || hasPendingRequest;
+  const submitDisabled = selected.length === 0 || submitting;
   const submitLabel = submitting
     ? 'جاري الإرسال...'
     : selected.length > 0
       ? `إرسال (${selected.length})`
-      : hasPendingRequest
-        ? 'تم الإرسال'
-        : 'إرسال (0)';
+      : 'إرسال (0)';
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -158,7 +120,7 @@ export default function ComprehensiveEvaluation() {
               variant="outline"
               size="sm"
               onClick={() => setSelected([...allDomainNames])}
-              disabled={allDomainNames.length === selected.length || hasPendingRequest}
+              disabled={allDomainNames.length === selected.length}
             >
               <Check className="ml-1.5 h-3.5 w-3.5" />
               اختيار الكل
