@@ -1300,6 +1300,34 @@ export default function AdminDashboard() {
                               {req.organization?.phone && (
                                 <p className="text-sm text-muted-foreground mt-3">📞 {req.organization.phone}</p>
                               )}
+
+                              {/* Admin Notes */}
+                              <div className="mt-4 pt-3 border-t border-border/40 space-y-2">
+                                <p className="text-sm font-semibold text-foreground">ملاحظات المسؤول:</p>
+                                <textarea
+                                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none"
+                                  rows={3}
+                                  placeholder="أضف ملاحظاتك هنا..."
+                                  defaultValue={req.admin_notes || ''}
+                                  maxLength={1000}
+                                  onBlur={async (e) => {
+                                    const val = e.target.value.trim();
+                                    if (val === (req.admin_notes || '').trim()) return;
+                                    const { error } = await supabase
+                                      .from('comprehensive_requests')
+                                      .update({ admin_notes: val || null })
+                                      .eq('id', req.id);
+                                    if (error) {
+                                      toast.error('حدث خطأ أثناء حفظ الملاحظات');
+                                    } else {
+                                      setComprehensiveRequests((prev) =>
+                                        prev.map((r) => (r.id === req.id ? { ...r, admin_notes: val || null } : r))
+                                      );
+                                      toast.success('تم حفظ الملاحظات');
+                                    }
+                                  }}
+                                />
+                              </div>
                             </div>
                           )}
                         </div>
