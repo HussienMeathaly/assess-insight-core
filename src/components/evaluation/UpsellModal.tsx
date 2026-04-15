@@ -8,7 +8,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Star, ChevronLeft, Sparkles } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface UpsellModalProps {
   open: boolean;
@@ -71,7 +70,7 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
-        className="max-w-2xl max-h-[90vh] p-0 gap-0 overflow-hidden text-right [direction:rtl] [&_*]:text-right [&>button]:right-auto [&>button]:left-4"
+        className="max-h-[90vh] max-w-2xl gap-0 overflow-hidden p-0 text-right [direction:rtl] [&_*]:text-right [&_*]:[direction:rtl] [&>button]:left-4 [&>button]:right-auto"
         dir="rtl"
       >
         {/* Hero Section */}
@@ -89,43 +88,42 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
 
         {/* Domains List */}
         <ScrollArea className="max-h-[45vh] px-6 py-4" dir="rtl">
-          <div className="space-y-3" dir="rtl">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex flex-row-reverse items-center justify-start gap-2 text-right">
-            <Sparkles className="w-4 h-4 text-primary" />
-            محاور التقييم الشامل ({comprehensiveDomains.length} مجال)
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {comprehensiveDomains.map((domain, i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-border bg-card p-3 text-right transition-colors hover:border-primary/30"
-                dir="rtl"
-              >
-                <div className="mb-2 flex flex-row-reverse items-center justify-start gap-2 text-right">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Star className="w-3.5 h-3.5 text-primary" />
+          <div className="space-y-3 text-right" dir="rtl">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+              <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+              <span className="flex-1 text-right">محاور التقييم الشامل ({comprehensiveDomains.length} مجال)</span>
+            </h3>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" dir="rtl">
+              {comprehensiveDomains.map((domain, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-border bg-card p-3 text-right transition-colors hover:border-primary/30"
+                  dir="rtl"
+                >
+                  <div className="mb-2 flex items-center gap-2">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <Star className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <h4 className="flex-1 text-right text-sm font-semibold text-foreground">{domain.name}</h4>
                   </div>
-                  <h4 className="font-semibold text-foreground text-sm text-right">{domain.name}</h4>
+
+                  <ul className="space-y-1 pr-9 text-right">
+                    {domain.elements.map((el, j) => (
+                      <li key={j} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <span className="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
+                        <span className="flex-1 text-right">{el}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-1 pr-9 text-right">
-                  {domain.elements.map((el, j) => (
-                    <li
-                      key={j}
-                      className="text-xs text-muted-foreground flex flex-row-reverse items-center justify-start gap-1.5 text-right"
-                    >
-                      <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
-                      {el}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
           </div>
         </ScrollArea>
 
         {/* CTA Footer */}
-        <div className="border-t border-border px-6 py-4 flex flex-col sm:flex-row-reverse gap-3 text-right" dir="rtl">
+        <div className="flex flex-col gap-3 border-t border-border px-6 py-4 text-right sm:flex-row" dir="rtl">
           <Button onClick={onUpgrade} className="flex-1 gap-2 text-sm sm:text-base">
             الانتقال إلى التقييم الشامل
             <ChevronLeft className="w-4 h-4" />
