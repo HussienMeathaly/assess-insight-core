@@ -23,9 +23,7 @@ const lockedDomains = [
   { name: 'القطاع الصناعي', elements: ['المواد الخام', 'المعدات والأجهزة', 'عمليات التصنيع والإنتاج', 'العمالة والفريق الفني', 'نظام الجودة الشامل', 'المنتج النهائي والتغليف', 'التوثيق الرقمي والتحليل البيئي'] },
 ];
 
-const makeKey = (d: string, e: string) => `${d}::${e}`;
-
-const allItemKeys = lockedDomains.flatMap((d) => d.elements.map((e) => makeKey(d.name, e)));
+const allDomainNames = lockedDomains.map((d) => d.name);
 
 export default function ComprehensiveEvaluation() {
   const navigate = useNavigate();
@@ -49,9 +47,8 @@ export default function ComprehensiveEvaluation() {
       });
   }, [user]);
 
-  const toggle = (d: string, e: string) => {
-    const id = makeKey(d, e);
-    setSelected((s) => (s.includes(id) ? s.filter((i) => i !== id) : [...s, id]));
+  const toggleDomain = (domainName: string) => {
+    setSelected((s) => s.includes(domainName) ? s.filter((i) => i !== domainName) : [...s, domainName]);
   };
 
   const handleSubmit = () => {
@@ -78,9 +75,9 @@ export default function ComprehensiveEvaluation() {
         .limit(1)
         .maybeSingle();
 
-      const items = selected.map((key) => {
-        const [domain, element] = key.split('::');
-        return { domain, element };
+      const items = selected.map((domainName) => {
+        const domain = lockedDomains.find((d) => d.name === domainName);
+        return { domain: domainName, elements: domain?.elements || [] };
       });
 
       const { error } = await supabase.from('comprehensive_requests').insert({
@@ -125,8 +122,8 @@ export default function ComprehensiveEvaluation() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSelected([...allItemKeys])}
-              disabled={selected.length === allItemKeys.length}
+              onClick={() => setSelected([...allDomainNames])}
+              disabled={selected.length === allDomainNames.length}
             >
               <Check className="h-3.5 w-3.5 ml-1.5" />
               اختيار الكل
@@ -142,66 +139,43 @@ export default function ComprehensiveEvaluation() {
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {lockedDomains.map((domain) => {
-            const allKeys = domain.elements.map((e) => makeKey(domain.name, e));
-            const allSelected = allKeys.every((id) => selected.includes(id));
+            const isSelected = selected.includes(domain.name);
 
             return (
-              <div key={domain.name} className="rounded-xl border border-border p-4">
+              <div key={domain.name} className={`rounded-xl border p-4 transition-colors ${
+                isSelected ? 'border-primary/30 bg-primary/5' : 'border-border'
+              }`}>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (allSelected) {
-                      setSelected((s) => s.filter((id) => !allKeys.includes(id)));
-                    } else {
-                      setSelected((s) => [...new Set([...s, ...allKeys])]);
-                    }
-                  }}
+                  onClick={() => toggleDomain(domain.name)}
                   className="flex w-full items-center gap-3 text-right"
                 >
                   <div
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                      allSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                     }`}
                   >
-                    {allSelected ? <Check className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                    {isSelected ? <Check className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                   </div>
                   <span className="flex-1 text-right text-sm font-semibold text-foreground">{domain.name}</span>
+                  <span className="text-xs text-muted-foreground">{domain.elements.length} عنصر</span>
                 </button>
 
-                <div className="mt-3 space-y-2 pr-10">
-                  {domain.elements.map((element) => {
-                    const isSelected = selected.includes(makeKey(domain.name, element));
-
-                    return (
-                      <button
-                        key={element}
-                        type="button"
-                        onClick={() => toggle(domain.name, element)}
-                        className={`flex w-full items-center gap-2.5 rounded-lg border px-3 py-2.5 text-right transition-colors ${
-                          isSelected
-                            ? 'border-primary/25 bg-primary/10'
-                            : 'border-border/60 bg-muted/15 hover:bg-muted/30'
-                        }`}
-                      >
-                        <div
-                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors ${
-                            isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                          }`}
-                        >
-                          {isSelected ? <Check className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                        </div>
-                        <span
-                          className={`flex-1 text-right text-sm transition-all ${
-                            isSelected ? 'font-medium text-foreground' : 'text-muted-foreground blur-[2px]'
-                          }`}
-                        >
-                          {element}
-                        </span>
-                      </button>
-                    );
-                  })}
+                <div className="mt-2 flex flex-wrap gap-1.5 pr-10">
+                  {domain.elements.map((element) => (
+                    <span
+                      key={element}
+                      className={`text-xs px-2 py-0.5 rounded-full transition-all ${
+                        isSelected
+                          ? 'bg-primary/10 text-primary'
+                          : 'bg-muted/40 text-muted-foreground blur-[2px]'
+                      }`}
+                    >
+                      {element}
+                    </span>
+                  ))}
                 </div>
               </div>
             );
