@@ -95,6 +95,44 @@ export type Database = {
           },
         ]
       }
+      comprehensive_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          organization_id: string | null
+          selected_items: Json
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          selected_items?: Json
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          selected_items?: Json
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comprehensive_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       criteria: {
         Row: {
           created_at: string | null
