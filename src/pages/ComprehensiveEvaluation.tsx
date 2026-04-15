@@ -210,7 +210,7 @@ export default function ComprehensiveEvaluation() {
                       <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
                         <Lock className="h-3 w-3" />
                       </div>
-                      <span className="flex-1 text-right text-sm text-muted-foreground blur-[2px]">
+                      <span className="flex-1 text-right text-sm text-muted-foreground blur-[5px] select-none">
                         {element}
                       </span>
                     </div>
