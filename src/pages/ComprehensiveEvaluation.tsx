@@ -29,10 +29,7 @@ export default function ComprehensiveEvaluation() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const { user } = useAuth();
-
-  // No longer blocking on pending requests — users can submit multiple
 
   const toggleDomain = (domainName: string) => {
     setSelected((current) =>
@@ -52,17 +49,6 @@ export default function ComprehensiveEvaluation() {
 
     if (!user) {
       toast.error('يرجى تسجيل الدخول أولاً');
-      return;
-    }
-
-    if (hasPendingRequest) {
-      toast.error('لديك طلب شامل قيد المعالجة بالفعل');
-      return;
-    }
-
-    const pending = await checkPendingRequest();
-    if (pending) {
-      toast.error('لديك طلب شامل قيد المعالجة بالفعل');
       return;
     }
 
@@ -94,21 +80,18 @@ export default function ComprehensiveEvaluation() {
       }
 
       setSelected([]);
-      setHasPendingRequest(true);
       toast.success('تم إرسال طلبك بنجاح، سيتواصل معك فريقنا قريبًا');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const submitDisabled = selected.length === 0 || submitting || hasPendingRequest;
+  const submitDisabled = selected.length === 0 || submitting;
   const submitLabel = submitting
     ? 'جاري الإرسال...'
     : selected.length > 0
       ? `إرسال (${selected.length})`
-      : hasPendingRequest
-        ? 'تم الإرسال'
-        : 'إرسال (0)';
+      : 'إرسال (0)';
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
