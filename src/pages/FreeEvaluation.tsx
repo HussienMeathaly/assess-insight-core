@@ -11,7 +11,7 @@ import { MainElementView } from '@/components/evaluation/MainElementView';
 import { EvaluationResult } from '@/components/evaluation/EvaluationResult';
 import { UpsellModal } from '@/components/evaluation/UpsellModal';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import profitLogo from '@/assets/profit-logo.png';
 
@@ -126,6 +126,16 @@ export default function FreeEvaluation() {
     window.location.reload();
   };
 
+  const handleUpgrade = () => {
+    setShowUpsell(false);
+    navigate('/contact-sales');
+  };
+
+  const handleUpsellClose = () => {
+    setShowUpsell(false);
+    setUpsellDismissCount((count) => count + 1);
+  };
+
   const handleBack = () => {
     navigate('/assessment');
   };
@@ -134,6 +144,8 @@ export default function FreeEvaluation() {
   const handleBackToAssessment = () => {
     navigate('/assessment');
   };
+
+  const showExternalUpgradeCta = showResults && !showUpsell && upsellDismissCount > 0;
 
   if (authLoading || checkingOrg) {
     return (
@@ -194,7 +206,7 @@ export default function FreeEvaluation() {
 
   if (showResults) {
     return (
-      <div className="min-h-screen py-8 px-4" dir="rtl">
+      <div className={`min-h-screen px-4 pt-8 ${showExternalUpgradeCta ? 'pb-32' : 'pb-8'}`} dir="rtl">
         <Helmet>
           <title>نتائج التقييم | PROFIT</title>
           <meta name="description" content="نتائج التقييم الشامل للمنتج" />
@@ -208,12 +220,34 @@ export default function FreeEvaluation() {
         />
         <UpsellModal
           open={showUpsell}
-          onClose={() => { setShowUpsell(false); setUpsellDismissCount(c => c + 1); }}
-          onUpgrade={() => {
-            setShowUpsell(false);
-            navigate('/contact-sales');
-          }}
+          onClose={handleUpsellClose}
+          onUpgrade={handleUpgrade}
         />
+
+        {showExternalUpgradeCta && (
+          <div className="pointer-events-none fixed inset-x-4 bottom-4 z-40 animate-fade-in motion-reduce:animate-none">
+            <div className="pointer-events-auto mx-auto max-w-3xl rounded-2xl border border-border bg-background/95 p-4 shadow-lg backdrop-blur">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3 text-right">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">يمكنك المتابعة إلى التقييم الشامل في أي وقت</p>
+                    <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                      اكشف جميع المحاور المقفلة واحصل على تحليل أعمق وتوصيات عملية.
+                    </p>
+                  </div>
+                </div>
+
+                <Button onClick={handleUpgrade} className="hover-scale w-full gap-2 sm:w-auto">
+                  الانتقال إلى التقييم الشامل
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
