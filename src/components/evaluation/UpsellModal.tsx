@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Star, ChevronLeft, Sparkles } from 'lucide-react';
+import { Check, ChevronLeft, Lock, Sparkles } from 'lucide-react';
 
 interface UpsellModalProps {
   open: boolean;
@@ -66,6 +66,16 @@ const comprehensiveDomains = [
   },
 ];
 
+const freeEvaluationPreview = {
+  name: 'فئة النشاط',
+  elements: [
+    'ملاءمة الفئة للسوق المحلي',
+    'قابلية الاستيراد والتصدير',
+    'الربحية والاستدامة',
+    'التوافق القانوني والتنظيمي',
+  ],
+};
+
 const domainTeasers = [
   'تفاصيل أعمق وتوصيات عملية عند الترقية',
   'رؤية أوضح لفرص التحسين عند الانتقال للتقييم الشامل',
@@ -96,10 +106,35 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
 
         {/* Domains List */}
         <ScrollArea className="max-h-[45vh] px-6 py-4" dir="rtl">
-          <div className="space-y-3 text-right" dir="rtl">
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground" dir="rtl">
+          <div className="space-y-4 text-right" dir="rtl">
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4" dir="rtl">
+              <div className="mb-3 flex items-center gap-3" dir="rtl">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15">
+                  <Check className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-primary">تم تقييمه في النسخة المجانية</p>
+                  <h3 className="mt-1 text-base font-bold text-foreground">{freeEvaluationPreview.name}</h3>
+                </div>
+              </div>
+
+              <ul className="space-y-2 text-right" dir="rtl">
+                {freeEvaluationPreview.elements.map((element) => (
+                  <li key={element} className="flex items-center gap-2 text-sm text-foreground" dir="rtl">
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                      <Check className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <span className="flex-1 text-right">{element}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-muted-foreground" dir="rtl">
               <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-              <span className="flex-1 text-right">محاور التقييم الشامل ({comprehensiveDomains.length} مجال)</span>
+              <span className="flex-1 text-right">
+                يتوفر بعد الترقية للتقييم الشامل ({comprehensiveDomains.length} مجال)
+              </span>
             </h3>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" dir="rtl">
@@ -109,18 +144,23 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
                   className="rounded-xl border border-border bg-card p-3 text-right transition-colors hover:border-primary/30"
                   dir="rtl"
                 >
-                  <div className="mb-2 flex items-center gap-2" dir="rtl">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <Star className="h-3.5 w-3.5 text-primary" />
+                  <div className="mb-2 flex items-start gap-2" dir="rtl">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
+                      <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                     </div>
-                    <h4 className="flex-1 text-right text-sm font-semibold text-foreground">{domain.name}</h4>
+                    <div className="flex-1">
+                      <h4 className="text-right text-sm font-semibold text-foreground">{domain.name}</h4>
+                      <p className="mt-1 text-right text-[11px] text-muted-foreground">
+                        هذا المحور مقفل ويظهر كاملًا بعد الترقية
+                      </p>
+                    </div>
                   </div>
 
                   <div className="rounded-lg border border-dashed border-border/70 bg-muted/20 px-3 py-3">
                     <ul className="space-y-2 text-right select-none" aria-hidden="true">
                       {domain.elements.map((_, j) => (
                         <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground/60" dir="rtl">
-                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/35" />
+                          <Lock className="h-3 w-3 shrink-0 text-muted-foreground/50" />
                           <span
                             className={`block h-3 rounded-full bg-muted-foreground/25 blur-sm ${
                               j % 3 === 0 ? 'w-3/4' : j % 3 === 1 ? 'w-5/6' : 'w-2/3'
