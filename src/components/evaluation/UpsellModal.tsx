@@ -89,9 +89,9 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
         {/* Domains List */}
         <ScrollArea className="max-h-[45vh] px-6 py-4" dir="rtl">
           <div className="space-y-3 text-right" dir="rtl">
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-              <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground" dir="rtl">
               <span className="flex-1 text-right">محاور التقييم الشامل ({comprehensiveDomains.length} مجال)</span>
+              <Sparkles className="h-4 w-4 shrink-0 text-primary" />
             </h3>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" dir="rtl">
@@ -101,18 +101,18 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
                   className="rounded-xl border border-border bg-card p-3 text-right transition-colors hover:border-primary/30"
                   dir="rtl"
                 >
-                  <div className="mb-2 flex items-center gap-2">
+                  <div className="mb-2 flex items-center gap-2" dir="rtl">
+                    <h4 className="flex-1 text-right text-sm font-semibold text-foreground">{domain.name}</h4>
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                       <Star className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <h4 className="flex-1 text-right text-sm font-semibold text-foreground">{domain.name}</h4>
                   </div>
 
                   <ul className="space-y-1 pr-9 text-right">
                     {domain.elements.map((el, j) => (
-                      <li key={j} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <span className="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
+                      <li key={j} className="flex items-center gap-1.5 text-xs text-muted-foreground" dir="rtl">
                         <span className="flex-1 text-right">{el}</span>
+                        <span className="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
                       </li>
                     ))}
                   </ul>
