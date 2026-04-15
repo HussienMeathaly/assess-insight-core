@@ -76,13 +76,6 @@ const freeEvaluationPreview = {
   ],
 };
 
-const domainTeasers = [
-  'تفاصيل أعمق وتوصيات عملية عند الترقية',
-  'رؤية أوضح لفرص التحسين عند الانتقال للتقييم الشامل',
-  'تحليل أدق يساعدك على اتخاذ قرارات تطوير أفضل',
-  'مؤشرات أوسع وخطوات عملية تظهر لك بعد الترقية',
-  'قراءة أشمل للمحور مع توصيات قابلة للتنفيذ',
-];
 
 export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
   return (
