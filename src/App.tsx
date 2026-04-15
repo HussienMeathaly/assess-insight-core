@@ -14,6 +14,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const FreeEvaluation = lazy(() => import("./pages/FreeEvaluation"));
 const EvaluationReport = lazy(() => import("./pages/EvaluationReport"));
+const ComprehensiveEvaluation = lazy(() => import("./pages/ComprehensiveEvaluation"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -62,6 +63,16 @@ const App = () => (
                 <Route path="/free-evaluation" element={
                   <ProtectedRoute>
                     <FreeEvaluation />
+                  </ProtectedRoute>
+                } />
+                <Route path="/contact-sales" element={
+                  <ProtectedRoute>
+                    <ComprehensiveEvaluation />
+                  </ProtectedRoute>
+                } />
+                <Route path="/comprehensive-evaluation" element={
+                  <ProtectedRoute>
+                    <ComprehensiveEvaluation />
                   </ProtectedRoute>
                 } />
                 <Route path="/report/:token" element={<EvaluationReport />} />
