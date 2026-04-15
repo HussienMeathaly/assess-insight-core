@@ -122,6 +122,10 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
                       ))}
                     </ul>
                   </div>
+
+                  <p className="mt-2 text-right text-xs font-medium text-primary/80" dir="rtl">
+                    تفاصيل أعمق وتوصيات عملية عند الترقية
+                  </p>
                 </div>
               ))}
             </div>
