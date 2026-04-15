@@ -35,6 +35,7 @@ import {
   Loader2,
   FileCheck2,
 } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -163,6 +164,8 @@ export default function AdminDashboard() {
   const [evaluationStatusFilter, setEvaluationStatusFilter] = useState<"all" | "completed" | "in_progress">("all");
   const [evaluationSearchQuery, setEvaluationSearchQuery] = useState("");
   const [editingOrganization, setEditingOrganization] = useState<Organization | null>(null);
+  const [comprehensiveRequests, setComprehensiveRequests] = useState<any[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -180,7 +183,7 @@ export default function AdminDashboard() {
     async function fetchData() {
       if (!isAdmin) return;
 
-      const [orgsResult, assessmentsResult, rolesResult, evaluationsResult] = await Promise.all([
+      const [orgsResult, assessmentsResult, rolesResult, evaluationsResult, requestsResult] = await Promise.all([
         supabase.from("organizations").select("*").order("created_at", { ascending: false }),
         supabase
           .from("assessments")
@@ -201,11 +204,16 @@ export default function AdminDashboard() {
         `,
           )
           .order("started_at", { ascending: false }),
+        supabase
+          .from("comprehensive_requests")
+          .select(`*, organization:organizations(name, contact_person, email, phone)`)
+          .order("created_at", { ascending: false }),
       ]);
 
       if (orgsResult.data) setOrganizations(orgsResult.data);
       if (assessmentsResult.data) setAssessments(assessmentsResult.data as Assessment[]);
       if (evaluationsResult.data) setEvaluations(evaluationsResult.data as Evaluation[]);
+      if (requestsResult.data) setComprehensiveRequests(requestsResult.data);
 
       // Fetch users from auth (we'll get them from organizations for now)
       const uniqueUserIds = new Set<string>();
@@ -742,6 +750,18 @@ export default function AdminDashboard() {
                 <FileCheck2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>التقييم المجاني</span>
               </TabsTrigger>
+              <TabsTrigger 
+                value="requests" 
+                className="flex-1 min-w-[calc(50%-4px)] sm:min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <span>طلبات الشامل</span>
+                {comprehensiveRequests.filter(r => r.status === 'pending').length > 0 && (
+                  <Badge variant="destructive" className="h-5 min-w-[20px] px-1 text-[10px]">
+                    {comprehensiveRequests.filter(r => r.status === 'pending').length}
+                  </Badge>
+                )}
+              </TabsTrigger>
             </TabsList>
 
           <TabsContent value="assessments">
@@ -1201,6 +1221,71 @@ export default function AdminDashboard() {
                     </Table>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="requests">
+            <Card className="border-border/30 bg-card/50 backdrop-blur-sm shadow-xl">
+              <CardHeader className="border-b border-border/30 pb-6">
+                <CardTitle className="text-lg sm:text-xl">طلبات التقييم الشامل ({comprehensiveRequests.length})</CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-6">
+                {comprehensiveRequests.length === 0 ? (
+                  <div className="py-12 text-center text-muted-foreground">لا توجد طلبات حتى الآن</div>
+                ) : (
+                  <div className="space-y-4">
+                    {comprehensiveRequests.map((req) => {
+                      const items = (req.selected_items || []) as { domain: string; element: string }[];
+                      const domains = [...new Set(items.map((i) => i.domain))];
+
+                      return (
+                        <div key={req.id} className="rounded-xl border border-border p-4 space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="text-right">
+                              <h3 className="font-semibold text-foreground">{req.organization?.name || 'غير محدد'}</h3>
+                              <p className="text-sm text-muted-foreground">{req.organization?.contact_person} • {req.organization?.email}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{new Date(req.created_at).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={req.status === 'pending' ? 'destructive' : 'secondary'}>
+                                {req.status === 'pending' ? 'جديد' : req.status === 'contacted' ? 'تم التواصل' : req.status}
+                              </Badge>
+                              <Button size="sm" variant="outline" onClick={() => setSelectedRequest(selectedRequest?.id === req.id ? null : req)}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-1.5">
+                            {domains.map((domain) => (
+                              <Badge key={domain} variant="outline" className="text-xs">{domain}</Badge>
+                            ))}
+                          </div>
+
+                          {selectedRequest?.id === req.id && (
+                            <div className="mt-3 rounded-lg border border-border/60 bg-muted/20 p-3 space-y-2">
+                              <p className="text-sm font-semibold text-foreground">العناصر المختارة ({items.length}):</p>
+                              {domains.map((domain) => (
+                                <div key={domain}>
+                                  <p className="text-sm font-medium text-foreground mt-2">{domain}</p>
+                                  <ul className="pr-4 space-y-1">
+                                    {items.filter((i) => i.domain === domain).map((item, idx) => (
+                                      <li key={idx} className="text-sm text-muted-foreground list-disc">{item.element}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              ))}
+                              {req.organization?.phone && (
+                                <p className="text-sm text-muted-foreground mt-3">📞 {req.organization.phone}</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
