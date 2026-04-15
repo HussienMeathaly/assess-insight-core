@@ -153,8 +153,9 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
                 {comprehensiveDomains.map((domain, i) => (
                   <div
                     key={i}
-                    className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/30 p-4 text-right shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md"
+                    className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/30 p-4 text-right shadow-sm transition-all duration-200 animate-fade-in motion-reduce:animate-none hover:border-primary/20 hover:shadow-md"
                     dir="rtl"
+                    style={{ animationDelay: `${i * 70}ms`, animationFillMode: 'both' }}
                   >
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary/5 to-transparent" />
 
