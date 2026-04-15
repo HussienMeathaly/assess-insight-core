@@ -163,18 +163,19 @@ export default function ComprehensiveEvaluation() {
                   <span className="text-xs text-muted-foreground">{domain.elements.length} عنصر</span>
                 </button>
 
-                <div className="mt-2 flex flex-wrap gap-1.5 pr-10">
+                <div className="mt-3 space-y-2 pr-10">
                   {domain.elements.map((element) => (
-                    <span
+                    <div
                       key={element}
-                      className={`text-xs px-2 py-0.5 rounded-full transition-all ${
-                        isSelected
-                          ? 'bg-primary/10 text-primary'
-                          : 'bg-muted/40 text-muted-foreground blur-[2px]'
-                      }`}
+                      className="flex items-center gap-2.5 rounded-lg border border-border/60 bg-muted/15 px-3 py-2.5"
                     >
-                      {element}
-                    </span>
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                        <Lock className="h-3 w-3" />
+                      </div>
+                      <span className="flex-1 text-right text-sm text-muted-foreground blur-[2px]">
+                        {element}
+                      </span>
+                    </div>
                   ))}
                 </div>
               </div>
