@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { AssessmentResult } from "@/types/assessment";
 import { CheckCircle2, AlertCircle, ArrowLeft, RotateCcw } from "lucide-react";
@@ -16,6 +17,10 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
   const { isQualified } = result;
   const navigate = useNavigate();
   const percentage = Math.round((result.totalScore / result.maxScore) * 100);
+
+  useEffect(() => {
+    void import("@/pages/FreeEvaluation");
+  }, []);
 
   return (
     <div className="text-center max-w-2xl mx-auto px-1 pt-16 md:pt-0">

@@ -100,7 +100,6 @@ export function useEvaluation() {
     try {
       setLoading(true);
       
-      // Fetch domain
       const { data: domains, error: domainError } = await supabase
         .from('evaluation_domains')
         .select('*')
@@ -113,7 +112,6 @@ export function useEvaluation() {
 
       const domainData = domains[0];
 
-      // Fetch main elements
       const { data: mainElements, error: mainError } = await supabase
         .from('main_elements')
         .select('*')
@@ -123,53 +121,97 @@ export function useEvaluation() {
 
       if (mainError) throw mainError;
 
-      // Fetch sub elements
+      const mainElementIds = (mainElements ?? []).map((item) => item.id);
+
+      if (mainElementIds.length === 0) {
+        setDomain({
+          ...domainData,
+          main_elements: [],
+        });
+        return;
+      }
+
       const { data: subElements, error: subError } = await supabase
         .from('sub_elements')
         .select('*')
+        .in('main_element_id', mainElementIds)
         .eq('is_active', true)
         .order('display_order');
 
       if (subError) throw subError;
 
-      // Fetch criteria
+      const subElementIds = (subElements ?? []).map((item) => item.id);
+
+      if (subElementIds.length === 0) {
+        const mainElementsWithSubs = (mainElements ?? []).map((me) => ({
+          ...me,
+          sub_elements: [],
+        }));
+
+        setDomain({
+          ...domainData,
+          main_elements: mainElementsWithSubs,
+        });
+        return;
+      }
+
       const { data: criteria, error: criteriaError } = await supabase
         .from('criteria')
         .select('*')
+        .in('sub_element_id', subElementIds)
         .eq('is_active', true)
         .order('display_order');
 
       if (criteriaError) throw criteriaError;
 
-      // Fetch options
-      const { data: options, error: optionsError } = await supabase
-        .from('criteria_options')
-        .select('*')
-        .order('display_order');
+      const criterionIds = (criteria ?? []).map((item) => item.id);
+
+      const { data: options, error: optionsError } = criterionIds.length
+        ? await supabase
+            .from('criteria_options')
+            .select('*')
+            .in('criterion_id', criterionIds)
+            .order('display_order')
+        : { data: [], error: null };
 
       if (optionsError) throw optionsError;
 
-      // Build hierarchical structure
-      const criteriaWithOptions = criteria?.map(c => ({
-        ...c,
-        options: options?.filter(o => o.criterion_id === c.id) || []
-      })) || [];
+      const optionsByCriterion = new Map<string, CriterionOption[]>();
+      (options ?? []).forEach((option) => {
+        const current = optionsByCriterion.get(option.criterion_id) ?? [];
+        current.push(option);
+        optionsByCriterion.set(option.criterion_id, current);
+      });
 
-      const subElementsWithCriteria = subElements?.map(se => ({
-        ...se,
-        criteria: criteriaWithOptions.filter(c => c.sub_element_id === se.id)
-      })) || [];
+      const criteriaBySubElement = new Map<string, Criterion[]>();
+      (criteria ?? []).forEach((criterion) => {
+        const current = criteriaBySubElement.get(criterion.sub_element_id) ?? [];
+        current.push({
+          ...criterion,
+          options: optionsByCriterion.get(criterion.id) ?? [],
+        });
+        criteriaBySubElement.set(criterion.sub_element_id, current);
+      });
 
-      const mainElementsWithSubs = mainElements?.map(me => ({
-        ...me,
-        sub_elements: subElementsWithCriteria.filter(se => se.main_element_id === me.id)
-      })) || [];
+      const subElementsByMainElement = new Map<string, SubElement[]>();
+      (subElements ?? []).forEach((subElement) => {
+        const current = subElementsByMainElement.get(subElement.main_element_id) ?? [];
+        current.push({
+          ...subElement,
+          criteria: criteriaBySubElement.get(subElement.id) ?? [],
+        });
+        subElementsByMainElement.set(subElement.main_element_id, current);
+      });
+
+      const mainElementsWithSubs = (mainElements ?? []).map((mainElement) => ({
+        ...mainElement,
+        sub_elements: subElementsByMainElement.get(mainElement.id) ?? [],
+      }));
 
       setDomain({
         ...domainData,
-        main_elements: mainElementsWithSubs
+        main_elements: mainElementsWithSubs,
       });
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'حدث خطأ أثناء تحميل البيانات');
     } finally {
