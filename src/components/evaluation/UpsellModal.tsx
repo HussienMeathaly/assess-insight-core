@@ -70,23 +70,27 @@ const comprehensiveDomains = [
 export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 overflow-hidden [direction:rtl] [&>button]:right-auto [&>button]:left-4" dir="rtl">
+      <DialogContent
+        className="max-w-2xl max-h-[90vh] p-0 gap-0 overflow-hidden text-right [direction:rtl] [&_*]:text-right [&>button]:right-auto [&>button]:left-4"
+        dir="rtl"
+      >
         {/* Hero Section */}
-        <div className="bg-gradient-to-bl from-primary/15 via-primary/5 to-transparent px-6 pt-6 pb-4">
-          <DialogHeader className="text-center sm:text-center">
+        <div className="bg-gradient-to-bl from-primary/15 via-primary/5 to-transparent px-6 pt-6 pb-4 text-right" dir="rtl">
+          <DialogHeader className="items-end text-right sm:text-right">
             <div className="text-4xl mb-3">🎉</div>
-            <DialogTitle className="text-xl sm:text-2xl font-bold text-foreground">
+            <DialogTitle className="w-full text-xl sm:text-2xl font-bold text-foreground text-right">
               أحسنت! لقد أكملت التقييم المبدئي
             </DialogTitle>
-            <DialogDescription className="text-sm sm:text-base text-muted-foreground mt-2 leading-relaxed">
+            <DialogDescription className="w-full text-sm sm:text-base text-muted-foreground mt-2 leading-relaxed text-right">
               للحصول على تحليل شامل وتوصيات تفصيلية تساعدك على التطوير، ننصحك بالانتقال إلى التقييم الكامل.
             </DialogDescription>
           </DialogHeader>
         </div>
 
         {/* Domains List */}
-        <ScrollArea className="max-h-[45vh] px-6 py-4">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+        <ScrollArea className="max-h-[45vh] px-6 py-4" dir="rtl">
+          <div className="space-y-3" dir="rtl">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex flex-row-reverse items-center justify-start gap-2 text-right">
             <Sparkles className="w-4 h-4 text-primary" />
             محاور التقييم الشامل ({comprehensiveDomains.length} مجال)
           </h3>
@@ -94,17 +98,21 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
             {comprehensiveDomains.map((domain, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/30"
+                className="rounded-xl border border-border bg-card p-3 text-right transition-colors hover:border-primary/30"
+                dir="rtl"
               >
-                <div className="flex items-center gap-2 mb-2">
+                <div className="mb-2 flex flex-row-reverse items-center justify-start gap-2 text-right">
                   <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                     <Star className="w-3.5 h-3.5 text-primary" />
                   </div>
-                  <h4 className="font-semibold text-foreground text-sm">{domain.name}</h4>
+                  <h4 className="font-semibold text-foreground text-sm text-right">{domain.name}</h4>
                 </div>
-                <ul className="space-y-1 mr-9">
+                <ul className="space-y-1 pr-9 text-right">
                   {domain.elements.map((el, j) => (
-                    <li key={j} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <li
+                      key={j}
+                      className="text-xs text-muted-foreground flex flex-row-reverse items-center justify-start gap-1.5 text-right"
+                    >
                       <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
                       {el}
                     </li>
@@ -113,10 +121,11 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
               </div>
             ))}
           </div>
+          </div>
         </ScrollArea>
 
         {/* CTA Footer */}
-        <div className="border-t border-border px-6 py-4 flex flex-col sm:flex-row gap-3">
+        <div className="border-t border-border px-6 py-4 flex flex-col sm:flex-row-reverse gap-3 text-right" dir="rtl">
           <Button onClick={onUpgrade} className="flex-1 gap-2 text-sm sm:text-base">
             الانتقال إلى التقييم الشامل
             <ChevronLeft className="w-4 h-4" />
