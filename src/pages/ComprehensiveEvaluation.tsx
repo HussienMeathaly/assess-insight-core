@@ -47,9 +47,8 @@ export default function ComprehensiveEvaluation() {
       });
   }, [user]);
 
-  const toggle = (d: string, e: string) => {
-    const id = makeKey(d, e);
-    setSelected((s) => (s.includes(id) ? s.filter((i) => i !== id) : [...s, id]));
+  const toggleDomain = (domainName: string) => {
+    setSelected((s) => s.includes(domainName) ? s.filter((i) => i !== domainName) : [...s, domainName]);
   };
 
   const handleSubmit = () => {
