@@ -23,9 +23,7 @@ const lockedDomains = [
   { name: 'القطاع الصناعي', elements: ['المواد الخام', 'المعدات والأجهزة', 'عمليات التصنيع والإنتاج', 'العمالة والفريق الفني', 'نظام الجودة الشامل', 'المنتج النهائي والتغليف', 'التوثيق الرقمي والتحليل البيئي'] },
 ];
 
-const makeKey = (d: string, e: string) => `${d}::${e}`;
-
-const allItemKeys = lockedDomains.flatMap((d) => d.elements.map((e) => makeKey(d.name, e)));
+const allDomainNames = lockedDomains.map((d) => d.name);
 
 export default function ComprehensiveEvaluation() {
   const navigate = useNavigate();
