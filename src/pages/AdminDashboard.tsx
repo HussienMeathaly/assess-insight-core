@@ -1248,9 +1248,30 @@ export default function AdminDashboard() {
                               <p className="text-xs text-muted-foreground mt-1">{new Date(req.created_at).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant={req.status === 'pending' ? 'destructive' : 'secondary'}>
+                              <Badge variant={req.status === 'pending' ? 'destructive' : 'default'}>
                                 {req.status === 'pending' ? 'جديد' : req.status === 'contacted' ? 'تم التواصل' : req.status}
                               </Badge>
+                              <Button
+                                size="sm"
+                                variant={req.status === 'pending' ? 'default' : 'outline'}
+                                onClick={async () => {
+                                  const newStatus = req.status === 'pending' ? 'contacted' : 'pending';
+                                  const { error } = await supabase
+                                    .from('comprehensive_requests')
+                                    .update({ status: newStatus })
+                                    .eq('id', req.id);
+                                  if (error) {
+                                    toast.error('حدث خطأ أثناء تحديث الحالة');
+                                  } else {
+                                    setComprehensiveRequests((prev) =>
+                                      prev.map((r) => (r.id === req.id ? { ...r, status: newStatus } : r))
+                                    );
+                                    toast.success(newStatus === 'contacted' ? 'تم تحديث الحالة إلى: تم التواصل' : 'تم إعادة الحالة إلى: جديد');
+                                  }
+                                }}
+                              >
+                                {req.status === 'pending' ? 'تم التواصل ✓' : 'إعادة لجديد'}
+                              </Button>
                               <Button size="sm" variant="outline" onClick={() => setSelectedRequest(selectedRequest?.id === req.id ? null : req)}>
                                 <Eye className="h-4 w-4" />
                               </Button>
