@@ -75,9 +75,9 @@ export default function ComprehensiveEvaluation() {
         .limit(1)
         .maybeSingle();
 
-      const items = selected.map((key) => {
-        const [domain, element] = key.split('::');
-        return { domain, element };
+      const items = selected.map((domainName) => {
+        const domain = lockedDomains.find((d) => d.name === domainName);
+        return { domain: domainName, elements: domain?.elements || [] };
       });
 
       const { error } = await supabase.from('comprehensive_requests').insert({
