@@ -133,52 +133,68 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
               </ul>
             </div>
 
-            <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-muted-foreground" dir="rtl">
-              <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-              <span className="flex-1 text-right">
-                يتوفر بعد الترقية للتقييم الشامل ({comprehensiveDomains.length} مجال)
-              </span>
-            </h3>
+            <div className="rounded-2xl border border-border/70 bg-gradient-to-b from-muted/45 via-background to-muted/20 p-4 shadow-sm" dir="rtl">
+              <div className="mb-4 flex items-start gap-3" dir="rtl">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 shadow-sm">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" dir="rtl">
-              {comprehensiveDomains.map((domain, i) => (
-                <div
-                  key={i}
-                  className="rounded-xl border border-border bg-card p-3 text-right transition-colors hover:border-primary/30"
-                  dir="rtl"
-                >
-                  <div className="mb-2 flex items-start gap-2" dir="rtl">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
-                      <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-right text-sm font-semibold text-foreground">{domain.name}</h4>
-                      <p className="mt-1 text-right text-[11px] text-muted-foreground">
-                        هذا المحور مقفل ويظهر كاملًا بعد الترقية
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg border border-dashed border-border/70 bg-muted/20 px-3 py-3">
-                    <ul className="space-y-2 text-right select-none" aria-hidden="true">
-                      {domain.elements.map((_, j) => (
-                        <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground/60" dir="rtl">
-                          <Lock className="h-3 w-3 shrink-0 text-muted-foreground/50" />
-                          <span
-                            className={`block h-3 rounded-full bg-muted-foreground/25 blur-sm ${
-                              j % 3 === 0 ? 'w-3/4' : j % 3 === 1 ? 'w-5/6' : 'w-2/3'
-                            }`}
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <p className="mt-2 text-right text-xs font-medium text-primary/80" dir="rtl">
-                    {domainTeasers[i % domainTeasers.length]}
+                <div className="flex-1">
+                  <h3 className="text-right text-sm font-semibold text-foreground">
+                    يتوفر بعد الترقية للتقييم الشامل ({comprehensiveDomains.length} مجال)
+                  </h3>
+                  <p className="mt-1 text-right text-xs text-muted-foreground">
+                    المحاور التالية مقفلة الآن وتظهر كاملة مع تحليل أعمق وتوصيات تنفيذية بعد الترقية
                   </p>
                 </div>
-              ))}
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" dir="rtl">
+                {comprehensiveDomains.map((domain, i) => (
+                  <div
+                    key={i}
+                    className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/30 p-4 text-right shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md"
+                    dir="rtl"
+                  >
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary/5 to-transparent" />
+
+                    <div className="relative mb-3 flex items-start gap-3" dir="rtl">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-background/90 shadow-sm">
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                      </div>
+
+                      <div className="flex-1">
+                        <div className="inline-flex items-center rounded-full border border-border/70 bg-background/80 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                          محتوى مقفل
+                        </div>
+                        <h4 className="mt-2 text-right text-sm font-semibold text-foreground">{domain.name}</h4>
+                        <p className="mt-1 text-right text-[11px] leading-5 text-muted-foreground">
+                          يظهر هذا المحور كاملًا فور الانتقال إلى التقييم الشامل
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="relative rounded-xl border border-dashed border-border/70 bg-muted/25 px-3 py-3.5 backdrop-blur-sm">
+                      <ul className="space-y-2.5 text-right select-none" aria-hidden="true">
+                        {domain.elements.map((_, j) => (
+                          <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground/60" dir="rtl">
+                            <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground/45" />
+                            <span
+                              className={`block h-3 rounded-full bg-muted-foreground/25 blur-sm ${
+                                j % 3 === 0 ? 'w-3/4' : j % 3 === 1 ? 'w-5/6' : 'w-2/3'
+                              }`}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <p className="mt-3 inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-right text-xs font-medium text-primary" dir="rtl">
+                      {domainTeasers[i % domainTeasers.length]}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </ScrollArea>
