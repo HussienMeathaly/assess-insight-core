@@ -221,11 +221,11 @@ export default function ComprehensiveEvaluation() {
           })}
         </div>
 
-        <div className="sticky bottom-4 flex justify-center pt-2">
+        <div className="sticky bottom-4 z-10 flex justify-center px-4 pt-2">
           <Button
             onClick={handleSubmit}
             size="lg"
-            className="w-full max-w-sm gap-2 rounded-xl shadow-lg sm:w-auto"
+            className="w-auto min-w-[11rem] max-w-full gap-2 rounded-xl px-5 shadow-lg sm:min-w-[13rem] sm:px-6"
             disabled={submitDisabled}
           >
             <Send className="h-4 w-4" />
