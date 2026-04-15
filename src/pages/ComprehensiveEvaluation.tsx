@@ -23,6 +23,8 @@ const lockedDomains = [
 
 const makeKey = (d: string, e: string) => `${d}::${e}`;
 
+const allItemKeys = lockedDomains.flatMap((d) => d.elements.map((e) => makeKey(d.name, e)));
+
 export default function ComprehensiveEvaluation() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
@@ -61,6 +63,26 @@ export default function ComprehensiveEvaluation() {
           <p className="mt-2 text-sm text-muted-foreground">
             اختر المحاور التي تريد تقييمها ثم اضغط إرسال.
           </p>
+
+          <div className="mt-3 flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelected([...allItemKeys])}
+              disabled={selected.length === allItemKeys.length}
+            >
+              <Check className="h-3.5 w-3.5 ml-1.5" />
+              اختيار الكل
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelected([])}
+              disabled={selected.length === 0}
+            >
+              إلغاء الكل
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-4">
