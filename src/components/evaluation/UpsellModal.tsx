@@ -202,7 +202,11 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
 
         {/* CTA Footer */}
         <div className="flex flex-col gap-3 border-t border-border px-6 py-4 text-right sm:flex-row" dir="rtl">
-          <Button onClick={onUpgrade} className="flex-1 gap-2 text-sm sm:text-base">
+          <Button
+            onClick={onUpgrade}
+            className="hover-scale flex-1 gap-2 text-sm animate-enter motion-reduce:animate-none sm:text-base"
+            style={{ animationDelay: '220ms', animationFillMode: 'both' }}
+          >
             الانتقال إلى التقييم الشامل
             <ChevronLeft className="w-4 h-4" />
           </Button>
