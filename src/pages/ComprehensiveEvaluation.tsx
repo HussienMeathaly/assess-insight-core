@@ -32,28 +32,7 @@ export default function ComprehensiveEvaluation() {
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const { user } = useAuth();
 
-  const checkPendingRequest = useCallback(async () => {
-    if (!user) {
-      setHasPendingRequest(false);
-      return false;
-    }
-
-    const { data } = await supabase
-      .from('comprehensive_requests')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('status', 'pending')
-      .limit(1)
-      .maybeSingle();
-
-    const pending = Boolean(data);
-    setHasPendingRequest(pending);
-    return pending;
-  }, [user]);
-
-  useEffect(() => {
-    void checkPendingRequest();
-  }, [checkPendingRequest]);
+  // No longer blocking on pending requests — users can submit multiple
 
   const toggleDomain = (domainName: string) => {
     setSelected((current) =>
