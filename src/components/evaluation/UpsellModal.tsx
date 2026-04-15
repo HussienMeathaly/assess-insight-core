@@ -106,23 +106,23 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
         {/* Domains List */}
         <ScrollArea className="max-h-[45vh] px-6 py-4" dir="rtl">
           <div className="space-y-4 text-right" dir="rtl">
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3" dir="rtl">
-              <div className="flex items-center gap-2 mb-2" dir="rtl">
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4" dir="rtl">
+              <div className="flex items-center gap-2 mb-3" dir="rtl">
+                <span className="text-sm font-bold text-foreground">{freeEvaluationPreview.name}</span>
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
                   <Check className="h-3 w-3" />
                   <span>تم تقييمه في النسخة المجانية</span>
                 </div>
-                <span className="text-sm font-bold text-foreground">{freeEvaluationPreview.name}</span>
               </div>
-              <div className="flex flex-wrap gap-1.5" dir="rtl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" dir="rtl">
                 {freeEvaluationPreview.elements.map((element) => (
-                  <span
+                  <div
                     key={element}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/80 px-2.5 py-1 text-xs font-medium text-foreground"
+                    className="flex items-center gap-2 rounded-lg border border-border/70 bg-background/80 px-3 py-2 text-xs font-medium text-foreground"
                   >
-                    <Check className="h-3 w-3 text-primary shrink-0" />
-                    {element}
-                  </span>
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>{element}</span>
+                  </div>
                 ))}
               </div>
             </div>
