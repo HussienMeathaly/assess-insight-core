@@ -92,14 +92,13 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
         dir="rtl"
       >
         {/* Hero Section */}
-        <div className="bg-gradient-to-bl from-primary/15 via-primary/5 to-transparent px-6 pt-6 pb-4 text-right" dir="rtl">
+        <div className="px-6 pt-4 pb-2 text-right" dir="rtl">
           <DialogHeader className="items-end text-right sm:text-right">
-            <div className="text-4xl mb-3">🎉</div>
-            <DialogTitle className="w-full text-xl sm:text-2xl font-bold text-foreground text-right">
-              أحسنت! لقد أكملت التقييم المبدئي
+            <DialogTitle className="w-full text-lg sm:text-xl font-bold text-foreground text-right">
+              🎉 أحسنت! لقد أكملت التقييم المبدئي
             </DialogTitle>
-            <DialogDescription className="w-full text-sm sm:text-base text-muted-foreground mt-2 leading-relaxed text-right">
-              للحصول على تحليل شامل وتوصيات تفصيلية تساعدك على التطوير، ننصحك بالانتقال إلى التقييم الكامل.
+            <DialogDescription className="w-full text-xs sm:text-sm text-muted-foreground mt-1 leading-relaxed text-right">
+              للحصول على تحليل شامل وتوصيات تفصيلية، ننصحك بالانتقال إلى التقييم الكامل.
             </DialogDescription>
           </DialogHeader>
         </div>
