@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Check, Lock, Send } from 'lucide-react';
@@ -29,30 +29,43 @@ export default function ComprehensiveEvaluation() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const { user } = useAuth();
 
-  // Check if user already submitted a request
-  useEffect(() => {
-    if (!user) return;
-    supabase
+  const checkPendingRequest = useCallback(async () => {
+    if (!user) {
+      setHasPendingRequest(false);
+      return false;
+    }
+
+    const { data } = await supabase
       .from('comprehensive_requests')
       .select('id')
       .eq('user_id', user.id)
       .eq('status', 'pending')
       .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setSubmitted(true);
-      });
+      .maybeSingle();
+
+    const pending = Boolean(data);
+    setHasPendingRequest(pending);
+    return pending;
   }, [user]);
 
+  useEffect(() => {
+    void checkPendingRequest();
+  }, [checkPendingRequest]);
+
   const toggleDomain = (domainName: string) => {
-    setSelected((s) => s.includes(domainName) ? s.filter((i) => i !== domainName) : [...s, domainName]);
+    setSelected((current) =>
+      current.includes(domainName)
+        ? current.filter((item) => item !== domainName)
+        : [...current, domainName]
+    );
   };
 
-  const handleSubmit = () => {
-    if (submitting || submitted) return;
+  const handleSubmit = async () => {
+    if (submitting) return;
+
     if (selected.length === 0) {
       toast.error('يرجى اختيار عنصر واحد على الأقل');
       return;
@@ -63,10 +76,20 @@ export default function ComprehensiveEvaluation() {
       return;
     }
 
+    if (hasPendingRequest) {
+      toast.error('لديك طلب شامل قيد المعالجة بالفعل');
+      return;
+    }
+
+    const pending = await checkPendingRequest();
+    if (pending) {
+      toast.error('لديك طلب شامل قيد المعالجة بالفعل');
+      return;
+    }
+
     setSubmitting(true);
 
-    (async () => {
-      // Get user's organization
+    try {
       const { data: org } = await supabase
         .from('organizations')
         .select('id')
@@ -76,7 +99,7 @@ export default function ComprehensiveEvaluation() {
         .maybeSingle();
 
       const items = selected.map((domainName) => {
-        const domain = lockedDomains.find((d) => d.name === domainName);
+        const domain = lockedDomains.find((item) => item.name === domainName);
         return { domain: domainName, elements: domain?.elements || [] };
       });
 
@@ -88,13 +111,25 @@ export default function ComprehensiveEvaluation() {
 
       if (error) {
         toast.error('حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.');
-      } else {
-        setSubmitted(true);
-        toast.success('تم إرسال طلبك بنجاح، سيتواصل معك فريقنا قريبًا');
+        return;
       }
+
+      setSelected([]);
+      setHasPendingRequest(true);
+      toast.success('تم إرسال طلبك بنجاح، سيتواصل معك فريقنا قريبًا');
+    } finally {
       setSubmitting(false);
-    })();
+    }
   };
+
+  const submitDisabled = selected.length === 0 || submitting || hasPendingRequest;
+  const submitLabel = submitting
+    ? 'جاري الإرسال...'
+    : selected.length > 0
+      ? `إرسال (${selected.length})`
+      : hasPendingRequest
+        ? 'تم الإرسال'
+        : 'إرسال (0)';
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -123,9 +158,9 @@ export default function ComprehensiveEvaluation() {
               variant="outline"
               size="sm"
               onClick={() => setSelected([...allDomainNames])}
-              disabled={selected.length === allDomainNames.length}
+              disabled={allDomainNames.length === selected.length || hasPendingRequest}
             >
-              <Check className="h-3.5 w-3.5 ml-1.5" />
+              <Check className="ml-1.5 h-3.5 w-3.5" />
               اختيار الكل
             </Button>
             <Button
@@ -144,9 +179,12 @@ export default function ComprehensiveEvaluation() {
             const isSelected = selected.includes(domain.name);
 
             return (
-              <div key={domain.name} className={`rounded-xl border p-4 transition-colors ${
-                isSelected ? 'border-primary/30 bg-primary/5' : 'border-border'
-              }`}>
+              <div
+                key={domain.name}
+                className={`rounded-xl border p-4 transition-colors ${
+                  isSelected ? 'border-primary/30 bg-primary/5' : 'border-border'
+                }`}
+              >
                 <button
                   type="button"
                   onClick={() => toggleDomain(domain.name)}
@@ -188,10 +226,10 @@ export default function ComprehensiveEvaluation() {
             onClick={handleSubmit}
             size="lg"
             className="w-full max-w-sm gap-2 rounded-xl shadow-lg sm:w-auto"
-            disabled={selected.length === 0 || submitting || submitted}
+            disabled={submitDisabled}
           >
             <Send className="h-4 w-4" />
-            {submitted ? 'تم الإرسال' : submitting ? 'جاري الإرسال...' : `إرسال (${selected.length})`}
+            {submitLabel}
           </Button>
         </div>
       </main>
