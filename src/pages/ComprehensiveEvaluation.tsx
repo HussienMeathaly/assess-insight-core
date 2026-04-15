@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Check, Lock, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import profitLogo from '@/assets/profit-logo.png';
 
 const lockedDomains = [
@@ -28,6 +30,24 @@ const allItemKeys = lockedDomains.flatMap((d) => d.elements.map((e) => makeKey(d
 export default function ComprehensiveEvaluation() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const { user } = useAuth();
+
+  // Check if user already submitted a request
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('comprehensive_requests')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('status', 'pending')
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setSubmitted(true);
+      });
+  }, [user]);
 
   const toggle = (d: string, e: string) => {
     const id = makeKey(d, e);
@@ -35,11 +55,48 @@ export default function ComprehensiveEvaluation() {
   };
 
   const handleSubmit = () => {
+    if (submitting || submitted) return;
     if (selected.length === 0) {
       toast.error('يرجى اختيار عنصر واحد على الأقل');
       return;
     }
-    toast.success('تم إرسال طلبك بنجاح، سيتواصل معك فريقنا قريبًا');
+
+    if (!user) {
+      toast.error('يرجى تسجيل الدخول أولاً');
+      return;
+    }
+
+    setSubmitting(true);
+
+    (async () => {
+      // Get user's organization
+      const { data: org } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const items = selected.map((key) => {
+        const [domain, element] = key.split('::');
+        return { domain, element };
+      });
+
+      const { error } = await supabase.from('comprehensive_requests').insert({
+        user_id: user.id,
+        organization_id: org?.id ?? null,
+        selected_items: items,
+      });
+
+      if (error) {
+        toast.error('حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.');
+      } else {
+        setSubmitted(true);
+        toast.success('تم إرسال طلبك بنجاح، سيتواصل معك فريقنا قريبًا');
+      }
+      setSubmitting(false);
+    })();
   };
 
   return (
@@ -156,10 +213,10 @@ export default function ComprehensiveEvaluation() {
             onClick={handleSubmit}
             size="lg"
             className="w-full max-w-sm gap-2 rounded-xl shadow-lg sm:w-auto"
-            disabled={selected.length === 0}
+            disabled={selected.length === 0 || submitting || submitted}
           >
             <Send className="h-4 w-4" />
-            إرسال ({selected.length})
+            {submitted ? 'تم الإرسال' : submitting ? 'جاري الإرسال...' : `إرسال (${selected.length})`}
           </Button>
         </div>
       </main>
