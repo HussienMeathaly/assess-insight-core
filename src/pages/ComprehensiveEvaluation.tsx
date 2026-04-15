@@ -120,7 +120,7 @@ export default function ComprehensiveEvaluation() {
               variant="outline"
               size="sm"
               onClick={() => setSelected([...allDomainNames])}
-              disabled={allDomainNames.length === selected.length || hasPendingRequest}
+              disabled={allDomainNames.length === selected.length}
             >
               <Check className="ml-1.5 h-3.5 w-3.5" />
               اختيار الكل
