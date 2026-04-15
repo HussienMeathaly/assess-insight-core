@@ -107,30 +107,25 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
         {/* Domains List */}
         <ScrollArea className="max-h-[45vh] px-6 py-4" dir="rtl">
           <div className="space-y-4 text-right" dir="rtl">
-            <div className="rounded-2xl border border-primary/20 bg-gradient-to-b from-primary/10 via-primary/5 to-card p-4 shadow-sm" dir="rtl">
-              <div className="mb-4 flex flex-col items-center border-b border-primary/15 pb-4 text-center" dir="rtl">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                  <Check className="h-3.5 w-3.5" />
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3" dir="rtl">
+              <div className="flex items-center gap-2 mb-2" dir="rtl">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                  <Check className="h-3 w-3" />
                   <span>تم تقييمه في النسخة المجانية</span>
                 </div>
-
-                <h3 className="text-lg font-bold text-foreground">{freeEvaluationPreview.name}</h3>
+                <span className="text-sm font-bold text-foreground">{freeEvaluationPreview.name}</span>
               </div>
-
-              <ul className="space-y-2.5 text-right" dir="rtl">
+              <div className="flex flex-wrap gap-1.5" dir="rtl">
                 {freeEvaluationPreview.elements.map((element) => (
-                  <li
+                  <span
                     key={element}
-                    className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/80 px-3 py-3 text-sm text-foreground shadow-sm"
-                    dir="rtl"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/80 px-2.5 py-1 text-xs font-medium text-foreground"
                   >
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
-                      <Check className="h-3.5 w-3.5" />
-                    </div>
-                    <span className="flex-1 text-right font-medium leading-6">{element}</span>
-                  </li>
+                    <Check className="h-3 w-3 text-primary shrink-0" />
+                    {element}
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
 
             <div className="rounded-2xl border border-border/70 bg-gradient-to-b from-muted/45 via-background to-muted/20 p-4 shadow-sm" dir="rtl">
