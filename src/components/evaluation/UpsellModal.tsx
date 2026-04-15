@@ -108,14 +108,20 @@ export function UpsellModal({ open, onClose, onUpgrade }: UpsellModalProps) {
                     <h4 className="flex-1 text-right text-sm font-semibold text-foreground">{domain.name}</h4>
                   </div>
 
-                  <ul className="space-y-1 pr-9 text-right">
-                    {domain.elements.map((el, j) => (
-                      <li key={j} className="flex items-center gap-1.5 text-xs text-muted-foreground" dir="rtl">
-                        <span className="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
-                        <span className="flex-1 text-right">{el}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="rounded-lg border border-dashed border-border/70 bg-muted/20 px-3 py-3">
+                    <ul className="space-y-2 text-right select-none" aria-hidden="true">
+                      {domain.elements.map((_, j) => (
+                        <li key={j} className="flex items-center gap-2 text-xs text-muted-foreground/60" dir="rtl">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/35" />
+                          <span
+                            className={`block h-3 rounded-full bg-muted-foreground/25 blur-sm ${
+                              j % 3 === 0 ? 'w-3/4' : j % 3 === 1 ? 'w-5/6' : 'w-2/3'
+                            }`}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               ))}
             </div>
