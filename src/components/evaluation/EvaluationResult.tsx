@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { CheckCircle2, AlertCircle, RotateCcw, ArrowLeft } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import profitLogo from '@/assets/profit-logo.png';
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { CheckCircle2, AlertCircle, RotateCcw, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
+import profitLogo from "@/assets/profit-logo.png";
 
 interface MainElementScore {
   score: number;
@@ -18,20 +18,14 @@ interface EvaluationResultProps {
   onBack: () => void;
 }
 
-export function EvaluationResult({
-  totalScore,
-  maxScore,
-  scoresByElement,
-  onRetake,
-  onBack
-}: EvaluationResultProps) {
+export function EvaluationResult({ totalScore, maxScore, scoresByElement, onRetake, onBack }: EvaluationResultProps) {
   const percentage = Math.round(totalScore);
   const isQualified = percentage >= 60;
 
   const getScoreLabel = (score: number) => {
-    if (score >= 80) return { label: 'جيد', color: 'text-green-500' };
-    if (score > 65) return { label: 'متوسط', color: 'text-yellow-500' };
-    return { label: 'ضعيف', color: 'text-destructive' };
+    if (score >= 80) return { label: "جيد", color: "text-green-500" };
+    if (score > 65) return { label: "متوسط", color: "text-yellow-500" };
+    return { label: "ضعيف", color: "text-destructive" };
   };
 
   const scoreInfo = getScoreLabel(percentage);
@@ -40,17 +34,9 @@ export function EvaluationResult({
     <div className="max-w-3xl mx-auto animate-fade-in">
       {/* Header */}
       <div className="text-center mb-6 sm:mb-8">
-        <img
-          src={profitLogo}
-          alt="PROFIT Logo"
-          className="h-16 sm:h-20 md:h-24 mx-auto mb-4 sm:mb-6"
-        />
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
-          نتائج التقييم
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          تم الانتهاء من التقييم الشامل للمنتج
-        </p>
+        <img src={profitLogo} alt="PROFIT Logo" className="h-16 sm:h-20 md:h-24 mx-auto mb-4 sm:mb-6" />
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-2">نتائج التقييم</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">تم الانتهاء من تقييم المرحلة الأولى للنشاط</p>
       </div>
 
       {/* Main Score Card - Shows Percentage Only */}
@@ -59,14 +45,7 @@ export function EvaluationResult({
           {/* Score Circle */}
           <div className="relative w-28 h-28 sm:w-32 sm:h-32">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="42"
-                fill="none"
-                stroke="hsl(var(--muted))"
-                strokeWidth="6"
-              />
+              <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
               <circle
                 cx="50"
                 cy="50"
@@ -84,23 +63,25 @@ export function EvaluationResult({
             </div>
           </div>
 
-          <div className={cn(
-            "inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full",
-            isQualified ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
-          )}>
+          <div
+            className={cn(
+              "inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full",
+              isQualified ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive",
+            )}
+          >
             {isQualified ? (
               <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
             ) : (
               <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             )}
             <span className="font-medium text-sm sm:text-base">
-              {isQualified ? 'المنتج مؤهل للتصنيف' : 'المنتج يحتاج تحسينات'}
+              {isQualified ? "المنتج مؤهل للتصنيف" : "المنتج يحتاج تحسينات"}
             </span>
           </div>
           <p className="text-sm sm:text-base text-muted-foreground max-w-md">
             {isQualified
-              ? 'حقق المنتج الحد الأدنى المطلوب للتأهل. يمكنك الآن متابعة عملية التصنيف.'
-              : 'لم يحقق المنتج الحد الأدنى المطلوب. يمكنك إعادة التقييم لتحسين النتيجة.'}
+              ? "حقق المنتج الحد الأدنى المطلوب للتأهل. يمكنك الآن متابعة عملية التصنيف."
+              : "لم يحقق المنتج الحد الأدنى المطلوب. يمكنك إعادة التقييم لتحسين النتيجة."}
           </p>
         </div>
       </div>
@@ -143,18 +124,11 @@ export function EvaluationResult({
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-        <Button
-          variant="outline"
-          onClick={onRetake}
-          className="gap-2 text-sm sm:text-base"
-        >
+        <Button variant="outline" onClick={onRetake} className="gap-2 text-sm sm:text-base">
           <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           إعادة التقييم
         </Button>
-        <Button
-          onClick={onBack}
-          className="gap-2 text-sm sm:text-base"
-        >
+        <Button onClick={onBack} className="gap-2 text-sm sm:text-base">
           <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           العودة للصفحة الرئيسية
         </Button>
