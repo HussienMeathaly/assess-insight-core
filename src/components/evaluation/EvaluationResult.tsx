@@ -20,7 +20,7 @@ interface EvaluationResultProps {
 
 export function EvaluationResult({ totalScore, maxScore, scoresByElement, onRetake, onBack }: EvaluationResultProps) {
   const percentage = Math.round(totalScore);
-  const isQualified = percentage >= 60;
+  const isQualified = percentage > 65;
 
   const getScoreLabel = (score: number) => {
     if (score >= 80) return { label: "جيد", color: "text-green-500" };
