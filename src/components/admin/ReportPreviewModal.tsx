@@ -115,10 +115,10 @@ export function ReportPreviewModal({
       // Generate and download
       const fileName = `تقرير-التقييم-${orgName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(wb, fileName);
-      toast.success('تم تحميل ملف Excel بنجاح');
+      setDownloadStatus({ open: true, type: "success", title: "تم التحميل بنجاح", message: "تم تحميل ملف Excel بنجاح" });
     } catch (error) {
       console.error('Error exporting Excel:', error);
-      toast.error('حدث خطأ أثناء تصدير الملف');
+      setDownloadStatus({ open: true, type: "error", title: "حدث خطأ", message: "حدث خطأ أثناء تصدير الملف" });
     }
   };
 
