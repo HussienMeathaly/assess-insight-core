@@ -60,6 +60,7 @@ export function ReportPreviewModal({
   downloading,
   reportData
 }: ReportPreviewModalProps) {
+  const [downloadStatus, setDownloadStatus] = useState<{ open: boolean; type: "success" | "error"; title: string; message: string }>({ open: false, type: "success", title: "", message: "" });
   if (!reportData) return null;
 
   const handleExportExcel = async () => {
