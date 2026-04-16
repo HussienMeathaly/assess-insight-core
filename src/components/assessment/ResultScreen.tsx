@@ -80,12 +80,19 @@ export function ResultScreen({ result, analysisText, isLoading, onRetake }: Resu
           <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground mt-4 mb-2">
             نتيجة التقييم الأولي
           </h2>
-          <p className={cn(
-            "text-base md:text-lg font-medium",
-            isQualified ? "text-success" : "text-muted-foreground"
+          <div className={cn(
+            "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-base md:text-lg font-medium",
+            isQualified 
+              ? "bg-success/10 text-success" 
+              : "bg-destructive/10 text-destructive"
           )}>
-            {isQualified ? "جاهزية مبدئية متوفرة ✓" : "توجد فجوات في الجاهزية"}
-          </p>
+            {isQualified ? (
+              <CheckCircle2 className="w-5 h-5" />
+            ) : (
+              <AlertCircle className="w-5 h-5" />
+            )}
+            <span>{isQualified ? "مؤهل" : "غير مؤهل"}</span>
+          </div>
         </motion.div>
 
         {/* Score Circle Only - No Details */}
