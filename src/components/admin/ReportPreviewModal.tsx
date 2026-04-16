@@ -68,9 +68,9 @@ export function ReportPreviewModal({
       // Create workbook
       const wb = XLSX.utils.book_new();
 
-      // Raw Data Table with weight and score columns
+      // Raw Data Table without weight column
       const rawData: (string | number)[][] = [
-        ['رقم', 'العنصر الرئيسي', 'العنصر الفرعي', 'المعيار', 'الإجابة', 'الوزن', 'الدرجة']
+        ['رقم', 'العنصر الرئيسي', 'العنصر الفرعي', 'المعيار', 'الإجابة', 'الدرجة']
       ];
 
       let rawRowNum = 1;
@@ -85,7 +85,6 @@ export function ReportPreviewModal({
               subElement.subElementName,
               answer.criterion_name,
               answer.selected_option_label,
-              answer.criterion_weight,
               answer.score
             ]);
           });
@@ -94,8 +93,8 @@ export function ReportPreviewModal({
 
       // Add total row
       rawData.push([]);
-      rawData.push(['', '', '', '', 'المجموع', maxScore, totalScore]);
-      rawData.push(['', '', '', '', 'النسبة المئوية', '', `${percentage}%`]);
+      rawData.push(['', '', '', '', 'المجموع', totalScore]);
+      rawData.push(['', '', '', '', 'النسبة المئوية', `${percentage}%`]);
 
       const rawSheet = XLSX.utils.aoa_to_sheet(rawData);
       
@@ -105,7 +104,6 @@ export function ReportPreviewModal({
         { wch: 30 },
         { wch: 50 },
         { wch: 30 },
-        { wch: 8 },
         { wch: 10 }
       ];
       
