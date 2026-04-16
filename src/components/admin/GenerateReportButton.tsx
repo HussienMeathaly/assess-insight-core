@@ -649,6 +649,14 @@ export function GenerateReportButton({
         downloading={generating}
         reportData={reportData}
       />
+
+      <StatusDialog
+        open={downloadStatus.open}
+        onClose={() => setDownloadStatus(s => ({ ...s, open: false }))}
+        type={downloadStatus.type}
+        title={downloadStatus.title}
+        message={downloadStatus.message}
+      />
     </>
   );
 }
