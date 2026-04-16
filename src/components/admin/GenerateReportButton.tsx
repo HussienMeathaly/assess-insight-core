@@ -858,7 +858,6 @@ export function GenerateReportButton({
       // Save PDF
       const fileName = `تقرير-التقييم-${orgName.replace(/\s+/g, '-')}.pdf`;
       pdf.save(fileName);
-      toast.success('تم تحميل التقرير بنجاح');
 
     } catch (error) {
       console.error('Error generating PDF:', error);

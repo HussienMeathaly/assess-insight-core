@@ -155,6 +155,7 @@ export function ReportPreviewModal({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0">
         {/* Header */}
@@ -364,5 +365,14 @@ export function ReportPreviewModal({
         </ScrollArea>
       </DialogContent>
     </Dialog>
+
+    <StatusDialog
+      open={downloadStatus.open}
+      onClose={() => setDownloadStatus(s => ({ ...s, open: false }))}
+      type={downloadStatus.type}
+      title={downloadStatus.title}
+      message={downloadStatus.message}
+    />
+    </>
   );
 }
