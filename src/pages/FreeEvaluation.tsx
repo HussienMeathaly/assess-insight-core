@@ -10,6 +10,7 @@ import { MobileProgressSummary } from '@/components/evaluation/MobileProgressSum
 import { MainElementView } from '@/components/evaluation/MainElementView';
 import { EvaluationResult } from '@/components/evaluation/EvaluationResult';
 import { UpsellModal } from '@/components/evaluation/UpsellModal';
+import { StatusDialog } from '@/components/ui/status-dialog';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
@@ -98,7 +99,6 @@ export default function FreeEvaluation() {
 
       if (error) throw error;
 
-      toast.success('تم حفظ بيانات الجهة بنجاح');
       setNeedsOrganization(false);
     } catch {
       toast.error('تعذر حفظ بيانات الجهة. يرجى المحاولة مرة أخرى.');
@@ -109,9 +109,7 @@ export default function FreeEvaluation() {
   useEffect(() => {
     if (showResults && !saved && !saving) {
       saveEvaluation().then((success) => {
-        if (success) {
-          toast.success('تم حفظ نتائج التقييم بنجاح');
-        } else {
+        if (!success) {
           toast.error('تعذر حفظ التقييم. تأكد من تسجيل الدخول وإكمال بيانات الجهة.');
         }
       });
