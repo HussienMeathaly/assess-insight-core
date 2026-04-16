@@ -991,14 +991,6 @@ export default function AdminDashboard() {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center justify-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleViewEvaluationDetails(evaluation)}
-                                >
-                                  <Eye className="h-4 w-4 ml-1" />
-                                  التفاصيل
-                                </Button>
                                 <GenerateReportButton
                                   evaluationId={evaluation.id}
                                   organizationName={evaluation.organization?.name || "غير معروف"}
