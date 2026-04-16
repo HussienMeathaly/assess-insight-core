@@ -20,7 +20,7 @@ interface EvaluationResultProps {
 
 export function EvaluationResult({ totalScore, maxScore, scoresByElement, onRetake, onBack }: EvaluationResultProps) {
   const percentage = Math.round(totalScore);
-  const isQualified = percentage >= 60;
+  const isQualified = percentage > 65;
 
   const getScoreLabel = (score: number) => {
     if (score >= 80) return { label: "جيد", color: "text-green-500" };
@@ -76,12 +76,12 @@ export function EvaluationResult({ totalScore, maxScore, scoresByElement, onReta
               <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             )}
             <span className="font-medium text-sm sm:text-base">
-              {isQualified ? "المنتج مؤهل للتصنيف" : "المنتج يحتاج تحسينات"}
+              {isQualified ? "المنتج مؤهل للانتقال إلى التقييم الشامل" : "المنتج يحتاج تحسينات"}
             </span>
           </div>
           <p className="text-sm sm:text-base text-muted-foreground max-w-md">
             {isQualified
-              ? "حقق المنتج الحد الأدنى المطلوب للتأهل. يمكنك الآن متابعة عملية التصنيف."
+              ? "أظهر المنتج جاهزية كافية للمرحلة التالية. يمكنك الآن التقدم لطلب التقييم الشامل للحصول على تحليل تفصيلي متكامل."
               : "لم يحقق المنتج الحد الأدنى المطلوب. يمكنك إعادة التقييم لتحسين النتيجة."}
           </p>
         </div>
