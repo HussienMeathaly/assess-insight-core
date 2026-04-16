@@ -69,16 +69,14 @@ export function GenerateReportButton({
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return BRAND_GREEN;
-    if (score >= 60) return BRAND_NAVY;
-    if (score >= 40) return '#ca8a04';
+    if (score > 65) return '#ca8a04';
     return '#dc2626';
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 80) return 'ممتاز';
-    if (score >= 60) return 'جيد جداً';
-    if (score >= 40) return 'جيد';
-    return 'يحتاج تحسين';
+    if (score >= 80) return 'جيد';
+    if (score > 65) return 'متوسط';
+    return 'ضعيف';
   };
 
   // Fetch report data
@@ -295,10 +293,9 @@ export function GenerateReportButton({
                     <table class="criteria-table">
                       <thead>
                         <tr>
-                          <th style="width: 50%;">المعيار</th>
+                          <th style="width: 55%;">المعيار</th>
                           <th style="width: 30%;">الإجابة</th>
-                          <th style="width: 10%;">الوزن</th>
-                          <th style="width: 10%;">النتيجة</th>
+                          <th style="width: 15%;">النتيجة</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -308,7 +305,6 @@ export function GenerateReportButton({
                             <tr>
                               <td class="criterion-name">${answer.criterion_name}</td>
                               <td class="criterion-answer">${answer.selected_option_label}</td>
-                              <td class="criterion-weight">${answer.criterion_weight}%</td>
                               <td class="criterion-score" style="color: ${scoreColor};">${answer.score}%</td>
                             </tr>
                           `;
@@ -698,8 +694,8 @@ export function GenerateReportButton({
                     <div class="score-value">${percentage}</div>
                     <div class="score-percent">%</div>
                   </div>
-                  <div class="score-status">${isQualified ? 'مؤهل للتصنيف' : 'يحتاج تحسينات'}</div>
-                  <div class="score-message">${isQualified ? 'حقق المنتج الحد الأدنى المطلوب للتأهل' : 'لم يحقق المنتج الحد الأدنى المطلوب (60%)'}</div>
+                  <div class="score-status">${percentage > 65 ? 'المنتج مؤهل للانتقال إلى التقييم الشامل' : 'يحتاج تحسينات'}</div>
+                  <div class="score-label" style="display:inline-block;padding:4px 16px;border-radius:15px;font-size:14px;font-weight:700;margin-bottom:5px;background:${getScoreColor(percentage)}15;color:${getScoreColor(percentage)};">${getScoreLabel(percentage)}</div>
                   <div class="stats-row">
                     <div class="stat-item">
                       <div class="stat-value">${totalAnswers}</div>
@@ -778,9 +774,11 @@ export function GenerateReportButton({
             </div>
             
             <div class="footer" style="margin-top: 50px;">
-              <img src="${profitLogo}" alt="Profit Logo" class="footer-logo" />
-              <p style="font-size: 16px; font-weight: 700; margin-bottom: 10px;">شكراً لاستخدامكم نظام PROFIT</p>
-              <p>تم إنشاء هذا التقرير بواسطة نظام PROFIT للتقييم</p>
+              <div style="font-size: 14px; color: #6b7280; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;">
+                <span>تم إنشاء هذا التقرير بواسطة نظام</span>
+                <img src="${profitLogo}" alt="Profit+" style="height: 30px; display: inline-block;" />
+                <span>للتقييم</span>
+              </div>
               <p>جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
             </div>
             
@@ -860,7 +858,6 @@ export function GenerateReportButton({
       // Save PDF
       const fileName = `تقرير-التقييم-${orgName.replace(/\s+/g, '-')}.pdf`;
       pdf.save(fileName);
-      toast.success('تم تحميل التقرير بنجاح');
 
     } catch (error) {
       console.error('Error generating PDF:', error);

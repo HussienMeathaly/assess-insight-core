@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { StatusDialog } from '@/components/ui/status-dialog';
 import { Download, FileSpreadsheet } from 'lucide-react';
 import profitLogo from '@/assets/profit-logo.png';
 
@@ -58,6 +60,7 @@ export function ReportPreviewModal({
   downloading,
   reportData
 }: ReportPreviewModalProps) {
+  const [downloadStatus, setDownloadStatus] = useState<{ open: boolean; type: "success" | "error"; title: string; message: string }>({ open: false, type: "success", title: "", message: "" });
   if (!reportData) return null;
 
   const handleExportExcel = async () => {
@@ -68,9 +71,9 @@ export function ReportPreviewModal({
       // Create workbook
       const wb = XLSX.utils.book_new();
 
-      // Raw Data Table with weight and score columns
+      // Raw Data Table without weight column
       const rawData: (string | number)[][] = [
-        ['رقم', 'العنصر الرئيسي', 'العنصر الفرعي', 'المعيار', 'الإجابة', 'الوزن', 'الدرجة']
+        ['رقم', 'العنصر الرئيسي', 'العنصر الفرعي', 'المعيار', 'الإجابة', 'الدرجة']
       ];
 
       let rawRowNum = 1;
@@ -85,7 +88,6 @@ export function ReportPreviewModal({
               subElement.subElementName,
               answer.criterion_name,
               answer.selected_option_label,
-              answer.criterion_weight,
               answer.score
             ]);
           });
@@ -94,8 +96,8 @@ export function ReportPreviewModal({
 
       // Add total row
       rawData.push([]);
-      rawData.push(['', '', '', '', 'المجموع', maxScore, totalScore]);
-      rawData.push(['', '', '', '', 'النسبة المئوية', '', `${percentage}%`]);
+      rawData.push(['', '', '', '', 'المجموع', totalScore]);
+      rawData.push(['', '', '', '', 'النسبة المئوية', `${percentage}%`]);
 
       const rawSheet = XLSX.utils.aoa_to_sheet(rawData);
       
@@ -105,7 +107,6 @@ export function ReportPreviewModal({
         { wch: 30 },
         { wch: 50 },
         { wch: 30 },
-        { wch: 8 },
         { wch: 10 }
       ];
       
@@ -114,10 +115,10 @@ export function ReportPreviewModal({
       // Generate and download
       const fileName = `تقرير-التقييم-${orgName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(wb, fileName);
-      toast.success('تم تحميل ملف Excel بنجاح');
+      setDownloadStatus({ open: true, type: "success", title: "تم التحميل بنجاح", message: "تم تحميل ملف Excel بنجاح" });
     } catch (error) {
       console.error('Error exporting Excel:', error);
-      toast.error('حدث خطأ أثناء تصدير الملف');
+      setDownloadStatus({ open: true, type: "error", title: "حدث خطأ", message: "حدث خطأ أثناء تصدير الملف" });
     }
   };
 
@@ -154,6 +155,7 @@ export function ReportPreviewModal({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0">
         {/* Header */}
@@ -363,5 +365,14 @@ export function ReportPreviewModal({
         </ScrollArea>
       </DialogContent>
     </Dialog>
+
+    <StatusDialog
+      open={downloadStatus.open}
+      onClose={() => setDownloadStatus(s => ({ ...s, open: false }))}
+      type={downloadStatus.type}
+      title={downloadStatus.title}
+      message={downloadStatus.message}
+    />
+    </>
   );
 }
