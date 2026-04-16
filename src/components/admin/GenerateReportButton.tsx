@@ -889,23 +889,6 @@ export function GenerateReportButton({
           )}
           <span className="hidden sm:inline">معاينة</span>
         </Button>
-
-        {/* Download Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleGeneratePDF}
-          disabled={!isCompleted || generating}
-          className="gap-1.5"
-          title={!isCompleted ? 'التقييم غير مكتمل' : 'تحميل التقرير PDF'}
-        >
-          {generating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <FileText className="h-4 w-4" />
-          )}
-          <span className="hidden sm:inline">PDF</span>
-        </Button>
       </div>
 
       {/* Report Preview Modal */}

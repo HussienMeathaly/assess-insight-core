@@ -303,10 +303,6 @@ export function EvaluationsMobileCards({
             </div>
 
             <div className="mt-3 flex gap-2">
-              <Button variant="secondary" size="sm" className="flex-1" onClick={() => onViewDetails(e)}>
-                <Eye className="h-4 w-4 ml-2" />
-                التفاصيل
-              </Button>
               <GenerateReportButton
                 evaluationId={e.id}
                 organizationName={e.organization?.name || "غير معروف"}
