@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { StatusDialog } from '@/components/ui/status-dialog';
 import { Download, FileSpreadsheet } from 'lucide-react';
 import profitLogo from '@/assets/profit-logo.png';
 
