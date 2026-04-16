@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, Check, Lock, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { StatusDialog } from '@/components/ui/status-dialog';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,6 +30,7 @@ export default function ComprehensiveEvaluation() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [statusDialog, setStatusDialog] = useState<{ open: boolean; type: "success" | "error"; title: string; message: string }>({ open: false, type: "success", title: "", message: "" });
   const { user } = useAuth();
 
   const toggleDomain = (domainName: string) => {
@@ -75,12 +77,12 @@ export default function ComprehensiveEvaluation() {
       });
 
       if (error) {
-        toast.error('حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.');
+        setStatusDialog({ open: true, type: "error", title: "حدث خطأ", message: "حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى." });
         return;
       }
 
       setSelected([]);
-      toast.success('تم إرسال طلبك بنجاح، سيتواصل معك فريقنا قريبًا');
+      setStatusDialog({ open: true, type: "success", title: "تم إرسال طلبك بنجاح", message: "سيتواصل معك فريقنا قريبًا لاستكمال إجراءات التقييم الشامل." });
     } finally {
       setSubmitting(false);
     }
@@ -194,6 +196,14 @@ export default function ComprehensiveEvaluation() {
             {submitLabel}
           </Button>
         </div>
+
+        <StatusDialog
+          open={statusDialog.open}
+          onClose={() => setStatusDialog(s => ({ ...s, open: false }))}
+          type={statusDialog.type}
+          title={statusDialog.title}
+          message={statusDialog.message}
+        />
       </main>
     </div>
   );
