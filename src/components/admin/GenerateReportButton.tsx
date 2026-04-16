@@ -61,6 +61,7 @@ export function GenerateReportButton({
   const [loading, setLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [downloadStatus, setDownloadStatus] = useState<{ open: boolean; type: "success" | "error"; title: string; message: string }>({ open: false, type: "success", title: "", message: "" });
 
   // Profit brand colors
   const BRAND_NAVY = '#1e3a5f';
