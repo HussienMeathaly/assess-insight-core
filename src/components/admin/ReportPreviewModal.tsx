@@ -350,11 +350,12 @@ export function ReportPreviewModal({
 
             {/* Footer */}
             <div className="text-center py-6 border-t mt-6">
-              <img src={profitLogo} alt="Profit+" className="h-14 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">
-                تم إنشاء هذا التقرير بواسطة نظام PROFIT+ للتقييم
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5 flex-wrap">
+                <span>تم إنشاء هذا التقرير بواسطة نظام</span>
+                <img src={profitLogo} alt="Profit+" className="h-5 inline-block align-middle" />
+                <span>للتقييم</span>
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-2">
                 جميع الحقوق محفوظة © {new Date().getFullYear()}
               </p>
             </div>
