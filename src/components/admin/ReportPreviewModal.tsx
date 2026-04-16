@@ -137,23 +137,20 @@ export function ReportPreviewModal({
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-lime-600';
-    if (score >= 60) return 'text-blue-600';
-    if (score >= 40) return 'text-yellow-600';
+    if (score > 65) return 'text-yellow-600';
     return 'text-red-600';
   };
 
   const getScoreBgColor = (score: number) => {
     if (score >= 80) return 'bg-lime-100 text-lime-700';
-    if (score >= 60) return 'bg-blue-100 text-blue-700';
-    if (score >= 40) return 'bg-yellow-100 text-yellow-700';
+    if (score > 65) return 'bg-yellow-100 text-yellow-700';
     return 'bg-red-100 text-red-700';
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 80) return 'ممتاز';
-    if (score >= 60) return 'جيد جداً';
-    if (score >= 40) return 'جيد';
-    return 'يحتاج تحسين';
+    if (score >= 80) return 'جيد';
+    if (score > 65) return 'متوسط';
+    return 'ضعيف';
   };
 
   return (
@@ -162,15 +159,10 @@ export function ReportPreviewModal({
         {/* Header */}
         <DialogHeader className="p-4 sm:p-6 border-b bg-gradient-to-l from-primary/5 to-transparent flex-shrink-0">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <img src={profitLogo} alt="Profit Logo" className="h-8 sm:h-10" />
-              <div>
-                <DialogTitle className="text-lg sm:text-xl font-bold text-primary">
-                  معاينة التقرير
-                </DialogTitle>
-                <p className="text-sm text-muted-foreground">{orgName}</p>
-              </div>
-            </div>
+            <img src={profitLogo} alt="Profit Logo" className="h-12 sm:h-14" />
+            <DialogTitle className="flex-1 text-center text-lg sm:text-xl font-bold text-primary">
+              معاينة التقرير
+            </DialogTitle>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -228,20 +220,20 @@ export function ReportPreviewModal({
                 ملخص النتيجة
               </div>
               <div className="p-6">
-                <div className={`text-center p-6 rounded-xl ${isQualified ? 'bg-lime-50 border-2 border-lime-400' : 'bg-red-50 border-2 border-red-400'}`}>
+                <div className={`text-center p-6 rounded-xl ${percentage > 65 ? 'bg-lime-50 border-2 border-lime-400' : 'bg-red-50 border-2 border-red-400'}`}>
                   {/* Score Circle */}
-                  <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 ${isQualified ? 'border-lime-500 bg-white' : 'border-red-500 bg-white'} mx-auto flex flex-col items-center justify-center mb-4`}>
-                    <span className={`text-3xl sm:text-4xl font-bold ${isQualified ? 'text-lime-600' : 'text-red-600'}`}>
+                  <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 ${percentage > 65 ? 'border-lime-500 bg-white' : 'border-red-500 bg-white'} mx-auto flex flex-col items-center justify-center mb-4`}>
+                    <span className={`text-3xl sm:text-4xl font-bold ${percentage > 65 ? 'text-lime-600' : 'text-red-600'}`}>
                       {percentage}
                     </span>
                     <span className="text-sm text-muted-foreground">%</span>
                   </div>
                   
-                  <p className={`text-xl font-bold mb-1 ${isQualified ? 'text-lime-600' : 'text-red-600'}`}>
-                    {isQualified ? 'مؤهل للتصنيف' : 'يحتاج تحسينات'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {isQualified ? 'حقق المنتج الحد الأدنى المطلوب للتأهل' : 'لم يحقق المنتج الحد الأدنى المطلوب (60%)'}
+                  <span className={`inline-block px-4 py-1.5 rounded-full text-sm font-bold mb-2 ${getScoreBgColor(percentage)}`}>
+                    {getScoreLabel(percentage)}
+                  </span>
+                  <p className={`text-lg font-bold mb-1 ${percentage > 65 ? 'text-lime-600' : 'text-red-600'}`}>
+                    {percentage > 65 ? 'المنتج مؤهل للانتقال إلى التقييم الشامل' : 'يحتاج تحسينات'}
                   </p>
 
                   {/* Stats Row */}
@@ -331,10 +323,9 @@ export function ReportPreviewModal({
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="bg-primary/10">
-                                <th className="text-right p-2 font-semibold text-primary" style={{ width: '50%' }}>المعيار</th>
+                                <th className="text-right p-2 font-semibold text-primary" style={{ width: '55%' }}>المعيار</th>
                                 <th className="text-right p-2 font-semibold text-primary" style={{ width: '30%' }}>الإجابة</th>
-                                <th className="text-center p-2 font-semibold text-primary" style={{ width: '10%' }}>الوزن</th>
-                                <th className="text-center p-2 font-semibold text-primary" style={{ width: '10%' }}>النتيجة</th>
+                                <th className="text-center p-2 font-semibold text-primary" style={{ width: '15%' }}>النتيجة</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -342,7 +333,6 @@ export function ReportPreviewModal({
                                 <tr key={answer.criterion_id} className="border-b border-muted last:border-0">
                                   <td className="p-2 text-foreground">{answer.criterion_name}</td>
                                   <td className="p-2 text-muted-foreground">{answer.selected_option_label}</td>
-                                  <td className="p-2 text-center text-primary">{answer.criterion_weight}%</td>
                                   <td className={`p-2 text-center font-semibold ${getScoreColor(answer.score)}`}>
                                     {answer.score}%
                                   </td>
@@ -360,10 +350,9 @@ export function ReportPreviewModal({
 
             {/* Footer */}
             <div className="text-center py-6 border-t mt-6">
-              <img src={profitLogo} alt="Profit Logo" className="h-12 mx-auto mb-3" />
-              <p className="font-bold text-primary mb-1">شكراً لاستخدامكم نظام PROFIT</p>
+              <img src={profitLogo} alt="Profit+" className="h-14 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">
-                تم إنشاء هذا التقرير بواسطة نظام PROFIT للتقييم
+                تم إنشاء هذا التقرير بواسطة نظام PROFIT+ للتقييم
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 جميع الحقوق محفوظة © {new Date().getFullYear()}
