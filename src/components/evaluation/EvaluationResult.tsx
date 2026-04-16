@@ -60,6 +60,7 @@ export function EvaluationResult({ totalScore, maxScore, scoresByElement, onReta
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-2xl sm:text-3xl font-bold text-foreground">{percentage}%</span>
+              <span className={cn("text-xs sm:text-sm font-semibold", scoreInfo.color)}>{scoreInfo.label}</span>
             </div>
           </div>
 
