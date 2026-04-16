@@ -5,6 +5,7 @@ import { FileText, Loader2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import profitLogo from '@/assets/profit-logo.png';
 import { ReportPreviewModal } from './ReportPreviewModal';
+import { StatusDialog } from '@/components/ui/status-dialog';
 
 interface GenerateReportButtonProps {
   evaluationId: string;
