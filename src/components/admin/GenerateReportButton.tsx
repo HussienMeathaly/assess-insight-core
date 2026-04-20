@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { FileText, Loader2, Eye } from 'lucide-react';
+import { Loader2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
-import profitLogo from '@/assets/profit-logo.png';
 import { ReportPreviewModal } from './ReportPreviewModal';
 import { StatusDialog } from '@/components/ui/status-dialog';
+import { generateReportPdf } from '@/lib/generatePdf';
 
 interface GenerateReportButtonProps {
   evaluationId: string;
@@ -63,54 +63,10 @@ export function GenerateReportButton({
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [downloadStatus, setDownloadStatus] = useState<{ open: boolean; type: "success" | "error"; title: string; message: string }>({ open: false, type: "success", title: "", message: "" });
 
-  const PDF_RENDER_SCALE = 1;
-  const PDF_IMAGE_QUALITY = 0.72;
-
-  // Profit brand colors
-  const BRAND_NAVY = '#1e3a5f';
-  const BRAND_GREEN = '#7cb342';
-  const BRAND_NAVY_LIGHT = '#2d4a6f';
-  const BRAND_GREEN_LIGHT = '#8bc34a';
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return BRAND_GREEN;
-    if (score > 65) return '#ca8a04';
-    return '#dc2626';
-  };
-
   const getScoreLabel = (score: number) => {
     if (score >= 80) return 'جيد';
     if (score > 65) return 'متوسط';
     return 'ضعيف';
-  };
-
-  const preloadPdfLibraries = () => Promise.all([import('jspdf'), import('html2canvas')]);
-
-  const waitForIframeAssets = async (iframeDoc: Document) => {
-    const images = Array.from(iframeDoc.images);
-
-    await Promise.all(
-      images.map(
-        (image) =>
-          image.complete
-            ? Promise.resolve()
-            : new Promise<void>((resolve) => {
-                image.onload = () => resolve();
-                image.onerror = () => resolve();
-              }),
-      ),
-    );
-
-    if ('fonts' in iframeDoc) {
-      try {
-        await iframeDoc.fonts.ready;
-      } catch {
-        // Ignore font readiness failures and continue rendering.
-      }
-    }
-
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   };
 
   // Fetch report data
@@ -276,12 +232,14 @@ export function GenerateReportButton({
     if (data) {
       setReportData(data);
       setPreviewOpen(true);
-      void preloadPdfLibraries();
+      // Preload pdfmake + fonts in background for faster download
+      void import('@/lib/generatePdf');
+      void import('@/lib/pdfFonts').then((m) => m.loadPdfFonts());
     }
     setLoading(false);
   };
 
-  // Handle PDF generation with jsPDF + html2canvas
+  // Handle PDF generation with pdfmake (vector text, sharp, searchable)
   const handleGeneratePDF = async () => {
     setGenerating(true);
 
@@ -295,330 +253,7 @@ export function GenerateReportButton({
         }
       }
 
-      const { orgName, domainName, percentage, isQualified, totalAnswers, maxScore, groupedAnswers, contactPerson, email, phone } = data;
-
-      // Detail pages are generated inline within htmlContent below
-
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html dir="rtl" lang="ar">
-        <head>
-          <meta charset="UTF-8">
-          <style>
-            @page { size: A4; margin: 0; }
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body {
-              font-family: 'Arial', 'Tahoma', sans-serif;
-              background: white; color: #1f2937; line-height: 1.7;
-              direction: rtl; font-size: 12px;
-            }
-            .page {
-              width: 210mm; min-height: 297mm; padding: 15mm;
-              background: white; position: relative; padding-bottom: 25mm;
-            }
-            .page-break { page-break-before: always; }
-            .page-header {
-              display: flex; justify-content: space-between; align-items: center;
-              padding-bottom: 12px; border-bottom: 2px solid ${BRAND_NAVY}; margin-bottom: 20px;
-            }
-            .page-header-logo { height: 35px; width: auto; }
-            .page-header-info { font-size: 11px; color: ${BRAND_NAVY}; font-weight: 500; }
-            .page-header-info .separator { margin: 0 8px; color: ${BRAND_GREEN}; }
-            .page-footer {
-              position: absolute; bottom: 10mm; left: 15mm; right: 15mm;
-              text-align: center; font-size: 10px; color: #6b7280;
-              border-top: 1px solid ${BRAND_NAVY}20; padding-top: 8px;
-            }
-            .page-footer .separator { margin: 0 10px; color: ${BRAND_GREEN}; }
-            .header {
-              text-align: center; padding: 25px; border: 3px solid ${BRAND_NAVY};
-              border-radius: 15px; margin-bottom: 25px;
-              background: linear-gradient(135deg, ${BRAND_NAVY}05 0%, ${BRAND_GREEN}05 100%);
-            }
-            .logo-img { max-width: 160px; height: auto; }
-            .report-title { font-size: 24px; color: ${BRAND_NAVY}; margin-top: 12px; font-weight: 700; }
-            .report-date { font-size: 12px; color: #6b7280; margin-top: 8px; }
-            .section { margin-bottom: 20px; }
-            .section-title {
-              font-size: 14px; font-weight: 600; color: white;
-              background: linear-gradient(135deg, ${BRAND_NAVY} 0%, ${BRAND_NAVY_LIGHT} 100%);
-              padding: 10px 15px; border-radius: 8px 8px 0 0;
-            }
-            .section-content {
-              border: 2px solid ${BRAND_NAVY}20; border-top: none;
-              border-radius: 0 0 8px 8px; padding: 15px; background: #fafafa;
-            }
-            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-            .info-item { padding: 10px; background: white; border-radius: 6px; border: 1px solid ${BRAND_NAVY}10; }
-            .info-label { font-size: 10px; color: #6b7280; margin-bottom: 3px; }
-            .info-value { font-size: 13px; font-weight: 600; color: ${BRAND_NAVY}; }
-            .score-box {
-              text-align: center; padding: 25px; border-radius: 12px;
-              background: ${percentage > 65 ? `linear-gradient(135deg, ${BRAND_GREEN}10 0%, ${BRAND_GREEN}20 100%)` : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'};
-              border: 3px solid ${percentage > 65 ? BRAND_GREEN : '#dc2626'};
-            }
-            .score-circle {
-              width: 110px; height: 110px; border-radius: 50%; background: white;
-              border: 6px solid ${percentage > 65 ? BRAND_GREEN : '#dc2626'};
-              margin: 0 auto 15px auto; padding-top: 22px; text-align: center;
-              box-sizing: border-box;
-            }
-            .score-value { font-size: 32px; font-weight: 700; color: ${percentage > 65 ? BRAND_GREEN : '#dc2626'}; line-height: 1; display: block; }
-            .score-percent { font-size: 14px; color: #6b7280; line-height: 1.2; display: block; margin-top: 4px; }
-            .score-status { font-size: 18px; font-weight: 700; color: ${percentage > 65 ? BRAND_GREEN : '#dc2626'}; margin-bottom: 8px; }
-            .stats-row {
-              display: flex; justify-content: center; gap: 30px; margin-top: 15px;
-              padding-top: 15px; border-top: 1px dashed ${BRAND_NAVY}30;
-            }
-            .stat-item { text-align: center; }
-            .stat-value { font-size: 20px; font-weight: 700; color: ${BRAND_NAVY}; }
-            .stat-label { font-size: 10px; color: #6b7280; }
-            .summary-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-            .summary-table th {
-              background: linear-gradient(135deg, ${BRAND_NAVY} 0%, ${BRAND_NAVY_LIGHT} 100%);
-              color: white; padding: 10px; text-align: right; font-weight: 600;
-            }
-            .summary-table td { padding: 10px; border-bottom: 1px solid ${BRAND_NAVY}15; }
-            .summary-table tr:nth-child(even) { background: ${BRAND_NAVY}03; }
-            .status-badge { display: inline-block; padding: 4px 10px; border-radius: 15px; font-size: 10px; font-weight: 600; }
-            .main-element-section { margin-bottom: 20px; }
-            .main-element-header {
-              background: linear-gradient(135deg, ${BRAND_NAVY} 0%, ${BRAND_NAVY_LIGHT} 100%);
-              color: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 12px;
-              display: flex; justify-content: space-between; align-items: center;
-            }
-            .main-element-title { font-size: 14px; font-weight: 700; }
-            .main-element-score {
-              font-size: 12px; background: ${BRAND_GREEN}; color: white;
-              padding: 5px 12px; border-radius: 15px; font-weight: 600;
-            }
-            .sub-element {
-              background: #fafafa; border-radius: 8px; padding: 12px; margin-bottom: 12px;
-              border: 1px solid ${BRAND_NAVY}10;
-            }
-            .sub-element-title {
-              font-size: 13px; font-weight: 600; color: ${BRAND_NAVY};
-              margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid ${BRAND_GREEN}40;
-            }
-            .criteria-table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: auto; }
-            .criterion-answer { white-space: nowrap; }
-            .criteria-table th {
-              background: ${BRAND_NAVY}10; color: ${BRAND_NAVY}; padding: 8px;
-              text-align: right; font-weight: 600; border-bottom: 2px solid ${BRAND_NAVY}20;
-            }
-            .criteria-table td { padding: 8px; border-bottom: 1px solid ${BRAND_NAVY}10; vertical-align: top; }
-            .criteria-table tr:nth-child(even) { background: white; }
-            .criterion-name { font-size: 11px; color: #374151; line-height: 1.5; }
-            .criterion-answer { font-size: 10px; color: #6b7280; }
-            .criterion-score { font-size: 11px; font-weight: 600; text-align: center; }
-            .footer {
-              text-align: center; padding: 20px; border-top: 3px solid ${BRAND_NAVY};
-              margin-top: 20px; background: linear-gradient(135deg, ${BRAND_NAVY}05 0%, ${BRAND_GREEN}05 100%);
-              border-radius: 12px;
-            }
-            .footer p { color: ${BRAND_NAVY}; font-size: 11px; margin-bottom: 3px; }
-          </style>
-        </head>
-        <body>
-          <!-- Cover Page -->
-          <div class="page">
-            <div class="header">
-              <div><img src="${profitLogo}" alt="Profit Logo" class="logo-img" /></div>
-              <div class="report-title">تقرير ${domainName}</div>
-              <div class="report-date">تاريخ إصدار التقرير: ${new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-            </div>
-
-            <div class="section">
-              <div class="section-title">معلومات الجهة</div>
-              <div class="section-content">
-                <div class="info-grid">
-                  <div class="info-item"><div class="info-label">اسم الجهة</div><div class="info-value">${orgName}</div></div>
-                  <div class="info-item"><div class="info-label">المسؤول</div><div class="info-value">${contactPerson || '-'}</div></div>
-                  <div class="info-item"><div class="info-label">البريد الإلكتروني</div><div class="info-value">${email || '-'}</div></div>
-                  <div class="info-item"><div class="info-label">رقم الهاتف</div><div class="info-value">${phone || '-'}</div></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="section">
-              <div class="section-title">ملخص النتيجة</div>
-              <div class="section-content">
-                <div class="score-box">
-                  <div class="score-circle">
-                    <div class="score-value">${percentage}</div>
-                    <div class="score-percent">%</div>
-                  </div>
-                  <div class="score-status">${percentage > 65 ? 'المنتج مؤهل للانتقال إلى التقييم الشامل' : 'يحتاج تحسينات'}</div>
-                  <div style="display:inline-block;padding:4px 16px;border-radius:15px;font-size:14px;font-weight:700;margin-bottom:5px;background:${getScoreColor(percentage)}15;color:${getScoreColor(percentage)};">${getScoreLabel(percentage)}</div>
-                  <div class="stats-row">
-                    <div class="stat-item"><div class="stat-value">${totalAnswers}</div><div class="stat-label">إجمالي المعايير</div></div>
-                    <div class="stat-item"><div class="stat-value">${groupedAnswers.length}</div><div class="stat-label">العناصر الرئيسية</div></div>
-                    <div class="stat-item"><div class="stat-value">${maxScore}</div><div class="stat-label">الدرجة القصوى</div></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="section">
-              <div class="section-title">ملخص النتائج حسب العناصر الرئيسية</div>
-              <div class="section-content" style="padding: 0;">
-                <table class="summary-table">
-                  <thead>
-                    <tr>
-                      <th style="width: 45%;">العنصر الرئيسي</th>
-                      <th style="width: 20%;">النتيجة</th>
-                      <th style="width: 15%;">النسبة</th>
-                      <th style="width: 20%;">التقييم</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${groupedAnswers.map(element => {
-                      const elemPercentage = element.mainElementWeight > 0 
-                        ? Math.round((element.totalScore / element.mainElementWeight) * 100) 
-                        : 0;
-                      const color = getScoreColor(elemPercentage);
-                      const label = getScoreLabel(elemPercentage);
-                      return `
-                        <tr>
-                          <td>${element.mainElementName}</td>
-                          <td>${element.totalScore.toFixed(1)} / ${element.mainElementWeight}</td>
-                          <td style="font-weight: 600; color: ${color};">${elemPercentage}%</td>
-                          <td><span class="status-badge" style="background: ${color}15; color: ${color};">${label}</span></td>
-                        </tr>
-                      `;
-                    }).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="page-footer">
-              <span>صفحة 1</span>
-              <span class="separator">|</span>
-              <span>نظام +PROFIT للتقييم</span>
-            </div>
-          </div>
-
-          <!-- Detail Pages (final closing block embedded into last detail page) -->
-          ${groupedAnswers.map((mainElement, index) => {
-            const elemPercentage = mainElement.mainElementWeight > 0
-              ? Math.round((mainElement.totalScore / mainElement.mainElementWeight) * 100)
-              : 0;
-            const isLast = index === groupedAnswers.length - 1;
-            return `
-              <div class="page ${index > 0 ? 'page-break' : ''}">
-                <div class="page-header">
-                  <img src="${profitLogo}" alt="Profit Logo" class="page-header-logo" />
-                  <div class="page-header-info">
-                    <span>${orgName}</span>
-                    <span class="separator">|</span>
-                    <span>${domainName}</span>
-                  </div>
-                </div>
-
-                <div class="main-element-section">
-                  <div class="main-element-header">
-                    <div class="main-element-title">${mainElement.mainElementName}</div>
-                    <div class="main-element-score">${mainElement.totalScore.toFixed(1)} / ${mainElement.mainElementWeight} (${elemPercentage}%)</div>
-                  </div>
-
-                  ${mainElement.subElements.map(subElement => `
-                    <div class="sub-element">
-                      <div class="sub-element-title">${subElement.subElementName}</div>
-                      <table class="criteria-table">
-                        <thead>
-                          <tr>
-                            <th>المعيار</th>
-                            <th>الإجابة</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          ${subElement.answers.map(answer => `
-                              <tr>
-                                <td class="criterion-name">${answer.criterion_name}</td>
-                                <td class="criterion-answer">${answer.selected_option_label}</td>
-                              </tr>
-                            `).join('')}
-                        </tbody>
-                      </table>
-                    </div>
-                  `).join('')}
-                </div>
-
-                ${isLast ? `
-                  <div class="footer" style="margin-top: 30px;">
-                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 10px; text-align: center; line-height: 40px;">
-                      <span style="vertical-align: middle;">تم إنشاء هذا التقرير بواسطة نظام</span>
-                      <img src="${profitLogo}" alt="Profit+" style="height: 28px; vertical-align: middle; margin: 0 6px;" />
-                      <span style="vertical-align: middle;">للتقييم</span>
-                    </div>
-                    <p>جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
-                  </div>
-                ` : ''}
-
-                <div class="page-footer">
-                  <span>صفحة ${index + 2}</span>
-                  <span class="separator">|</span>
-                  <span>نظام +PROFIT للتقييم</span>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </body>
-        </html>
-      `;
-
-      const [{ default: jsPDF }, { default: html2canvas }] = await preloadPdfLibraries();
-
-      // Create temporary iframe
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'absolute';
-      iframe.style.left = '-9999px';
-      iframe.style.top = '-9999px';
-      iframe.style.width = '210mm';
-      iframe.style.height = 'auto';
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) throw new Error('Could not access iframe document');
-      
-      iframeDoc.open();
-      iframeDoc.write(htmlContent);
-      iframeDoc.close();
-
-      await waitForIframeAssets(iframeDoc);
-
-      const pages = iframeDoc.querySelectorAll('.page');
-      if (!pages || pages.length === 0) throw new Error('Pages not found');
-
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
-
-      const pageWidth = 210;
-      const pageHeight = 297;
-
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i] as HTMLElement;
-        const canvas = await html2canvas(page, {
-          scale: PDF_RENDER_SCALE,
-          useCORS: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-        });
-
-        const imgData = canvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
-        const imgWidth = pageWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
-      }
-
-      if (iframe.parentNode) {
-        iframe.parentNode.removeChild(iframe);
-      }
-
-      const fileName = `تقرير-التقييم-${orgName.replace(/\s+/g, '-')}.pdf`;
-      pdf.save(fileName);
+      await generateReportPdf(data);
 
       setDownloadStatus({ open: true, type: "success", title: "تم التحميل بنجاح", message: "تم تحميل ملف PDF بنجاح" });
     } catch (error) {
