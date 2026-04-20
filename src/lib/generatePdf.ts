@@ -113,7 +113,7 @@ export const generateReportPdfFromElement = async ({
   };
 
   // Cursor tracking remaining vertical space on the current page (in mm)
-  let cursorMm = marginMm;
+  let cursorMm = contentTopMm;
   let isFirstOnPage = true;
 
   for (const block of blocks) {
@@ -129,12 +129,12 @@ export const generateReportPdfFromElement = async ({
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
     // CASE A: block fits on the current page → place it
-    const remaining = pageHeightMm - marginMm - cursorMm;
+    const remaining = contentBottomMm - cursorMm;
     if (blockHeightMm <= remaining + 0.01) {
       pdf.addImage(
         imgData,
         'JPEG',
-        marginMm,
+        sideMarginMm,
         cursorMm,
         usableWidthMm,
         blockHeightMm,
@@ -149,7 +149,7 @@ export const generateReportPdfFromElement = async ({
     // CASE B: block doesn't fit. Start a new page (unless already empty).
     if (!isFirstOnPage) {
       pdf.addPage();
-      cursorMm = marginMm;
+      cursorMm = contentTopMm;
       isFirstOnPage = true;
     }
 
@@ -158,7 +158,7 @@ export const generateReportPdfFromElement = async ({
       pdf.addImage(
         imgData,
         'JPEG',
-        marginMm,
+        sideMarginMm,
         cursorMm,
         usableWidthMm,
         blockHeightMm,
@@ -204,14 +204,14 @@ export const generateReportPdfFromElement = async ({
 
       if (!isFirstOnPage) {
         pdf.addPage();
-        cursorMm = marginMm;
+        cursorMm = contentTopMm;
         isFirstOnPage = true;
       }
 
       pdf.addImage(
         sliceData,
         'JPEG',
-        marginMm,
+        sideMarginMm,
         cursorMm,
         usableWidthMm,
         sliceHeightMm,
@@ -225,12 +225,75 @@ export const generateReportPdfFromElement = async ({
       if (consumedMm < blockHeightMm - 0.01) {
         // More slices to come — force a new page
         pdf.addPage();
-        cursorMm = marginMm;
+        cursorMm = contentTopMm;
         isFirstOnPage = true;
       } else {
         cursorMm += sliceHeightMm + 4;
       }
     }
+  }
+
+  // ===== Draw header & footer on every page =====
+  const totalPages = pdf.getNumberOfPages();
+  const BRAND_NAVY: [number, number, number] = [30, 58, 95];
+  const MUTED: [number, number, number] = [107, 114, 128];
+
+  for (let p = 1; p <= totalPages; p++) {
+    pdf.setPage(p);
+
+    // Header: logo (left) + thin separator
+    if (logoDataUrl && logoSize) {
+      const logoMaxHmm = 9;
+      const logoMaxWmm = 32;
+      const ratio = logoSize.w / logoSize.h;
+      let lh = logoMaxHmm;
+      let lw = lh * ratio;
+      if (lw > logoMaxWmm) {
+        lw = logoMaxWmm;
+        lh = lw / ratio;
+      }
+      pdf.addImage(
+        logoDataUrl,
+        'PNG',
+        sideMarginMm,
+        (headerHeightMm - lh) / 2,
+        lw,
+        lh,
+        undefined,
+        'FAST'
+      );
+    }
+    pdf.setDrawColor(229, 231, 235);
+    pdf.setLineWidth(0.2);
+    pdf.line(
+      sideMarginMm,
+      headerHeightMm - 2,
+      pageWidthMm - sideMarginMm,
+      headerHeightMm - 2
+    );
+
+    // Footer: separator + page number (left) + brand text (right)
+    pdf.line(
+      sideMarginMm,
+      contentBottomMm + 2,
+      pageWidthMm - sideMarginMm,
+      contentBottomMm + 2
+    );
+    pdf.setFontSize(9);
+    pdf.setTextColor(...MUTED);
+    pdf.text(
+      `Page ${p} / ${totalPages}`,
+      sideMarginMm,
+      pageHeightMm - 4,
+      { align: 'left' }
+    );
+    pdf.setTextColor(...BRAND_NAVY);
+    pdf.text(
+      footerText,
+      pageWidthMm - sideMarginMm,
+      pageHeightMm - 4,
+      { align: 'right' }
+    );
   }
 
   pdf.save(fileName);
