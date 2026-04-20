@@ -293,8 +293,8 @@ export function GenerateReportButton({
                     <table class="criteria-table">
                       <thead>
                         <tr>
-                          <th style="width: 60%;">المعيار</th>
-                          <th style="width: 40%;">الإجابة</th>
+                          <th>المعيار</th>
+                          <th>الإجابة</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -420,7 +420,8 @@ export function GenerateReportButton({
               font-size: 13px; font-weight: 600; color: ${BRAND_NAVY};
               margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid ${BRAND_GREEN}40;
             }
-            .criteria-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+            .criteria-table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: auto; }
+            .criterion-answer { white-space: nowrap; }
             .criteria-table th {
               background: ${BRAND_NAVY}10; color: ${BRAND_NAVY}; padding: 8px;
               text-align: right; font-weight: 600; border-bottom: 2px solid ${BRAND_NAVY}20;

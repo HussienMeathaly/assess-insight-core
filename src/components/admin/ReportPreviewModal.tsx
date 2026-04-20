@@ -322,18 +322,18 @@ export function ReportPreviewModal({
                         </h4>
                         
                         <div className="overflow-x-auto">
-                          <table className="w-full text-sm">
+                          <table className="w-full text-sm" style={{ tableLayout: 'auto' }}>
                             <thead>
                               <tr className="bg-primary/10">
-                                <th className="text-right p-2 font-semibold text-primary" style={{ width: '60%' }}>المعيار</th>
-                                <th className="text-right p-2 font-semibold text-primary" style={{ width: '40%' }}>الإجابة</th>
+                                <th className="text-right p-2 font-semibold text-primary w-auto">المعيار</th>
+                                <th className="text-right p-2 font-semibold text-primary w-auto">الإجابة</th>
                               </tr>
                             </thead>
                             <tbody>
                               {subElement.answers.map((answer) => (
                                 <tr key={answer.criterion_id} className="border-b border-muted last:border-0">
-                                  <td className="p-2 text-foreground">{answer.criterion_name}</td>
-                                  <td className="p-2 text-muted-foreground">{answer.selected_option_label}</td>
+                                  <td className="p-2 text-foreground align-top">{answer.criterion_name}</td>
+                                  <td className="p-2 text-muted-foreground align-top whitespace-nowrap">{answer.selected_option_label}</td>
                                 </tr>
                               ))}
                             </tbody>
