@@ -145,17 +145,17 @@ export const generateReportPdfFromElement = async ({
   const cssWidth = element.getBoundingClientRect().width;
   const pxPerCssPx = fullCanvas.width / cssWidth;
 
-  // Maximum slice height in canvas pixels that fits one PDF page
-  const pxPerMm = fullCanvas.width / usableWidthMm;
-  const maxSlicePx = Math.floor(usableHeightMm * pxPerMm);
-  const maxSliceCssPx = maxSlicePx / pxPerCssPx;
-
-  // ===== STEP 2: Compute smart boundaries (in canvas pixels) =====
-  // We use offsetTop relative to `element` (NOT getBoundingClientRect which
-  // returns viewport-relative coords and breaks inside scrollable parents).
-  const blocks: HTMLElement[] = blockSelector
+  // ===== STEP 2: Compute export blocks (in canvas pixels) =====
+  // We paginate using explicit PDF-safe blocks instead of arbitrary DOM
+  // descendants so tables/cards are kept together whenever possible.
+  const matchedBlocks: HTMLElement[] = blockSelector
     ? Array.from(element.querySelectorAll<HTMLElement>(blockSelector))
     : (Array.from(element.children) as HTMLElement[]);
+
+  // Keep only leaf-most matches to avoid overlapping parent/child blocks.
+  const blocks = matchedBlocks.filter(
+    (block) => !matchedBlocks.some((other) => other !== block && block.contains(other))
+  );
 
   const offsetWithin = (el: HTMLElement, root: HTMLElement): number => {
     let y = 0;
@@ -167,82 +167,62 @@ export const generateReportPdfFromElement = async ({
     return y;
   };
 
-  const boundariesCss = new Set<number>([0, Math.round(element.scrollHeight)]);
-  const addBoundaryPair = (top: number, bottom: number) => {
-    boundariesCss.add(Math.max(0, Math.round(top)));
-    boundariesCss.add(Math.max(0, Math.round(bottom)));
-  };
+  // Maximum slice height in canvas pixels that fits one PDF page.
+  const pxPerMm = fullCanvas.width / usableWidthMm;
+  const maxSlicePx = Math.floor(usableHeightMm * pxPerMm);
 
-  // If a top-level card is taller than one page, recurse into its children
-  // until we reach nested sections that fit on a page. This avoids splitting
-  // a table/sub-card just because its parent card is too tall.
-  const collectBoundaries = (node: HTMLElement, depth = 0) => {
-    if (node.offsetHeight <= 0) return;
+  const blockRanges = blocks
+    .map((block) => {
+      const topPx = Math.round(offsetWithin(block, element) * pxPerCssPx);
+      const bottomPx = Math.round((offsetWithin(block, element) + block.offsetHeight) * pxPerCssPx);
+      return {
+        topPx: Math.max(0, topPx),
+        bottomPx: Math.min(fullCanvas.height, bottomPx),
+      };
+    })
+    .filter((range) => range.bottomPx > range.topPx)
+    .sort((a, b) => a.topPx - b.topPx);
 
-    const top = offsetWithin(node, element);
-    const bottom = top + node.offsetHeight;
-    addBoundaryPair(top, bottom);
-
-    if (node.offsetHeight <= maxSliceCssPx || depth >= 10) return;
-
-    const children = Array.from(node.children).filter(
-      (child): child is HTMLElement => child instanceof HTMLElement && child.offsetHeight > 0
-    );
-
-    for (const child of children) {
-      collectBoundaries(child, depth + 1);
-    }
-  };
-
-  for (const block of blocks) {
-    collectBoundaries(block);
-  }
-
-  const uniqueBoundaries = Array.from(boundariesCss)
-    .sort((a, b) => a - b)
-    .map((v) => Math.round(v * pxPerCssPx))
-    .filter((v) => v >= 0 && v <= fullCanvas.height);
-
-  // ===== STEP 3: Greedy pack boundaries into pages =====
-  // Walk boundaries; whenever the next boundary would overflow, cut at
-  // the LAST boundary that still fits, and start a new page from there.
+  // ===== STEP 3: Pack full blocks into pages =====
   const pageRanges: Array<{ topPx: number; bottomPx: number }> = [];
-  let pageTopPx = uniqueBoundaries[0] ?? 0;
-  let lastFitPx = pageTopPx;
 
-  for (let i = 1; i < uniqueBoundaries.length; i++) {
-    const b = uniqueBoundaries[i];
-    if (b - pageTopPx <= maxSlicePx) {
-      lastFitPx = b;
-      continue;
-    }
-
-    // b doesn't fit. Cut at lastFitPx (the largest boundary that did fit).
-    if (lastFitPx > pageTopPx) {
-      pageRanges.push({ topPx: pageTopPx, bottomPx: lastFitPx });
-      pageTopPx = lastFitPx;
-      // re-evaluate b on the next page (may still not fit if a single
-      // card > one page, then we hard-split below)
-      i--;
-      continue;
-    }
-
-    // No boundary fit — a single block is taller than one page.
-    // Hard-split it at maxSlicePx and continue.
-    const forcedBottom = pageTopPx + maxSlicePx;
-    pageRanges.push({ topPx: pageTopPx, bottomPx: forcedBottom });
-    pageTopPx = forcedBottom;
-    lastFitPx = forcedBottom;
-    i--;
-  }
-
-  // Flush the last page
-  if (lastFitPx > pageTopPx) {
-    pageRanges.push({ topPx: pageTopPx, bottomPx: lastFitPx });
-  }
-
-  if (pageRanges.length === 0) {
+  if (blockRanges.length === 0) {
     pageRanges.push({ topPx: 0, bottomPx: fullCanvas.height });
+  } else {
+    let pageTopPx = 0;
+    let lastSafeBottomPx = pageTopPx;
+    let i = 0;
+
+    while (i < blockRanges.length) {
+      const block = blockRanges[i];
+      const candidateBottomPx = Math.max(lastSafeBottomPx, block.bottomPx);
+
+      if (candidateBottomPx - pageTopPx <= maxSlicePx) {
+        lastSafeBottomPx = candidateBottomPx;
+        i++;
+        continue;
+      }
+
+      // Cut at the last whole block that fit. Start the next page exactly
+      // from there so any heading/gap before the next block is preserved.
+      if (lastSafeBottomPx > pageTopPx) {
+        pageRanges.push({ topPx: pageTopPx, bottomPx: lastSafeBottomPx });
+        pageTopPx = lastSafeBottomPx;
+        lastSafeBottomPx = pageTopPx;
+        continue;
+      }
+
+      // A single block is taller than one page: force-split as fallback.
+      const forcedBottomPx = Math.min(pageTopPx + maxSlicePx, fullCanvas.height);
+      if (forcedBottomPx <= pageTopPx) break;
+      pageRanges.push({ topPx: pageTopPx, bottomPx: forcedBottomPx });
+      pageTopPx = forcedBottomPx;
+      lastSafeBottomPx = pageTopPx;
+    }
+
+    if (pageTopPx < fullCanvas.height) {
+      pageRanges.push({ topPx: pageTopPx, bottomPx: fullCanvas.height });
+    }
   }
 
   // ===== STEP 4: Render footer ONCE as a canvas template =====
