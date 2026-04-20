@@ -755,7 +755,7 @@ export default function AdminDashboard() {
                 className="flex-1 min-w-[calc(50%-4px)] sm:min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
               >
                 <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-                <span>طلبات الشامل</span>
+                <span>طلبات التقييم الشامل</span>
                 {comprehensiveRequests.filter(r => r.status === 'pending').length > 0 && (
                   <Badge variant="destructive" className="h-5 min-w-[20px] px-1 text-[10px]">
                     {comprehensiveRequests.filter(r => r.status === 'pending').length}
