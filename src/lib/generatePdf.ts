@@ -75,8 +75,18 @@ export const generateReportPdf = async (data: PdfReportData) => {
     imageToDataURL(profitLogo),
   ]);
 
-  (pdfMake as any).vfs = vfs;
-  (pdfMake as any).fonts = PDF_FONTS;
+  // pdfmake exposes addVirtualFileSystem (not a plain vfs assignment) and addFonts
+  const pm = pdfMake as any;
+  if (typeof pm.addVirtualFileSystem === 'function') {
+    pm.addVirtualFileSystem(vfs);
+  } else {
+    pm.vfs = { ...(pm.vfs || {}), ...vfs };
+  }
+  if (typeof pm.addFonts === 'function') {
+    pm.addFonts(PDF_FONTS);
+  } else {
+    pm.fonts = PDF_FONTS;
+  }
 
   const {
     orgName,
