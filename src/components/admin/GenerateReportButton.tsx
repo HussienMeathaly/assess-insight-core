@@ -63,6 +63,9 @@ export function GenerateReportButton({
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [downloadStatus, setDownloadStatus] = useState<{ open: boolean; type: "success" | "error"; title: string; message: string }>({ open: false, type: "success", title: "", message: "" });
 
+  const PDF_RENDER_SCALE = 1;
+  const PDF_IMAGE_QUALITY = 0.72;
+
   // Profit brand colors
   const BRAND_NAVY = '#1e3a5f';
   const BRAND_GREEN = '#7cb342';
@@ -79,6 +82,35 @@ export function GenerateReportButton({
     if (score >= 80) return 'جيد';
     if (score > 65) return 'متوسط';
     return 'ضعيف';
+  };
+
+  const preloadPdfLibraries = () => Promise.all([import('jspdf'), import('html2canvas')]);
+
+  const waitForIframeAssets = async (iframeDoc: Document) => {
+    const images = Array.from(iframeDoc.images);
+
+    await Promise.all(
+      images.map(
+        (image) =>
+          image.complete
+            ? Promise.resolve()
+            : new Promise<void>((resolve) => {
+                image.onload = () => resolve();
+                image.onerror = () => resolve();
+              }),
+      ),
+    );
+
+    if ('fonts' in iframeDoc) {
+      try {
+        await iframeDoc.fonts.ready;
+      } catch {
+        // Ignore font readiness failures and continue rendering.
+      }
+    }
+
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   };
 
   // Fetch report data
@@ -244,6 +276,7 @@ export function GenerateReportButton({
     if (data) {
       setReportData(data);
       setPreviewOpen(true);
+      void preloadPdfLibraries();
     }
     setLoading(false);
   };
@@ -553,6 +586,8 @@ export function GenerateReportButton({
         </html>
       `;
 
+      const [{ default: jsPDF }, { default: html2canvas }] = await preloadPdfLibraries();
+
       // Create temporary iframe
       const iframe = document.createElement('iframe');
       iframe.style.position = 'absolute';
@@ -569,15 +604,12 @@ export function GenerateReportButton({
       iframeDoc.write(htmlContent);
       iframeDoc.close();
 
-      // Wait for content to render
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await waitForIframeAssets(iframeDoc);
 
       const pages = iframeDoc.querySelectorAll('.page');
       if (!pages || pages.length === 0) throw new Error('Pages not found');
 
-      const { default: jsPDF } = await import('jspdf');
-      const { default: html2canvas } = await import('html2canvas');
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
 
       const pageWidth = 210;
       const pageHeight = 297;
@@ -585,14 +617,13 @@ export function GenerateReportButton({
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i] as HTMLElement;
         const canvas = await html2canvas(page, {
-          scale: 1.5,
+          scale: PDF_RENDER_SCALE,
           useCORS: true,
-          allowTaint: true,
           backgroundColor: '#ffffff',
           logging: false,
         });
 
-        const imgData = canvas.toDataURL('image/jpeg', 0.85);
+        const imgData = canvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
         const imgWidth = pageWidth;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
@@ -600,7 +631,9 @@ export function GenerateReportButton({
         pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
       }
 
-      document.body.removeChild(iframe);
+      if (iframe.parentNode) {
+        iframe.parentNode.removeChild(iframe);
+      }
 
       const fileName = `تقرير-التقييم-${orgName.replace(/\s+/g, '-')}.pdf`;
       pdf.save(fileName);
