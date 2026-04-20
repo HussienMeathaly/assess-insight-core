@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { FileText, Loader2, Eye } from 'lucide-react';
+import { Loader2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
-import profitLogo from '@/assets/profit-logo.png';
 import { ReportPreviewModal } from './ReportPreviewModal';
 import { StatusDialog } from '@/components/ui/status-dialog';
+import { generateReportPdf } from '@/lib/generatePdf';
 
 interface GenerateReportButtonProps {
   evaluationId: string;
@@ -63,54 +63,10 @@ export function GenerateReportButton({
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [downloadStatus, setDownloadStatus] = useState<{ open: boolean; type: "success" | "error"; title: string; message: string }>({ open: false, type: "success", title: "", message: "" });
 
-  const PDF_RENDER_SCALE = 1;
-  const PDF_IMAGE_QUALITY = 0.72;
-
-  // Profit brand colors
-  const BRAND_NAVY = '#1e3a5f';
-  const BRAND_GREEN = '#7cb342';
-  const BRAND_NAVY_LIGHT = '#2d4a6f';
-  const BRAND_GREEN_LIGHT = '#8bc34a';
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return BRAND_GREEN;
-    if (score > 65) return '#ca8a04';
-    return '#dc2626';
-  };
-
   const getScoreLabel = (score: number) => {
     if (score >= 80) return 'جيد';
     if (score > 65) return 'متوسط';
     return 'ضعيف';
-  };
-
-  const preloadPdfLibraries = () => Promise.all([import('jspdf'), import('html2canvas')]);
-
-  const waitForIframeAssets = async (iframeDoc: Document) => {
-    const images = Array.from(iframeDoc.images);
-
-    await Promise.all(
-      images.map(
-        (image) =>
-          image.complete
-            ? Promise.resolve()
-            : new Promise<void>((resolve) => {
-                image.onload = () => resolve();
-                image.onerror = () => resolve();
-              }),
-      ),
-    );
-
-    if ('fonts' in iframeDoc) {
-      try {
-        await iframeDoc.fonts.ready;
-      } catch {
-        // Ignore font readiness failures and continue rendering.
-      }
-    }
-
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   };
 
   // Fetch report data
