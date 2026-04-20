@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, Check, Send } from 'lucide-react';
+import { ArrowRight, Check, Lock, Send } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { StatusDialog } from '@/components/ui/status-dialog';
@@ -171,11 +171,9 @@ export default function ComprehensiveEvaluation() {
                       key={element}
                       className="flex items-center gap-2.5 rounded-lg border border-border/60 bg-muted/15 px-3 py-2.5"
                     >
-                      <Checkbox
-                        checked={isSelected}
-                        disabled
-                        className="h-4 w-4 opacity-70"
-                      />
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                        <Lock className="h-3 w-3" />
+                      </div>
                       <span className="flex-1 text-right text-sm text-muted-foreground blur-[5px] select-none">
                         {element}
                       </span>
