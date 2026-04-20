@@ -10,7 +10,35 @@ export interface GeneratePdfOptions {
   // CSS selector matching top-level blocks that must not be split.
   // Defaults to direct children of the element.
   blockSelector?: string;
+  // Optional logo (data URL or absolute URL) for the header.
+  logoUrl?: string;
+  // Optional footer text (right side). Defaults to system name.
+  footerText?: string;
 }
+
+const loadImageAsDataUrl = async (src: string): Promise<string | null> => {
+  try {
+    if (src.startsWith('data:')) return src;
+    const res = await fetch(src);
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+};
+
+const getImageSize = (dataUrl: string): Promise<{ w: number; h: number }> =>
+  new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+    img.onerror = () => resolve({ w: 1, h: 1 });
+    img.src = dataUrl;
+  });
 
 const waitForAssets = async (root: HTMLElement) => {
   await (document as any).fonts?.ready;
