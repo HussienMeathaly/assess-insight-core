@@ -51,6 +51,7 @@ interface ReportPreviewModalProps {
     groupedAnswers: GroupedElement[];
     completedAt?: string;
   } | null;
+  captureRef?: React.RefObject<HTMLDivElement>;
 }
 
 export function ReportPreviewModal({
@@ -58,7 +59,8 @@ export function ReportPreviewModal({
   onOpenChange,
   onDownload,
   downloading,
-  reportData
+  reportData,
+  captureRef,
 }: ReportPreviewModalProps) {
   const [downloadStatus, setDownloadStatus] = useState<{ open: boolean; type: "success" | "error"; title: string; message: string }>({ open: false, type: "success", title: "", message: "" });
   if (!reportData) return null;
@@ -190,7 +192,7 @@ export function ReportPreviewModal({
 
         {/* Content */}
         <ScrollArea className="flex-1 p-4 sm:p-6">
-          <div className="space-y-6" dir="rtl">
+          <div ref={captureRef} id="report-capture-root" className="space-y-6 bg-white p-4 sm:p-6" dir="rtl" style={{ fontFamily: "'Readex Pro', sans-serif" }}>
             {/* Organization Info Card */}
             <div className="rounded-xl border bg-card overflow-hidden">
               <div className="bg-primary text-primary-foreground px-4 py-3 font-semibold">

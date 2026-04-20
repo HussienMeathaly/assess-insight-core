@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Loader2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { ReportPreviewModal } from './ReportPreviewModal';
 import { StatusDialog } from '@/components/ui/status-dialog';
-import { generateReportPdf } from '@/lib/generatePdf';
+import { generateReportPdfFromElement } from '@/lib/generatePdf';
 
 interface GenerateReportButtonProps {
   evaluationId: string;
@@ -61,6 +61,7 @@ export function GenerateReportButton({
   const [loading, setLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
   const [downloadStatus, setDownloadStatus] = useState<{ open: boolean; type: "success" | "error"; title: string; message: string }>({ open: false, type: "success", title: "", message: "" });
 
   const getScoreLabel = (score: number) => {
@@ -232,28 +233,32 @@ export function GenerateReportButton({
     if (data) {
       setReportData(data);
       setPreviewOpen(true);
-      // Preload pdfmake + fonts in background for faster download
+      // Preload pdf libs in background for faster download
       void import('@/lib/generatePdf');
-      void import('@/lib/pdfFonts').then((m) => m.loadPdfFonts());
+      void import('html2canvas');
+      void import('jspdf');
     }
     setLoading(false);
   };
 
-  // Handle PDF generation with pdfmake (vector text, sharp, searchable)
+  // Handle PDF generation by rasterizing the preview content (perfect Arabic shaping)
   const handleGeneratePDF = async () => {
+    if (!captureRef.current) {
+      setDownloadStatus({ open: true, type: "error", title: "حدث خطأ", message: "تعذر العثور على محتوى التقرير" });
+      return;
+    }
+
     setGenerating(true);
 
     try {
-      let data = reportData;
-      if (!data) {
-        data = await fetchReportData();
-        if (!data) {
-          setGenerating(false);
-          return;
-        }
-      }
+      const orgName = reportData?.orgName || organizationName;
+      const fileName = `تقرير-التقييم-${orgName.replace(/\s+/g, '-')}.pdf`;
 
-      await generateReportPdf(data);
+      await generateReportPdfFromElement({
+        element: captureRef.current,
+        fileName,
+        scale: 3,
+      });
 
       setDownloadStatus({ open: true, type: "success", title: "تم التحميل بنجاح", message: "تم تحميل ملف PDF بنجاح" });
     } catch (error) {
@@ -289,12 +294,10 @@ export function GenerateReportButton({
       <ReportPreviewModal
         open={previewOpen}
         onOpenChange={setPreviewOpen}
-        onDownload={() => {
-          setPreviewOpen(false);
-          handleGeneratePDF();
-        }}
+        onDownload={handleGeneratePDF}
         downloading={generating}
         reportData={reportData}
+        captureRef={captureRef}
       />
 
       <StatusDialog
