@@ -205,6 +205,8 @@ export function ReportPreviewModal({
         {/* Content */}
         <ScrollArea className="flex-1 p-4 sm:p-6">
           <div ref={captureRef} id="report-capture-root" className="space-y-6 bg-white p-4 sm:p-6" dir="rtl" style={{ fontFamily: "'Readex Pro', sans-serif" }}>
+            {/* PAGE 1: cover + org info + score summary + results summary table */}
+            <div data-pdf-page className="space-y-6">
             <div data-pdf-block className="rounded-[28px] border-2 border-primary/80 bg-background px-6 py-10 text-center shadow-sm sm:px-10 sm:py-14">
               <img src={profitLogo} alt="Profit Logo" className="mx-auto mb-8 h-12 sm:h-14" />
               <h1 className="mb-4 text-3xl font-bold text-primary sm:text-4xl">تقرير فئة النشاط</h1>
@@ -318,6 +320,8 @@ export function ReportPreviewModal({
                 </table>
               </div>
             </div>
+            </div>
+            {/* END PAGE 1 */}
 
             {/* Detailed Results by Main Element — each on its own page */}
             {groupedAnswers.map((mainElement, mainIdx) => {
