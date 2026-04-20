@@ -10,7 +10,35 @@ export interface GeneratePdfOptions {
   // CSS selector matching top-level blocks that must not be split.
   // Defaults to direct children of the element.
   blockSelector?: string;
+  // Optional logo (data URL or absolute URL) for the header.
+  logoUrl?: string;
+  // Optional footer text (right side). Defaults to system name.
+  footerText?: string;
 }
+
+const loadImageAsDataUrl = async (src: string): Promise<string | null> => {
+  try {
+    if (src.startsWith('data:')) return src;
+    const res = await fetch(src);
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+};
+
+const getImageSize = (dataUrl: string): Promise<{ w: number; h: number }> =>
+  new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+    img.onerror = () => resolve({ w: 1, h: 1 });
+    img.src = dataUrl;
+  });
 
 const waitForAssets = async (root: HTMLElement) => {
   await (document as any).fonts?.ready;
@@ -32,6 +60,8 @@ export const generateReportPdfFromElement = async ({
   fileName,
   scale = 3,
   blockSelector,
+  logoUrl,
+  footerText = 'نظام +PROFIT للتقييم',
 }: GeneratePdfOptions): Promise<void> => {
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
     import('html2canvas'),
@@ -49,9 +79,21 @@ export const generateReportPdfFromElement = async ({
 
   const pageWidthMm = pdf.internal.pageSize.getWidth();
   const pageHeightMm = pdf.internal.pageSize.getHeight();
-  const marginMm = 8;
-  const usableWidthMm = pageWidthMm - marginMm * 2;
-  const usableHeightMm = pageHeightMm - marginMm * 2;
+  const sideMarginMm = 8;
+  const headerHeightMm = 18; // reserved for logo + separator
+  const footerHeightMm = 12; // reserved for page number + brand
+  const contentTopMm = headerHeightMm;
+  const contentBottomMm = pageHeightMm - footerHeightMm;
+  const usableWidthMm = pageWidthMm - sideMarginMm * 2;
+  const usableHeightMm = contentBottomMm - contentTopMm;
+
+  // Preload logo if provided
+  let logoDataUrl: string | null = null;
+  let logoSize: { w: number; h: number } | null = null;
+  if (logoUrl) {
+    logoDataUrl = await loadImageAsDataUrl(logoUrl);
+    if (logoDataUrl) logoSize = await getImageSize(logoDataUrl);
+  }
 
   // Collect blocks (cards). Falls back to direct children.
   const blocks: HTMLElement[] = blockSelector
@@ -71,7 +113,7 @@ export const generateReportPdfFromElement = async ({
   };
 
   // Cursor tracking remaining vertical space on the current page (in mm)
-  let cursorMm = marginMm;
+  let cursorMm = contentTopMm;
   let isFirstOnPage = true;
 
   for (const block of blocks) {
@@ -87,12 +129,12 @@ export const generateReportPdfFromElement = async ({
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
     // CASE A: block fits on the current page → place it
-    const remaining = pageHeightMm - marginMm - cursorMm;
+    const remaining = contentBottomMm - cursorMm;
     if (blockHeightMm <= remaining + 0.01) {
       pdf.addImage(
         imgData,
         'JPEG',
-        marginMm,
+        sideMarginMm,
         cursorMm,
         usableWidthMm,
         blockHeightMm,
@@ -107,7 +149,7 @@ export const generateReportPdfFromElement = async ({
     // CASE B: block doesn't fit. Start a new page (unless already empty).
     if (!isFirstOnPage) {
       pdf.addPage();
-      cursorMm = marginMm;
+      cursorMm = contentTopMm;
       isFirstOnPage = true;
     }
 
@@ -116,7 +158,7 @@ export const generateReportPdfFromElement = async ({
       pdf.addImage(
         imgData,
         'JPEG',
-        marginMm,
+        sideMarginMm,
         cursorMm,
         usableWidthMm,
         blockHeightMm,
@@ -162,14 +204,14 @@ export const generateReportPdfFromElement = async ({
 
       if (!isFirstOnPage) {
         pdf.addPage();
-        cursorMm = marginMm;
+        cursorMm = contentTopMm;
         isFirstOnPage = true;
       }
 
       pdf.addImage(
         sliceData,
         'JPEG',
-        marginMm,
+        sideMarginMm,
         cursorMm,
         usableWidthMm,
         sliceHeightMm,
@@ -183,12 +225,75 @@ export const generateReportPdfFromElement = async ({
       if (consumedMm < blockHeightMm - 0.01) {
         // More slices to come — force a new page
         pdf.addPage();
-        cursorMm = marginMm;
+        cursorMm = contentTopMm;
         isFirstOnPage = true;
       } else {
         cursorMm += sliceHeightMm + 4;
       }
     }
+  }
+
+  // ===== Draw header & footer on every page =====
+  const totalPages = pdf.getNumberOfPages();
+  const BRAND_NAVY: [number, number, number] = [30, 58, 95];
+  const MUTED: [number, number, number] = [107, 114, 128];
+
+  for (let p = 1; p <= totalPages; p++) {
+    pdf.setPage(p);
+
+    // Header: logo (left) + thin separator
+    if (logoDataUrl && logoSize) {
+      const logoMaxHmm = 9;
+      const logoMaxWmm = 32;
+      const ratio = logoSize.w / logoSize.h;
+      let lh = logoMaxHmm;
+      let lw = lh * ratio;
+      if (lw > logoMaxWmm) {
+        lw = logoMaxWmm;
+        lh = lw / ratio;
+      }
+      pdf.addImage(
+        logoDataUrl,
+        'PNG',
+        sideMarginMm,
+        (headerHeightMm - lh) / 2,
+        lw,
+        lh,
+        undefined,
+        'FAST'
+      );
+    }
+    pdf.setDrawColor(229, 231, 235);
+    pdf.setLineWidth(0.2);
+    pdf.line(
+      sideMarginMm,
+      headerHeightMm - 2,
+      pageWidthMm - sideMarginMm,
+      headerHeightMm - 2
+    );
+
+    // Footer: separator + page number (left) + brand text (right)
+    pdf.line(
+      sideMarginMm,
+      contentBottomMm + 2,
+      pageWidthMm - sideMarginMm,
+      contentBottomMm + 2
+    );
+    pdf.setFontSize(9);
+    pdf.setTextColor(...MUTED);
+    pdf.text(
+      `Page ${p} / ${totalPages}`,
+      sideMarginMm,
+      pageHeightMm - 4,
+      { align: 'left' }
+    );
+    pdf.setTextColor(...BRAND_NAVY);
+    pdf.text(
+      footerText,
+      pageWidthMm - sideMarginMm,
+      pageHeightMm - 4,
+      { align: 'right' }
+    );
   }
 
   pdf.save(fileName);

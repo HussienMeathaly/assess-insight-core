@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { ReportPreviewModal } from './ReportPreviewModal';
 import { StatusDialog } from '@/components/ui/status-dialog';
 import { generateReportPdfFromElement } from '@/lib/generatePdf';
+import profitLogo from '@/assets/profit-logo.png';
 
 interface GenerateReportButtonProps {
   evaluationId: string;
@@ -258,6 +259,8 @@ export function GenerateReportButton({
         element: captureRef.current,
         fileName,
         scale: 3,
+        logoUrl: profitLogo,
+        footerText: 'نظام +PROFIT للتقييم',
       });
 
       setDownloadStatus({ open: true, type: "success", title: "تم التحميل بنجاح", message: "تم تحميل ملف PDF بنجاح" });
