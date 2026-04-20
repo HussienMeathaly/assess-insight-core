@@ -1,27 +1,20 @@
 // PDF generation via HTML rasterization (html2canvas + jsPDF).
-// This approach uses the browser's native rendering for perfect Arabic
-// shaping/RTL — same look as the on-screen preview.
+// Uses smart pagination: captures each "block" (card) separately and
+// places it as a unit so cards never get split across pages.
 
 export interface GeneratePdfOptions {
   element: HTMLElement;
   fileName: string;
   // Higher = sharper, larger file. 3 is a good balance for Arabic.
   scale?: number;
+  // CSS selector matching top-level blocks that must not be split.
+  // Defaults to direct children of the element.
+  blockSelector?: string;
 }
 
-export const generateReportPdfFromElement = async ({
-  element,
-  fileName,
-  scale = 3,
-}: GeneratePdfOptions): Promise<void> => {
-  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-    import('html2canvas'),
-    import('jspdf'),
-  ]);
-
-  // Wait for images & fonts inside the element to be ready
+const waitForAssets = async (root: HTMLElement) => {
   await (document as any).fonts?.ready;
-  const imgs = Array.from(element.querySelectorAll('img'));
+  const imgs = Array.from(root.querySelectorAll('img'));
   await Promise.all(
     imgs.map(
       (img) =>
@@ -32,16 +25,20 @@ export const generateReportPdfFromElement = async ({
         })
     )
   );
+};
 
-  const canvas = await html2canvas(element, {
-    scale,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff',
-    logging: false,
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
-  });
+export const generateReportPdfFromElement = async ({
+  element,
+  fileName,
+  scale = 3,
+  blockSelector,
+}: GeneratePdfOptions): Promise<void> => {
+  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+    import('html2canvas'),
+    import('jspdf'),
+  ]);
+
+  await waitForAssets(element);
 
   const pdf = new jsPDF({
     orientation: 'portrait',
@@ -50,26 +47,148 @@ export const generateReportPdfFromElement = async ({
     compress: true,
   });
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
+  const pageWidthMm = pdf.internal.pageSize.getWidth();
+  const pageHeightMm = pdf.internal.pageSize.getHeight();
+  const marginMm = 8;
+  const usableWidthMm = pageWidthMm - marginMm * 2;
+  const usableHeightMm = pageHeightMm - marginMm * 2;
 
-  // Fit canvas width to PDF page width, then split vertically across pages
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * pageWidth) / canvas.width;
+  // Collect blocks (cards). Falls back to direct children.
+  const blocks: HTMLElement[] = blockSelector
+    ? Array.from(element.querySelectorAll<HTMLElement>(blockSelector))
+    : (Array.from(element.children) as HTMLElement[]);
 
-  const imgData = canvas.toDataURL('image/jpeg', 0.95);
+  if (blocks.length === 0) {
+    blocks.push(element);
+  }
 
-  let heightLeft = imgHeight;
-  let position = 0;
+  const renderOptions = {
+    scale,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#ffffff',
+    logging: false,
+  };
 
-  pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-  heightLeft -= pageHeight;
+  // Cursor tracking remaining vertical space on the current page (in mm)
+  let cursorMm = marginMm;
+  let isFirstOnPage = true;
 
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight; // negative offset to shift image up
-    pdf.addPage();
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-    heightLeft -= pageHeight;
+  for (const block of blocks) {
+    // Render block to a canvas
+    const canvas = await html2canvas(block, {
+      ...renderOptions,
+      windowWidth: block.scrollWidth,
+      windowHeight: block.scrollHeight,
+    });
+
+    // Compute mm dimensions while preserving aspect ratio at usable width
+    const blockHeightMm = (canvas.height * usableWidthMm) / canvas.width;
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+    // CASE A: block fits on the current page → place it
+    const remaining = pageHeightMm - marginMm - cursorMm;
+    if (blockHeightMm <= remaining + 0.01) {
+      pdf.addImage(
+        imgData,
+        'JPEG',
+        marginMm,
+        cursorMm,
+        usableWidthMm,
+        blockHeightMm,
+        undefined,
+        'FAST'
+      );
+      cursorMm += blockHeightMm + 4; // small gap between blocks
+      isFirstOnPage = false;
+      continue;
+    }
+
+    // CASE B: block doesn't fit. Start a new page (unless already empty).
+    if (!isFirstOnPage) {
+      pdf.addPage();
+      cursorMm = marginMm;
+      isFirstOnPage = true;
+    }
+
+    // CASE B1: block fits on a fresh page → place it
+    if (blockHeightMm <= usableHeightMm + 0.01) {
+      pdf.addImage(
+        imgData,
+        'JPEG',
+        marginMm,
+        cursorMm,
+        usableWidthMm,
+        blockHeightMm,
+        undefined,
+        'FAST'
+      );
+      cursorMm += blockHeightMm + 4;
+      isFirstOnPage = false;
+      continue;
+    }
+
+    // CASE B2: block is taller than a full page → must split this single
+    // block across pages (last resort, only happens for huge cards).
+    let consumedMm = 0;
+    while (consumedMm < blockHeightMm - 0.01) {
+      const sliceHeightMm = Math.min(usableHeightMm, blockHeightMm - consumedMm);
+
+      // Map mm slice back to canvas pixel coordinates
+      const pxPerMm = canvas.width / usableWidthMm;
+      const sliceTopPx = Math.floor(consumedMm * pxPerMm);
+      const slicePxHeight = Math.floor(sliceHeightMm * pxPerMm);
+
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = slicePxHeight;
+      const ctx = sliceCanvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+        ctx.drawImage(
+          canvas,
+          0,
+          sliceTopPx,
+          canvas.width,
+          slicePxHeight,
+          0,
+          0,
+          canvas.width,
+          slicePxHeight
+        );
+      }
+      const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
+
+      if (!isFirstOnPage) {
+        pdf.addPage();
+        cursorMm = marginMm;
+        isFirstOnPage = true;
+      }
+
+      pdf.addImage(
+        sliceData,
+        'JPEG',
+        marginMm,
+        cursorMm,
+        usableWidthMm,
+        sliceHeightMm,
+        undefined,
+        'FAST'
+      );
+
+      consumedMm += sliceHeightMm;
+      isFirstOnPage = false;
+
+      if (consumedMm < blockHeightMm - 0.01) {
+        // More slices to come — force a new page
+        pdf.addPage();
+        cursorMm = marginMm;
+        isFirstOnPage = true;
+      } else {
+        cursorMm += sliceHeightMm + 4;
+      }
+    }
   }
 
   pdf.save(fileName);
