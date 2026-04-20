@@ -293,8 +293,8 @@ export function GenerateReportButton({
                     <table class="criteria-table">
                       <thead>
                         <tr>
-                          <th style="width: 60%;">المعيار</th>
-                          <th style="width: 40%;">الإجابة</th>
+                          <th>المعيار</th>
+                          <th>الإجابة</th>
                         </tr>
                       </thead>
                       <tbody>
