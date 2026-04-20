@@ -346,7 +346,7 @@ export function GenerateReportButton({
               <div class="page-footer">
                 <span>صفحة ${index + 2}</span>
                 <span class="separator">|</span>
-                <span>نظام PROFIT للتقييم</span>
+                <span>نظام +PROFIT للتقييم</span>
               </div>
             </div>
           `;
