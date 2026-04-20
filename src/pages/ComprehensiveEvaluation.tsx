@@ -165,7 +165,7 @@ export default function ComprehensiveEvaluation() {
                   <span className="text-xs text-muted-foreground">{domain.elements.length} عنصر</span>
                 </button>
 
-                <div className="mt-3 space-y-2 pr-8">
+                <div className="mt-3 space-y-2 pr-10">
                   {domain.elements.map((element) => (
                     <div
                       key={element}
@@ -176,7 +176,7 @@ export default function ComprehensiveEvaluation() {
                         disabled
                         className="h-4 w-4 opacity-70"
                       />
-                      <span className="flex-1 text-right text-sm text-muted-foreground">
+                      <span className="flex-1 text-right text-sm text-muted-foreground blur-[5px] select-none">
                         {element}
                       </span>
                     </div>
