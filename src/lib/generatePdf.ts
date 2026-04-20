@@ -143,60 +143,83 @@ export const generateReportPdfFromElement = async ({
   });
 
   const cssWidth = element.getBoundingClientRect().width;
-  const pxPerCssPx = fullCanvas.width / cssWidth; // = scale, basically
+  const pxPerCssPx = fullCanvas.width / cssWidth;
 
   // ===== STEP 2: Compute card boundaries (in canvas pixels) =====
+  // We use offsetTop relative to `element` (NOT getBoundingClientRect which
+  // returns viewport-relative coords and breaks inside scrollable parents).
   const blocks: HTMLElement[] = blockSelector
     ? Array.from(element.querySelectorAll<HTMLElement>(blockSelector))
     : (Array.from(element.children) as HTMLElement[]);
 
-  const containerTop = element.getBoundingClientRect().top;
-  // Boundary list: top of canvas, bottom-of-each-card, bottom of canvas.
-  const boundariesPx: number[] = [0];
+  // Compute offset of a descendant relative to `element` by walking up
+  const offsetWithin = (el: HTMLElement, root: HTMLElement): number => {
+    let y = 0;
+    let cur: HTMLElement | null = el;
+    while (cur && cur !== root) {
+      y += cur.offsetTop;
+      cur = cur.offsetParent as HTMLElement | null;
+    }
+    return y;
+  };
+
+  // Boundary list: 0, top-of-each-card, bottom-of-each-card, end of canvas.
+  // We add BOTH top and bottom so we can cut just BEFORE a card if it
+  // doesn't fit (creating a clean break with no whitespace inside it).
+  const boundariesCss = new Set<number>([0]);
   for (const b of blocks) {
-    const r = b.getBoundingClientRect();
-    const bottomCss = r.bottom - containerTop;
-    boundariesPx.push(Math.round(bottomCss * pxPerCssPx));
+    const top = offsetWithin(b, element);
+    const bottom = top + b.offsetHeight;
+    boundariesCss.add(Math.round(top));
+    boundariesCss.add(Math.round(bottom));
   }
-  boundariesPx.push(fullCanvas.height);
-  // Dedupe & sort
-  const uniqueBoundaries = Array.from(new Set(boundariesPx)).sort((a, b) => a - b);
+  boundariesCss.add(Math.round(element.scrollHeight));
+
+  const uniqueBoundaries = Array.from(boundariesCss)
+    .sort((a, b) => a - b)
+    .map((v) => Math.round(v * pxPerCssPx))
+    .filter((v) => v >= 0 && v <= fullCanvas.height);
 
   // Maximum slice height in canvas pixels that fits one PDF page
   const pxPerMm = fullCanvas.width / usableWidthMm;
   const maxSlicePx = Math.floor(usableHeightMm * pxPerMm);
 
   // ===== STEP 3: Greedy pack boundaries into pages =====
-  // We accumulate from the previous "page top" until adding the next
-  // boundary would exceed maxSlicePx, then we cut at the last good boundary.
+  // Walk boundaries; whenever the next boundary would overflow, cut at
+  // the LAST boundary that still fits, and start a new page from there.
   const pageRanges: Array<{ topPx: number; bottomPx: number }> = [];
-  let pageTopPx = 0;
+  let pageTopPx = uniqueBoundaries[0] ?? 0;
+  let lastFitPx = pageTopPx;
 
   for (let i = 1; i < uniqueBoundaries.length; i++) {
-    const candidateBottom = uniqueBoundaries[i];
-    const sliceHeight = candidateBottom - pageTopPx;
-
-    if (sliceHeight <= maxSlicePx) {
-      // Still fits; if this is the last boundary, finalize the page.
-      if (i === uniqueBoundaries.length - 1) {
-        pageRanges.push({ topPx: pageTopPx, bottomPx: candidateBottom });
-      }
+    const b = uniqueBoundaries[i];
+    if (b - pageTopPx <= maxSlicePx) {
+      lastFitPx = b;
       continue;
     }
 
-    // Doesn't fit. Cut at the previous boundary if there is one.
-    const prevBottom = uniqueBoundaries[i - 1];
-    if (prevBottom > pageTopPx) {
-      pageRanges.push({ topPx: pageTopPx, bottomPx: prevBottom });
-      pageTopPx = prevBottom;
-      i--; // re-evaluate this boundary on the next page
-    } else {
-      // A single card is taller than one page → hard split it
-      const forcedBottom = pageTopPx + maxSlicePx;
-      pageRanges.push({ topPx: pageTopPx, bottomPx: forcedBottom });
-      pageTopPx = forcedBottom;
-      i--; // re-evaluate this boundary on the next page
+    // b doesn't fit. Cut at lastFitPx (the largest boundary that did fit).
+    if (lastFitPx > pageTopPx) {
+      pageRanges.push({ topPx: pageTopPx, bottomPx: lastFitPx });
+      pageTopPx = lastFitPx;
+      // re-evaluate b on the next page (may still not fit if a single
+      // card > one page, then we hard-split below)
+      i--;
+      continue;
     }
+
+    // No boundary fit — a single block is taller than one page.
+    // Hard-split it at maxSlicePx and continue.
+    const forcedBottom = pageTopPx + maxSlicePx;
+    pageRanges.push({ topPx: pageTopPx, bottomPx: forcedBottom });
+    pageTopPx = forcedBottom;
+    lastFitPx = forcedBottom;
+    i--;
+  }
+
+  // Flush the last page
+  if (lastFitPx > pageTopPx) {
+    pageRanges.push({ topPx: pageTopPx, bottomPx: lastFitPx });
   }
 
   if (pageRanges.length === 0) {
