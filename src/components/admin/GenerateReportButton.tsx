@@ -259,7 +259,7 @@ export function GenerateReportButton({
         element: captureRef.current,
         fileName,
         scale: 2,
-        blockSelector: ':scope > div',
+        blockSelector: '[data-pdf-block]',
         logoUrl: profitLogo,
         footerText: 'نظام +PROFIT للتقييم',
       });

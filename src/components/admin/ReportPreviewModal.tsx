@@ -194,7 +194,7 @@ export function ReportPreviewModal({
         <ScrollArea className="flex-1 p-4 sm:p-6">
           <div ref={captureRef} id="report-capture-root" className="space-y-6 bg-white p-4 sm:p-6" dir="rtl" style={{ fontFamily: "'Readex Pro', sans-serif" }}>
             {/* Organization Info Card */}
-            <div className="rounded-xl border bg-card overflow-hidden">
+            <div data-pdf-block className="rounded-xl border bg-card overflow-hidden">
               <div className="bg-primary text-primary-foreground px-4 py-3 font-semibold">
                 معلومات الجهة
               </div>
@@ -219,7 +219,7 @@ export function ReportPreviewModal({
             </div>
 
             {/* Score Summary Card */}
-            <div className="rounded-xl border bg-card overflow-hidden">
+            <div data-pdf-block className="rounded-xl border bg-card overflow-hidden">
               <div className="bg-primary text-primary-foreground px-4 py-3 font-semibold">
                 ملخص النتيجة
               </div>
@@ -260,7 +260,7 @@ export function ReportPreviewModal({
             </div>
 
             {/* Results Summary Table */}
-            <div className="rounded-xl border bg-card overflow-hidden">
+            <div data-pdf-block className="rounded-xl border bg-card overflow-hidden">
               <div className="bg-primary text-primary-foreground px-4 py-3 font-semibold">
                 ملخص النتائج حسب العناصر الرئيسية
               </div>
@@ -318,7 +318,7 @@ export function ReportPreviewModal({
                   {/* Sub Elements */}
                   <div className="p-4 space-y-4">
                     {mainElement.subElements.map((subElement) => (
-                      <div key={subElement.subElementId} className="bg-muted/30 rounded-lg p-3">
+                      <div data-pdf-block key={subElement.subElementId} className="bg-muted/30 rounded-lg p-3">
                         <h4 className="font-semibold text-primary mb-3 pb-2 border-b-2 border-primary/20">
                           {subElement.subElementName}
                         </h4>
@@ -349,7 +349,7 @@ export function ReportPreviewModal({
             })}
 
             {/* Footer */}
-            <div className="text-center py-6 border-t mt-6">
+            <div data-pdf-block className="text-center py-6 border-t mt-6">
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 flex-wrap">
                 <span>تم إنشاء هذا التقرير بواسطة نظام</span>
                 <img src={profitLogo} alt="Profit+" className="h-10 inline-block" />
