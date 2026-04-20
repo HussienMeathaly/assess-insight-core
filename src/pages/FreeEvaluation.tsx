@@ -115,7 +115,7 @@ export default function FreeEvaluation() {
       });
     }
     if (showResults && upsellDismissCount < 2) {
-      const timer = setTimeout(() => setShowUpsell(true), 1500);
+      const timer = setTimeout(() => setShowUpsell(true), 5000);
       return () => clearTimeout(timer);
     }
   }, [showResults, saved, saving, saveEvaluation, upsellDismissCount]);
