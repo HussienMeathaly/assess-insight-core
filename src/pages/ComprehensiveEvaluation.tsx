@@ -155,27 +155,28 @@ export default function ComprehensiveEvaluation() {
                   onClick={() => toggleDomain(domain.name)}
                   className="flex w-full items-center gap-3 text-right"
                 >
-                  <div
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                      isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {isSelected ? <Check className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                  </div>
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => toggleDomain(domain.name)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="h-5 w-5"
+                  />
                   <span className="flex-1 text-right text-sm font-semibold text-foreground">{domain.name}</span>
                   <span className="text-xs text-muted-foreground">{domain.elements.length} عنصر</span>
                 </button>
 
-                <div className="mt-3 space-y-2 pr-10">
+                <div className="mt-3 space-y-2 pr-8">
                   {domain.elements.map((element) => (
                     <div
                       key={element}
                       className="flex items-center gap-2.5 rounded-lg border border-border/60 bg-muted/15 px-3 py-2.5"
                     >
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                        <Lock className="h-3 w-3" />
-                      </div>
-                      <span className="flex-1 text-right text-sm text-muted-foreground blur-[5px] select-none">
+                      <Checkbox
+                        checked={isSelected}
+                        disabled
+                        className="h-4 w-4 opacity-70"
+                      />
+                      <span className="flex-1 text-right text-sm text-muted-foreground">
                         {element}
                       </span>
                     </div>
