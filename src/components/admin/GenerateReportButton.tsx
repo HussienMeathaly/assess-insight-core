@@ -547,10 +547,10 @@ export function GenerateReportButton({
 
                 ${isLast ? `
                   <div class="footer" style="margin-top: 30px;">
-                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;">
-                      <span>تم إنشاء هذا التقرير بواسطة نظام</span>
-                      <img src="${profitLogo}" alt="Profit+" style="height: 30px; display: inline-block;" />
-                      <span>للتقييم</span>
+                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 10px; text-align: center; line-height: 40px;">
+                      <span style="vertical-align: middle;">تم إنشاء هذا التقرير بواسطة نظام</span>
+                      <img src="${profitLogo}" alt="Profit+" style="height: 28px; vertical-align: middle; margin: 0 6px;" />
+                      <span style="vertical-align: middle;">للتقييم</span>
                     </div>
                     <p>جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
                   </div>
