@@ -145,14 +145,18 @@ export const generateReportPdfFromElement = async ({
   const cssWidth = element.getBoundingClientRect().width;
   const pxPerCssPx = fullCanvas.width / cssWidth;
 
-  // ===== STEP 2: Compute card boundaries (in canvas pixels) =====
+  // Maximum slice height in canvas pixels that fits one PDF page
+  const pxPerMm = fullCanvas.width / usableWidthMm;
+  const maxSlicePx = Math.floor(usableHeightMm * pxPerMm);
+  const maxSliceCssPx = maxSlicePx / pxPerCssPx;
+
+  // ===== STEP 2: Compute smart boundaries (in canvas pixels) =====
   // We use offsetTop relative to `element` (NOT getBoundingClientRect which
   // returns viewport-relative coords and breaks inside scrollable parents).
   const blocks: HTMLElement[] = blockSelector
     ? Array.from(element.querySelectorAll<HTMLElement>(blockSelector))
     : (Array.from(element.children) as HTMLElement[]);
 
-  // Compute offset of a descendant relative to `element` by walking up
   const offsetWithin = (el: HTMLElement, root: HTMLElement): number => {
     let y = 0;
     let cur: HTMLElement | null = el;
@@ -163,26 +167,41 @@ export const generateReportPdfFromElement = async ({
     return y;
   };
 
-  // Boundary list: 0, top-of-each-card, bottom-of-each-card, end of canvas.
-  // We add BOTH top and bottom so we can cut just BEFORE a card if it
-  // doesn't fit (creating a clean break with no whitespace inside it).
-  const boundariesCss = new Set<number>([0]);
-  for (const b of blocks) {
-    const top = offsetWithin(b, element);
-    const bottom = top + b.offsetHeight;
-    boundariesCss.add(Math.round(top));
-    boundariesCss.add(Math.round(bottom));
+  const boundariesCss = new Set<number>([0, Math.round(element.scrollHeight)]);
+  const addBoundaryPair = (top: number, bottom: number) => {
+    boundariesCss.add(Math.max(0, Math.round(top)));
+    boundariesCss.add(Math.max(0, Math.round(bottom)));
+  };
+
+  // If a top-level card is taller than one page, recurse into its children
+  // until we reach nested sections that fit on a page. This avoids splitting
+  // a table/sub-card just because its parent card is too tall.
+  const collectBoundaries = (node: HTMLElement, depth = 0) => {
+    if (node.offsetHeight <= 0) return;
+
+    const top = offsetWithin(node, element);
+    const bottom = top + node.offsetHeight;
+    addBoundaryPair(top, bottom);
+
+    if (node.offsetHeight <= maxSliceCssPx || depth >= 10) return;
+
+    const children = Array.from(node.children).filter(
+      (child): child is HTMLElement => child instanceof HTMLElement && child.offsetHeight > 0
+    );
+
+    for (const child of children) {
+      collectBoundaries(child, depth + 1);
+    }
+  };
+
+  for (const block of blocks) {
+    collectBoundaries(block);
   }
-  boundariesCss.add(Math.round(element.scrollHeight));
 
   const uniqueBoundaries = Array.from(boundariesCss)
     .sort((a, b) => a - b)
     .map((v) => Math.round(v * pxPerCssPx))
     .filter((v) => v >= 0 && v <= fullCanvas.height);
-
-  // Maximum slice height in canvas pixels that fits one PDF page
-  const pxPerMm = fullCanvas.width / usableWidthMm;
-  const maxSlicePx = Math.floor(usableHeightMm * pxPerMm);
 
   // ===== STEP 3: Greedy pack boundaries into pages =====
   // Walk boundaries; whenever the next boundary would overflow, cut at
