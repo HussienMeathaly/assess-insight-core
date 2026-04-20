@@ -297,61 +297,7 @@ export function GenerateReportButton({
 
       const { orgName, domainName, percentage, isQualified, totalAnswers, maxScore, groupedAnswers, contactPerson, email, phone } = data;
 
-      const generateMainElementPages = () => {
-        return groupedAnswers.map((mainElement, index) => {
-          const elemPercentage = mainElement.mainElementWeight > 0 
-            ? Math.round((mainElement.totalScore / mainElement.mainElementWeight) * 100) 
-            : 0;
-          
-          return `
-            <div class="page ${index > 0 ? 'page-break' : ''}">
-              <div class="page-header">
-                <img src="${profitLogo}" alt="Profit Logo" class="page-header-logo" />
-                <div class="page-header-info">
-                  <span>${orgName}</span>
-                  <span class="separator">|</span>
-                  <span>${domainName}</span>
-                </div>
-              </div>
-              
-              <div class="main-element-section">
-                <div class="main-element-header">
-                  <div class="main-element-title">${mainElement.mainElementName}</div>
-                  <div class="main-element-score">${mainElement.totalScore.toFixed(1)} / ${mainElement.mainElementWeight} (${elemPercentage}%)</div>
-                </div>
-                
-                ${mainElement.subElements.map(subElement => `
-                  <div class="sub-element">
-                    <div class="sub-element-title">${subElement.subElementName}</div>
-                    <table class="criteria-table">
-                      <thead>
-                        <tr>
-                          <th>المعيار</th>
-                          <th>الإجابة</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        ${subElement.answers.map(answer => `
-                            <tr>
-                              <td class="criterion-name">${answer.criterion_name}</td>
-                              <td class="criterion-answer">${answer.selected_option_label}</td>
-                            </tr>
-                          `).join('')}
-                      </tbody>
-                    </table>
-                  </div>
-                `).join('')}
-              </div>
-              
-              <div class="page-footer">
-                <span>صفحة ${index + 2}</span>
-                <span class="separator">|</span>
-                <span>نظام PROFIT للتقييم</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-      };
+      // Detail pages are generated inline within htmlContent below
 
       const htmlContent = `
         <!DOCTYPE html>
@@ -549,39 +495,75 @@ export function GenerateReportButton({
             <div class="page-footer">
               <span>صفحة 1</span>
               <span class="separator">|</span>
-              <span>نظام PROFIT للتقييم</span>
+              <span>نظام +PROFIT للتقييم</span>
             </div>
           </div>
 
-          <!-- Detail Pages -->
-          ${generateMainElementPages()}
+          <!-- Detail Pages (final closing block embedded into last detail page) -->
+          ${groupedAnswers.map((mainElement, index) => {
+            const elemPercentage = mainElement.mainElementWeight > 0
+              ? Math.round((mainElement.totalScore / mainElement.mainElementWeight) * 100)
+              : 0;
+            const isLast = index === groupedAnswers.length - 1;
+            return `
+              <div class="page ${index > 0 ? 'page-break' : ''}">
+                <div class="page-header">
+                  <img src="${profitLogo}" alt="Profit Logo" class="page-header-logo" />
+                  <div class="page-header-info">
+                    <span>${orgName}</span>
+                    <span class="separator">|</span>
+                    <span>${domainName}</span>
+                  </div>
+                </div>
 
-          <!-- Final Page -->
-          <div class="page page-break">
-            <div class="page-header">
-              <img src="${profitLogo}" alt="Profit Logo" class="page-header-logo" />
-              <div class="page-header-info">
-                <span>${orgName}</span>
-                <span class="separator">|</span>
-                <span>${domainName}</span>
+                <div class="main-element-section">
+                  <div class="main-element-header">
+                    <div class="main-element-title">${mainElement.mainElementName}</div>
+                    <div class="main-element-score">${mainElement.totalScore.toFixed(1)} / ${mainElement.mainElementWeight} (${elemPercentage}%)</div>
+                  </div>
+
+                  ${mainElement.subElements.map(subElement => `
+                    <div class="sub-element">
+                      <div class="sub-element-title">${subElement.subElementName}</div>
+                      <table class="criteria-table">
+                        <thead>
+                          <tr>
+                            <th>المعيار</th>
+                            <th>الإجابة</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${subElement.answers.map(answer => `
+                              <tr>
+                                <td class="criterion-name">${answer.criterion_name}</td>
+                                <td class="criterion-answer">${answer.selected_option_label}</td>
+                              </tr>
+                            `).join('')}
+                        </tbody>
+                      </table>
+                    </div>
+                  `).join('')}
+                </div>
+
+                ${isLast ? `
+                  <div class="footer" style="margin-top: 30px;">
+                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;">
+                      <span>تم إنشاء هذا التقرير بواسطة نظام</span>
+                      <img src="${profitLogo}" alt="Profit+" style="height: 30px; display: inline-block;" />
+                      <span>للتقييم</span>
+                    </div>
+                    <p>جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
+                  </div>
+                ` : ''}
+
+                <div class="page-footer">
+                  <span>صفحة ${index + 2}</span>
+                  <span class="separator">|</span>
+                  <span>نظام +PROFIT للتقييم</span>
+                </div>
               </div>
-            </div>
-            
-            <div class="footer" style="margin-top: 50px;">
-              <div style="font-size: 14px; color: #6b7280; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;">
-                <span>تم إنشاء هذا التقرير بواسطة نظام</span>
-                <img src="${profitLogo}" alt="Profit+" style="height: 30px; display: inline-block;" />
-                <span>للتقييم</span>
-              </div>
-              <p>جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
-            </div>
-            
-            <div class="page-footer">
-              <span>صفحة ${groupedAnswers.length + 2}</span>
-              <span class="separator">|</span>
-              <span>نظام PROFIT للتقييم</span>
-            </div>
-          </div>
+            `;
+          }).join('')}
         </body>
         </html>
       `;
