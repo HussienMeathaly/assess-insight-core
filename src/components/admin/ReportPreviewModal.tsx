@@ -319,15 +319,21 @@ export function ReportPreviewModal({
               </div>
             </div>
 
-            {/* Detailed Results by Main Element */}
-            {groupedAnswers.map((mainElement) => {
+            {/* Detailed Results by Main Element — each on its own page */}
+            {groupedAnswers.map((mainElement, mainIdx) => {
               const elemPercentage = mainElement.mainElementWeight > 0 
                 ? Math.round((mainElement.totalScore / mainElement.mainElementWeight) * 100) 
                 : 0;
-              
+              const isLast = mainIdx === groupedAnswers.length - 1;
+
               return (
-                <div key={mainElement.mainElementId} className="space-y-4">
-                  <div data-pdf-block className="rounded-xl border bg-card overflow-hidden">
+                <div
+                  key={mainElement.mainElementId}
+                  data-pdf-page
+                  data-pdf-block
+                  className="space-y-4"
+                >
+                  <div className="rounded-xl border bg-card overflow-hidden">
                     <div className="bg-gradient-to-l from-primary to-primary/80 px-4 py-3 text-primary-foreground flex items-center justify-between gap-3">
                       <span className="font-bold">{mainElement.mainElementName}</span>
                       <span className="rounded-full bg-primary-foreground/20 px-3 py-1 text-sm font-semibold text-primary-foreground">
@@ -338,50 +344,52 @@ export function ReportPreviewModal({
 
                   <div className="space-y-4">
                     {mainElement.subElements.map((subElement) => (
-                      <div data-pdf-block key={subElement.subElementId} className="overflow-hidden rounded-xl border bg-card">
+                      <div key={subElement.subElementId} className="overflow-hidden rounded-xl border bg-card">
                         <div className="bg-muted/40 px-4 py-3">
                           <h4 className="border-b-2 border-primary/20 pb-2 font-semibold text-primary">
                             {subElement.subElementName}
                           </h4>
                         </div>
                         <div className="p-3">
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-sm" style={{ tableLayout: 'auto' }}>
-                            <thead>
-                              <tr className="bg-primary/10">
-                                <th className="text-right p-2 font-semibold text-primary w-auto">المعيار</th>
-                                <th className="text-right p-2 font-semibold text-primary w-auto">الإجابة</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {subElement.answers.map((answer) => (
-                                <tr key={answer.criterion_id} className="border-b border-muted last:border-0">
-                                  <td className="p-2 text-foreground align-top">{answer.criterion_name}</td>
-                                  <td className="p-2 text-muted-foreground align-top whitespace-nowrap">{answer.selected_option_label}</td>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm" style={{ tableLayout: 'auto' }}>
+                              <thead>
+                                <tr className="bg-primary/10">
+                                  <th className="text-right p-2 font-semibold text-primary w-auto">المعيار</th>
+                                  <th className="text-right p-2 font-semibold text-primary w-auto">الإجابة</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                              </thead>
+                              <tbody>
+                                {subElement.answers.map((answer) => (
+                                  <tr key={answer.criterion_id} className="border-b border-muted last:border-0">
+                                    <td className="p-2 text-foreground align-top">{answer.criterion_name}</td>
+                                    <td className="p-2 text-muted-foreground align-top whitespace-nowrap">{answer.selected_option_label}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
+
+                  {/* Footer attached to the last main element so they stay on the same page */}
+                  {isLast && (
+                    <div className="text-center py-6 border-t mt-6">
+                      <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 flex-wrap">
+                        <span>تم إنشاء هذا التقرير بواسطة نظام</span>
+                        <img src={profitLogo} alt="Profit+" className="h-10 inline-block" />
+                        <span>للتقييم</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        جميع الحقوق محفوظة © {new Date().getFullYear()}
+                      </p>
+                    </div>
+                  )}
                 </div>
               );
             })}
-
-            {/* Footer */}
-            <div data-pdf-block className="text-center py-6 border-t mt-6">
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 flex-wrap">
-                <span>تم إنشاء هذا التقرير بواسطة نظام</span>
-                <img src={profitLogo} alt="Profit+" className="h-10 inline-block" />
-                <span>للتقييم</span>
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                جميع الحقوق محفوظة © {new Date().getFullYear()}
-              </p>
-            </div>
           </div>
         </ScrollArea>
       </DialogContent>
