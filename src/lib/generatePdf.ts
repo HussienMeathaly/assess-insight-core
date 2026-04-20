@@ -60,6 +60,8 @@ export const generateReportPdfFromElement = async ({
   fileName,
   scale = 3,
   blockSelector,
+  logoUrl,
+  footerText = 'نظام +PROFIT للتقييم',
 }: GeneratePdfOptions): Promise<void> => {
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
     import('html2canvas'),
@@ -77,9 +79,21 @@ export const generateReportPdfFromElement = async ({
 
   const pageWidthMm = pdf.internal.pageSize.getWidth();
   const pageHeightMm = pdf.internal.pageSize.getHeight();
-  const marginMm = 8;
-  const usableWidthMm = pageWidthMm - marginMm * 2;
-  const usableHeightMm = pageHeightMm - marginMm * 2;
+  const sideMarginMm = 8;
+  const headerHeightMm = 18; // reserved for logo + separator
+  const footerHeightMm = 12; // reserved for page number + brand
+  const contentTopMm = headerHeightMm;
+  const contentBottomMm = pageHeightMm - footerHeightMm;
+  const usableWidthMm = pageWidthMm - sideMarginMm * 2;
+  const usableHeightMm = contentBottomMm - contentTopMm;
+
+  // Preload logo if provided
+  let logoDataUrl: string | null = null;
+  let logoSize: { w: number; h: number } | null = null;
+  if (logoUrl) {
+    logoDataUrl = await loadImageAsDataUrl(logoUrl);
+    if (logoDataUrl) logoSize = await getImageSize(logoDataUrl);
+  }
 
   // Collect blocks (cards). Falls back to direct children.
   const blocks: HTMLElement[] = blockSelector
