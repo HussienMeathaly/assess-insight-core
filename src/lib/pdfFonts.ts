@@ -5,8 +5,8 @@ let cachedVfs: Record<string, string> | null = null;
 
 const FONT_URLS = {
   // Readex Pro - excellent Arabic & Latin support, modern and clean
-  regular: 'https://fonts.gstatic.com/s/readexpro/v22/SLXYc1bJ7HE5YDoGPuzj_dh8na74KiwZQQ.ttf',
-  bold: 'https://fonts.gstatic.com/s/readexpro/v22/SLXYc1bJ7HE5YDoGPuzj_dh8nan_KywZQQ.ttf',
+  regular: 'https://fonts.gstatic.com/s/readexpro/v27/SLXnc1bJ7HE5YDoGPuzj_dh8uc7wUy8ZQQyX2KY8TL0kGZN6blTC4USmgg.ttf',
+  bold: 'https://fonts.gstatic.com/s/readexpro/v27/SLXnc1bJ7HE5YDoGPuzj_dh8uc7wUy8ZQQyX2KY8TL0kGZN6blTCBkOmgg.ttf',
 };
 
 const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
