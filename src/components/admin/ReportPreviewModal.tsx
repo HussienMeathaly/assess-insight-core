@@ -156,6 +156,18 @@ export function ReportPreviewModal({
     return 'ضعيف';
   };
 
+  const issueDateLabel = completedAt
+    ? new Intl.DateTimeFormat('ar-EG', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }).format(new Date(completedAt))
+    : new Intl.DateTimeFormat('ar-EG', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }).format(new Date());
+
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -193,6 +205,14 @@ export function ReportPreviewModal({
         {/* Content */}
         <ScrollArea className="flex-1 p-4 sm:p-6">
           <div ref={captureRef} id="report-capture-root" className="space-y-6 bg-white p-4 sm:p-6" dir="rtl" style={{ fontFamily: "'Readex Pro', sans-serif" }}>
+            <div data-pdf-block className="rounded-[28px] border-2 border-primary/80 bg-background px-6 py-10 text-center shadow-sm sm:px-10 sm:py-14">
+              <img src={profitLogo} alt="Profit Logo" className="mx-auto mb-8 h-12 sm:h-14" />
+              <h1 className="mb-4 text-3xl font-bold text-primary sm:text-4xl">تقرير فئة النشاط</h1>
+              <p className="text-base text-muted-foreground sm:text-lg">
+                تاريخ إصدار التقرير: {issueDateLabel}
+              </p>
+            </div>
+
             {/* Organization Info Card */}
             <div data-pdf-block className="rounded-xl border bg-card overflow-hidden">
               <div className="bg-primary text-primary-foreground px-4 py-3 font-semibold">
@@ -306,23 +326,25 @@ export function ReportPreviewModal({
                 : 0;
               
               return (
-                <div key={mainElement.mainElementId} className="rounded-xl border bg-card overflow-hidden">
-                  {/* Main Element Header */}
-                  <div className="bg-gradient-to-l from-primary to-primary/80 text-primary-foreground px-4 py-3 flex items-center justify-between">
-                    <span className="font-bold">{mainElement.mainElementName}</span>
-                    <span className="bg-primary-foreground/20 text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">
-                      {mainElement.totalScore.toFixed(1)} / {mainElement.mainElementWeight} ({elemPercentage}%)
-                    </span>
+                <div key={mainElement.mainElementId} className="space-y-4">
+                  <div data-pdf-block className="rounded-xl border bg-card overflow-hidden">
+                    <div className="bg-gradient-to-l from-primary to-primary/80 px-4 py-3 text-primary-foreground flex items-center justify-between gap-3">
+                      <span className="font-bold">{mainElement.mainElementName}</span>
+                      <span className="rounded-full bg-primary-foreground/20 px-3 py-1 text-sm font-semibold text-primary-foreground">
+                        {mainElement.totalScore.toFixed(1)} / {mainElement.mainElementWeight} ({elemPercentage}%)
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Sub Elements */}
-                  <div className="p-4 space-y-4">
+                  <div className="space-y-4">
                     {mainElement.subElements.map((subElement) => (
-                      <div data-pdf-block key={subElement.subElementId} className="bg-muted/30 rounded-lg p-3">
-                        <h4 className="font-semibold text-primary mb-3 pb-2 border-b-2 border-primary/20">
-                          {subElement.subElementName}
-                        </h4>
-                        
+                      <div data-pdf-block key={subElement.subElementId} className="overflow-hidden rounded-xl border bg-card">
+                        <div className="bg-muted/40 px-4 py-3">
+                          <h4 className="border-b-2 border-primary/20 pb-2 font-semibold text-primary">
+                            {subElement.subElementName}
+                          </h4>
+                        </div>
+                        <div className="p-3">
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm" style={{ tableLayout: 'auto' }}>
                             <thead>
@@ -340,6 +362,7 @@ export function ReportPreviewModal({
                               ))}
                             </tbody>
                           </table>
+                        </div>
                         </div>
                       </div>
                     ))}

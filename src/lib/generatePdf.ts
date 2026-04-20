@@ -19,6 +19,11 @@ export interface GeneratePdfOptions {
   footerText?: string;
 }
 
+interface BlockRange {
+  topPx: number;
+  bottomPx: number;
+}
+
 const waitForAssets = async (root: HTMLElement) => {
   await (document as any).fonts?.ready;
   const imgs = Array.from(root.querySelectorAll('img'));
@@ -91,6 +96,67 @@ const renderHtmlToCanvas = async (
   }
 };
 
+const offsetWithin = (el: HTMLElement, root: HTMLElement): number => {
+  let y = 0;
+  let cur: HTMLElement | null = el;
+  while (cur && cur !== root) {
+    y += cur.offsetTop;
+    cur = cur.offsetParent as HTMLElement | null;
+  }
+  return y;
+};
+
+const buildBlockRanges = ({
+  blocks,
+  element,
+  fullCanvasHeight,
+  pxPerCssPx,
+  maxSliceCssPx,
+}: {
+  blocks: HTMLElement[];
+  element: HTMLElement;
+  fullCanvasHeight: number;
+  pxPerCssPx: number;
+  maxSliceCssPx: number;
+}): BlockRange[] => {
+  const ranges: BlockRange[] = [];
+
+  const pushRange = (topCssPx: number, bottomCssPx: number) => {
+    const topPx = Math.max(0, Math.round(topCssPx * pxPerCssPx));
+    const bottomPx = Math.min(fullCanvasHeight, Math.round(bottomCssPx * pxPerCssPx));
+    if (bottomPx > topPx) {
+      ranges.push({ topPx, bottomPx });
+    }
+  };
+
+  const collectRanges = (node: HTMLElement, depth = 0) => {
+    const topCssPx = offsetWithin(node, element);
+    const bottomCssPx = topCssPx + node.offsetHeight;
+
+    if (node.offsetHeight <= maxSliceCssPx || depth >= 6 || node.children.length === 0) {
+      pushRange(topCssPx, bottomCssPx);
+      return;
+    }
+
+    const childElements = Array.from(node.children).filter(
+      (child): child is HTMLElement => child instanceof HTMLElement && child.offsetHeight > 0
+    );
+
+    if (childElements.length === 0) {
+      pushRange(topCssPx, bottomCssPx);
+      return;
+    }
+
+    for (const child of childElements) {
+      collectRanges(child, depth + 1);
+    }
+  };
+
+  for (const block of blocks) collectRanges(block);
+
+  return ranges.sort((a, b) => a.topPx - b.topPx);
+};
+
 export const generateReportPdfFromElement = async ({
   element,
   fileName,
@@ -157,31 +223,18 @@ export const generateReportPdfFromElement = async ({
     (block) => !matchedBlocks.some((other) => other !== block && block.contains(other))
   );
 
-  const offsetWithin = (el: HTMLElement, root: HTMLElement): number => {
-    let y = 0;
-    let cur: HTMLElement | null = el;
-    while (cur && cur !== root) {
-      y += cur.offsetTop;
-      cur = cur.offsetParent as HTMLElement | null;
-    }
-    return y;
-  };
-
   // Maximum slice height in canvas pixels that fits one PDF page.
   const pxPerMm = fullCanvas.width / usableWidthMm;
   const maxSlicePx = Math.floor(usableHeightMm * pxPerMm);
+  const maxSliceCssPx = maxSlicePx / pxPerCssPx;
 
-  const blockRanges = blocks
-    .map((block) => {
-      const topPx = Math.round(offsetWithin(block, element) * pxPerCssPx);
-      const bottomPx = Math.round((offsetWithin(block, element) + block.offsetHeight) * pxPerCssPx);
-      return {
-        topPx: Math.max(0, topPx),
-        bottomPx: Math.min(fullCanvas.height, bottomPx),
-      };
-    })
-    .filter((range) => range.bottomPx > range.topPx)
-    .sort((a, b) => a.topPx - b.topPx);
+  const blockRanges = buildBlockRanges({
+    blocks,
+    element,
+    fullCanvasHeight: fullCanvas.height,
+    pxPerCssPx,
+    maxSliceCssPx,
+  });
 
   // ===== STEP 3: Pack full blocks into pages =====
   const pageRanges: Array<{ topPx: number; bottomPx: number }> = [];
@@ -195,6 +248,13 @@ export const generateReportPdfFromElement = async ({
 
     while (i < blockRanges.length) {
       const block = blockRanges[i];
+      if (block.topPx > pageTopPx && block.bottomPx - pageTopPx > maxSlicePx && lastSafeBottomPx > pageTopPx) {
+        pageRanges.push({ topPx: pageTopPx, bottomPx: lastSafeBottomPx });
+        pageTopPx = block.topPx;
+        lastSafeBottomPx = pageTopPx;
+        continue;
+      }
+
       const candidateBottomPx = Math.max(lastSafeBottomPx, block.bottomPx);
 
       if (candidateBottomPx - pageTopPx <= maxSlicePx) {
