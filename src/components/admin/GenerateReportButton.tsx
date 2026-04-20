@@ -259,6 +259,8 @@ export function GenerateReportButton({
         element: captureRef.current,
         fileName,
         scale: 3,
+        logoUrl: profitLogo,
+        footerText: 'نظام +PROFIT للتقييم',
       });
 
       setDownloadStatus({ open: true, type: "success", title: "تم التحميل بنجاح", message: "تم تحميل ملف PDF بنجاح" });
