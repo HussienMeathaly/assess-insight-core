@@ -293,22 +293,17 @@ export function GenerateReportButton({
                     <table class="criteria-table">
                       <thead>
                         <tr>
-                          <th style="width: 55%;">المعيار</th>
-                          <th style="width: 30%;">الإجابة</th>
-                          <th style="width: 15%;">النتيجة</th>
+                          <th style="width: 60%;">المعيار</th>
+                          <th style="width: 40%;">الإجابة</th>
                         </tr>
                       </thead>
                       <tbody>
-                        ${subElement.answers.map(answer => {
-                          const scoreColor = getScoreColor(answer.score);
-                          return `
+                        ${subElement.answers.map(answer => `
                             <tr>
                               <td class="criterion-name">${answer.criterion_name}</td>
                               <td class="criterion-answer">${answer.selected_option_label}</td>
-                              <td class="criterion-score" style="color: ${scoreColor};">${answer.score}%</td>
                             </tr>
-                          `;
-                        }).join('')}
+                          `).join('')}
                       </tbody>
                     </table>
                   </div>
