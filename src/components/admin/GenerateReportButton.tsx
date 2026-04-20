@@ -375,8 +375,8 @@ export function GenerateReportButton({
             .info-value { font-size: 13px; font-weight: 600; color: ${BRAND_NAVY}; }
             .score-box {
               text-align: center; padding: 25px; border-radius: 12px;
-              background: ${isQualified ? `linear-gradient(135deg, ${BRAND_GREEN}10 0%, ${BRAND_GREEN}20 100%)` : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'};
-              border: 3px solid ${isQualified ? BRAND_GREEN : '#dc2626'};
+              background: ${percentage > 65 ? `linear-gradient(135deg, ${BRAND_GREEN}10 0%, ${BRAND_GREEN}20 100%)` : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'};
+              border: 3px solid ${percentage > 65 ? BRAND_GREEN : '#dc2626'};
             }
             .score-circle {
               width: 110px; height: 110px; border-radius: 50%; background: white;
