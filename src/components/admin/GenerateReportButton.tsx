@@ -375,17 +375,18 @@ export function GenerateReportButton({
             .info-value { font-size: 13px; font-weight: 600; color: ${BRAND_NAVY}; }
             .score-box {
               text-align: center; padding: 25px; border-radius: 12px;
-              background: ${isQualified ? `linear-gradient(135deg, ${BRAND_GREEN}10 0%, ${BRAND_GREEN}20 100%)` : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'};
-              border: 3px solid ${isQualified ? BRAND_GREEN : '#dc2626'};
+              background: ${percentage > 65 ? `linear-gradient(135deg, ${BRAND_GREEN}10 0%, ${BRAND_GREEN}20 100%)` : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)'};
+              border: 3px solid ${percentage > 65 ? BRAND_GREEN : '#dc2626'};
             }
             .score-circle {
-              width: 100px; height: 100px; border-radius: 50%; background: white;
-              display: inline-flex; align-items: center; justify-content: center; flex-direction: column;
-              border: 6px solid ${isQualified ? BRAND_GREEN : '#dc2626'}; margin-bottom: 15px;
+              width: 110px; height: 110px; border-radius: 50%; background: white;
+              border: 6px solid ${percentage > 65 ? BRAND_GREEN : '#dc2626'};
+              margin: 0 auto 15px auto; padding-top: 22px; text-align: center;
+              box-sizing: border-box;
             }
-            .score-value { font-size: 32px; font-weight: 700; color: ${isQualified ? BRAND_GREEN : '#dc2626'}; }
-            .score-percent { font-size: 14px; color: #6b7280; }
-            .score-status { font-size: 18px; font-weight: 700; color: ${isQualified ? BRAND_GREEN : '#dc2626'}; margin-bottom: 5px; }
+            .score-value { font-size: 32px; font-weight: 700; color: ${percentage > 65 ? BRAND_GREEN : '#dc2626'}; line-height: 1; display: block; }
+            .score-percent { font-size: 14px; color: #6b7280; line-height: 1.2; display: block; margin-top: 4px; }
+            .score-status { font-size: 18px; font-weight: 700; color: ${percentage > 65 ? BRAND_GREEN : '#dc2626'}; margin-bottom: 8px; }
             .stats-row {
               display: flex; justify-content: center; gap: 30px; margin-top: 15px;
               padding-top: 15px; border-top: 1px dashed ${BRAND_NAVY}30;
