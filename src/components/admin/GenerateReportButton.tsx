@@ -258,7 +258,8 @@ export function GenerateReportButton({
       await generateReportPdfFromElement({
         element: captureRef.current,
         fileName,
-        scale: 3,
+        scale: 2,
+        blockSelector: ':scope > div',
         logoUrl: profitLogo,
         footerText: 'نظام +PROFIT للتقييم',
       });
