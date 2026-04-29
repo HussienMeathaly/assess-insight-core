@@ -182,7 +182,7 @@ export default function FreeEvaluation() {
   };
 
   const handleBack = () => {
-    navigate('/assessment');
+    navigate('/');
   };
 
   // Navigate back to assessment results
