@@ -187,8 +187,11 @@ export default function Auth() {
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
   };
 
-  // Redirect on auth
+  // Redirect on auth — but NEVER redirect if the user arrived via a recovery link.
+  // The recovery flow must show the password reset form even though the
+  // PKCE code exchange has already established a session.
   useEffect(() => {
+    if (initialRecoveryRef.current) return;
     if (isAuthenticated && !loading && !isResettingPassword) {
       clearSessionStorage();
       navigate("/assessment");
