@@ -22,7 +22,7 @@ export function AuthCard({
   onMouseLeave 
 }: AuthCardProps) {
   return (
-    <div className="min-h-[100svh] flex items-center justify-center px-4 py-8 sm:p-6 relative overflow-hidden">
+    <div className="min-h-[100svh] flex items-center justify-center px-4 py-4 sm:p-6 relative overflow-hidden">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* Gradient Orbs */}
@@ -60,7 +60,7 @@ export function AuthCard({
       <div className="w-full max-w-md relative z-10">
         {/* Logo Section */}
         <motion.div 
-          className="text-center mb-8"
+          className="text-center mb-4 sm:mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -82,11 +82,11 @@ export function AuthCard({
             <img 
               src={profitLogo} 
               alt="Profit+" 
-              className="h-16 sm:h-20 md:h-24 mx-auto mb-4 relative z-10 drop-shadow-2xl" 
+              className="h-12 sm:h-20 md:h-24 mx-auto mb-2 sm:mb-4 relative z-10 drop-shadow-2xl" 
             />
           </div>
           <motion.p 
-            className="text-muted-foreground text-lg font-medium"
+            className="text-muted-foreground text-sm sm:text-lg font-medium"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -130,7 +130,7 @@ export function AuthCard({
             />
           </div>
 
-          <div className="bg-card/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 relative overflow-hidden shadow-2xl border border-border/30">
+          <div className="bg-card/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-8 md:p-10 relative overflow-hidden shadow-2xl border border-border/30">
             {/* Traveling Light Beam */}
             <motion.div
               className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent pointer-events-none"
