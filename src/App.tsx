@@ -10,9 +10,9 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { RecoveryRedirect } from "@/components/RecoveryRedirect";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Landing from "./pages/Landing";
+import Auth from "./pages/Auth";
 
 const Index = lazy(() => import("./pages/Index"));
-const Auth = lazy(() => import("./pages/Auth"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const FreeEvaluation = lazy(() => import("./pages/FreeEvaluation"));
 const EvaluationReport = lazy(() => import("./pages/EvaluationReport"));
