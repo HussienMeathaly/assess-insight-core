@@ -410,31 +410,51 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
+  const requestDeleteUser = (userId: string) => {
     if (userId === user?.id) {
       toast.error("لا يمكنك حذف حسابك الخاص");
       return;
     }
+    const target = users.find((u) => u.id === userId);
+    setPendingDelete({
+      type: "user",
+      id: userId,
+      label: target?.email || "هذا المستخدم",
+    });
+  };
 
+  const requestDeleteAssessment = (assessmentId: string) => {
+    const target = assessments.find((a) => a.id === assessmentId);
+    setPendingDelete({
+      type: "assessment",
+      id: assessmentId,
+      label: target?.organization?.name || "هذا التقييم",
+    });
+  };
+
+  const requestDeleteEvaluation = (evaluationId: string) => {
+    const target = evaluations.find((e) => e.id === evaluationId);
+    setPendingDelete({
+      type: "evaluation",
+      id: evaluationId,
+      label: target?.organization?.name || "هذا التقييم",
+    });
+  };
+
+  const performDeleteUser = async (userId: string) => {
     setDeletingUser(userId);
-
     try {
       const { data, error } = await supabase.functions.invoke("manage-users", {
-        body: {
-          action: "delete",
-          userId,
-        },
+        body: { action: "delete", userId },
       });
-
       if (error) throw error;
       if (data.error) {
         toast.error(data.error);
         return;
       }
-
-      // Remove from local state
       setUsers((prev) => prev.filter((u) => u.id !== userId));
       toast.success("تم حذف المستخدم بنجاح");
+      setPendingDelete(null);
     } catch (error) {
       logError("Error deleting user", error);
       toast.error("حدث خطأ أثناء حذف المستخدم");
@@ -443,26 +463,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteAssessment = async (assessmentId: string) => {
+  const performDeleteAssessment = async (assessmentId: string) => {
     setDeletingAssessment(assessmentId);
-
     try {
-      // First delete assessment answers
       const { error: answersError } = await supabase
         .from("assessment_answers")
         .delete()
         .eq("assessment_id", assessmentId);
-
       if (answersError) throw answersError;
-
-      // Then delete the assessment
       const { error } = await supabase.from("assessments").delete().eq("id", assessmentId);
-
       if (error) throw error;
-
-      // Remove from local state
       setAssessments((prev) => prev.filter((a) => a.id !== assessmentId));
       toast.success("تم حذف التقييم الأولي بنجاح");
+      setPendingDelete(null);
     } catch (error) {
       logError("Error deleting assessment", error);
       toast.error("حدث خطأ أثناء حذف التقييم");
@@ -471,26 +484,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteEvaluation = async (evaluationId: string) => {
+  const performDeleteEvaluation = async (evaluationId: string) => {
     setDeletingEvaluation(evaluationId);
-
     try {
-      // First delete evaluation answers
       const { error: answersError } = await supabase
         .from("evaluation_answers")
         .delete()
         .eq("evaluation_id", evaluationId);
-
       if (answersError) throw answersError;
-
-      // Then delete the evaluation
       const { error } = await supabase.from("evaluations").delete().eq("id", evaluationId);
-
       if (error) throw error;
-
-      // Remove from local state
       setEvaluations((prev) => prev.filter((e) => e.id !== evaluationId));
       toast.success("تم حذف التقييم المجاني بنجاح");
+      setPendingDelete(null);
     } catch (error) {
       logError("Error deleting evaluation", error);
       toast.error("حدث خطأ أثناء حذف التقييم");
@@ -498,6 +504,23 @@ export default function AdminDashboard() {
       setDeletingEvaluation(null);
     }
   };
+
+  const handleDeleteUser = requestDeleteUser;
+  const handleDeleteAssessment = requestDeleteAssessment;
+  const handleDeleteEvaluation = requestDeleteEvaluation;
+
+  const confirmPendingDelete = () => {
+    if (!pendingDelete) return;
+    if (pendingDelete.type === "user") performDeleteUser(pendingDelete.id);
+    else if (pendingDelete.type === "assessment") performDeleteAssessment(pendingDelete.id);
+    else if (pendingDelete.type === "evaluation") performDeleteEvaluation(pendingDelete.id);
+  };
+
+  const isDeleting =
+    !!pendingDelete &&
+    ((pendingDelete.type === "user" && deletingUser === pendingDelete.id) ||
+      (pendingDelete.type === "assessment" && deletingAssessment === pendingDelete.id) ||
+      (pendingDelete.type === "evaluation" && deletingEvaluation === pendingDelete.id));
 
   if (authLoading || roleLoading || loadingData) {
     return (
