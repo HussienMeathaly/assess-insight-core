@@ -226,7 +226,7 @@ export default function FreeEvaluation() {
           <meta name="description" content="حدد فئة نشاط منشأتك قبل بدء التقييم المجاني" />
         </Helmet>
         <ActivityCategoryStep
-          initialValue={activityCategory ?? ''}
+          initialValue=""
           onSubmit={handleActivityCategorySubmit}
           onBack={() => navigate('/')}
           submitting={savingCategory}
