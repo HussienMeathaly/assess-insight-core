@@ -217,6 +217,23 @@ export default function FreeEvaluation() {
     );
   }
 
+  if (needsActivityCategory) {
+    return (
+      <div className="min-h-screen" dir="rtl">
+        <Helmet>
+          <title>فئة النشاط | PROFIT</title>
+          <meta name="description" content="حدد فئة نشاط منشأتك قبل بدء التقييم المجاني" />
+        </Helmet>
+        <ActivityCategoryStep
+          initialValue={activityCategory ?? ''}
+          onSubmit={handleActivityCategorySubmit}
+          onBack={() => navigate('/')}
+          submitting={savingCategory}
+        />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" dir="rtl">
