@@ -93,17 +93,23 @@ export default function Auth() {
   });
 
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  // Detect recovery token in URL hash OR query string on initial load
-  const [isResettingPassword, setIsResettingPassword] = useState(() => {
-    const hash = window.location.hash;
-    const search = window.location.search;
-    return (
-      hash.includes('type=recovery') ||
-      hash.includes('type=magiclink') ||
-      search.includes('type=recovery') ||
-      search.includes('code=')
-    );
-  });
+  // Detect recovery token in URL hash OR query string on initial load.
+  // Supabase may issue links as #type=recovery, ?type=recovery, or ?code=...
+  // We treat any of these as a recovery flow until proven otherwise.
+  const initialRecoveryRef = useRef<boolean>(
+    (() => {
+      const hash = window.location.hash;
+      const search = window.location.search;
+      return (
+        hash.includes('type=recovery') ||
+        hash.includes('type=magiclink') ||
+        hash.includes('access_token=') ||
+        search.includes('type=recovery') ||
+        /[?&]code=/.test(search)
+      );
+    })()
+  );
+  const [isResettingPassword, setIsResettingPassword] = useState(initialRecoveryRef.current);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showResetSent, setShowResetSent] = useState(false);
@@ -181,8 +187,11 @@ export default function Auth() {
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
   };
 
-  // Redirect on auth
+  // Redirect on auth — but NEVER redirect if the user arrived via a recovery link.
+  // The recovery flow must show the password reset form even though the
+  // PKCE code exchange has already established a session.
   useEffect(() => {
+    if (initialRecoveryRef.current) return;
     if (isAuthenticated && !loading && !isResettingPassword) {
       clearSessionStorage();
       navigate("/assessment");
