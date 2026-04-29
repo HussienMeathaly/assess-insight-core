@@ -40,7 +40,14 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { logError } from "@/lib/logger";
+
+type PendingDelete =
+  | { type: "user"; id: string; label: string }
+  | { type: "assessment"; id: string; label: string }
+  | { type: "evaluation"; id: string; label: string }
+  | null;
 
 interface Organization {
   id: string;
