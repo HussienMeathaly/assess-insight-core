@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { isPasswordRecoveryUrl, markPasswordRecoveryFlow } from "@/lib/authRecovery";
 
 /**
  * Detects Supabase password-recovery links that may land on any route
@@ -13,18 +14,9 @@ export function RecoveryRedirect() {
   useEffect(() => {
     if (location.pathname === "/auth") return;
 
-    const hash = window.location.hash || "";
-    const search = window.location.search || "";
-
-    const isRecovery =
-      hash.includes("type=recovery") ||
-      hash.includes("type=magiclink") ||
-      hash.includes("access_token=") ||
-      search.includes("type=recovery") ||
-      /[?&]code=/.test(search);
-
-    if (isRecovery) {
-      navigate(`/auth${search}${hash}`, { replace: true });
+    if (isPasswordRecoveryUrl()) {
+      markPasswordRecoveryFlow();
+      navigate(`/auth${window.location.search}${window.location.hash}`, { replace: true });
     }
   }, [location.pathname, navigate]);
 
