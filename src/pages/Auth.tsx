@@ -93,10 +93,16 @@ export default function Auth() {
   });
 
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  // Detect recovery token in URL hash on initial load
+  // Detect recovery token in URL hash OR query string on initial load
   const [isResettingPassword, setIsResettingPassword] = useState(() => {
     const hash = window.location.hash;
-    return hash.includes('type=recovery') || hash.includes('type=magiclink');
+    const search = window.location.search;
+    return (
+      hash.includes('type=recovery') ||
+      hash.includes('type=magiclink') ||
+      search.includes('type=recovery') ||
+      search.includes('code=')
+    );
   });
   const [resetSuccess, setResetSuccess] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
