@@ -55,7 +55,7 @@ const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
             onFocus={() => onFocusChange?.(true)}
             onBlur={() => onFocusChange?.(false)}
             className={cn(
-              "w-full pr-12 pl-12 py-4 bg-secondary/30 border-2 rounded-2xl text-foreground",
+              "w-full pr-12 pl-12 py-3 sm:py-4 bg-secondary/30 border-2 rounded-2xl text-foreground",
               "placeholder:text-muted-foreground/60",
               "focus:outline-none focus:bg-secondary/50 transition-all duration-300",
               "hover:bg-secondary/40 hover:border-primary/30",

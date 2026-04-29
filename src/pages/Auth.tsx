@@ -406,7 +406,7 @@ export default function Auth() {
     >
       <AuthHeader isLogin={isLogin} />
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
         {/* Organization Fields - Only for Signup */}
         <AnimatePresence mode="wait">
           {!isLogin && (
@@ -416,7 +416,7 @@ export default function Auth() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="space-y-5"
+              className="space-y-4 sm:space-y-5"
             >
               {/* Organization Name */}
               <AuthInput
