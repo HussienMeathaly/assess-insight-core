@@ -9,14 +9,14 @@ interface AuthHeaderProps {
 export function AuthHeader({ isLogin }: AuthHeaderProps) {
   return (
     <motion.div 
-      className="text-center mb-8"
+      className="text-center mb-5 sm:mb-8"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.3 }}
     >
       <motion.div
         className={cn(
-          "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-5 transition-all duration-500 relative",
+          "inline-flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl mb-3 sm:mb-5 transition-all duration-500 relative",
           isLogin 
             ? "bg-gradient-to-br from-primary/20 to-primary/5" 
             : "bg-gradient-to-br from-accent/20 to-accent/5",
@@ -27,7 +27,7 @@ export function AuthHeader({ isLogin }: AuthHeaderProps) {
         {/* Inner Glow */}
         <motion.div
           className={cn(
-            "absolute inset-0 rounded-3xl blur-xl",
+            "absolute inset-0 rounded-2xl sm:rounded-3xl blur-xl",
             isLogin ? "bg-primary/30" : "bg-accent/30"
           )}
           animate={{
@@ -42,14 +42,14 @@ export function AuthHeader({ isLogin }: AuthHeaderProps) {
         />
         
         {isLogin ? (
-          <LogIn className="w-9 h-9 text-primary relative z-10" />
+          <LogIn className="w-6 h-6 sm:w-9 sm:h-9 text-primary relative z-10" />
         ) : (
-          <UserPlus className="w-9 h-9 text-accent relative z-10" />
+          <UserPlus className="w-6 h-6 sm:w-9 sm:h-9 text-accent relative z-10" />
         )}
       </motion.div>
       
       <motion.h2 
-        className="text-3xl font-bold text-foreground mb-2"
+        className="text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2"
         key={isLogin ? "login" : "signup"}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -58,7 +58,7 @@ export function AuthHeader({ isLogin }: AuthHeaderProps) {
       </motion.h2>
       
       <motion.p 
-        className="text-muted-foreground"
+        className="text-sm sm:text-base text-muted-foreground"
         key={isLogin ? "login-desc" : "signup-desc"}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
