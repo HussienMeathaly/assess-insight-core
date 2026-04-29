@@ -44,6 +44,7 @@ interface ReportData {
   contactPerson: string;
   email: string;
   phone: string;
+  activityCategory?: string;
   percentage: number;
   isQualified: boolean;
   totalAnswers: number;
