@@ -173,6 +173,7 @@ export default function AdminDashboard() {
   const [editingOrganization, setEditingOrganization] = useState<Organization | null>(null);
   const [comprehensiveRequests, setComprehensiveRequests] = useState<any[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
