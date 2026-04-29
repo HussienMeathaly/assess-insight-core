@@ -165,6 +165,8 @@ export default function Auth() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
+        initialRecoveryRef.current = true;
+        markPasswordRecoveryFlow();
         setIsResettingPassword(true);
         setIsForgotPassword(false);
         setIsLogin(true);
@@ -343,6 +345,8 @@ export default function Auth() {
   };
 
   const resetToLogin = () => {
+    initialRecoveryRef.current = false;
+    clearPasswordRecoveryFlow();
     setShowConfirmation(false);
     setShowResetSent(false);
     setIsForgotPassword(false);
@@ -360,7 +364,7 @@ export default function Auth() {
   };
 
   // Loading state
-  if (loading) {
+  if (loading && !isResettingPassword) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <motion.div 
@@ -385,7 +389,12 @@ export default function Auth() {
 
   // Password reset form
   if (isResettingPassword) {
-    return <ResetPasswordForm onSuccess={() => setResetSuccess(true)} />;
+    return <ResetPasswordForm onSuccess={() => {
+      initialRecoveryRef.current = false;
+      clearPasswordRecoveryFlow();
+      setIsResettingPassword(false);
+      setResetSuccess(true);
+    }} />;
   }
 
   // Email confirmation message
