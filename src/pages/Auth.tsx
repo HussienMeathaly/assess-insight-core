@@ -33,6 +33,12 @@ import {
 } from "@/components/auth";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
+import {
+  clearPasswordRecoveryFlow,
+  isPasswordRecoveryFlowPending,
+  isPasswordRecoveryUrl,
+  markPasswordRecoveryFlow,
+} from "@/lib/authRecovery";
 
 // Validation schemas
 const validOrgAndNameRegex = /^[\u0600-\u06FFa-zA-Z0-9\s_]+$/;
@@ -96,19 +102,7 @@ export default function Auth() {
   // Detect recovery token in URL hash OR query string on initial load.
   // Supabase may issue links as #type=recovery, ?type=recovery, or ?code=...
   // We treat any of these as a recovery flow until proven otherwise.
-  const initialRecoveryRef = useRef<boolean>(
-    (() => {
-      const hash = window.location.hash;
-      const search = window.location.search;
-      return (
-        hash.includes('type=recovery') ||
-        hash.includes('type=magiclink') ||
-        hash.includes('access_token=') ||
-        search.includes('type=recovery') ||
-        /[?&]code=/.test(search)
-      );
-    })()
-  );
+  const initialRecoveryRef = useRef<boolean>(isPasswordRecoveryUrl() || isPasswordRecoveryFlowPending());
   const [isResettingPassword, setIsResettingPassword] = useState(initialRecoveryRef.current);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -142,6 +136,14 @@ export default function Auth() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(true);
 
+  useEffect(() => {
+    if (!initialRecoveryRef.current) return;
+    markPasswordRecoveryFlow();
+    setIsResettingPassword(true);
+    setIsForgotPassword(false);
+    setIsLogin(true);
+  }, []);
+
   // 3D card effect
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -163,6 +165,8 @@ export default function Auth() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
+        initialRecoveryRef.current = true;
+        markPasswordRecoveryFlow();
         setIsResettingPassword(true);
         setIsForgotPassword(false);
         setIsLogin(true);
@@ -341,6 +345,8 @@ export default function Auth() {
   };
 
   const resetToLogin = () => {
+    initialRecoveryRef.current = false;
+    clearPasswordRecoveryFlow();
     setShowConfirmation(false);
     setShowResetSent(false);
     setIsForgotPassword(false);
@@ -358,7 +364,7 @@ export default function Auth() {
   };
 
   // Loading state
-  if (loading) {
+  if (loading && !isResettingPassword) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <motion.div 
@@ -383,7 +389,12 @@ export default function Auth() {
 
   // Password reset form
   if (isResettingPassword) {
-    return <ResetPasswordForm onSuccess={() => setResetSuccess(true)} />;
+    return <ResetPasswordForm onSuccess={() => {
+      initialRecoveryRef.current = false;
+      clearPasswordRecoveryFlow();
+      setIsResettingPassword(false);
+      setResetSuccess(true);
+    }} />;
   }
 
   // Email confirmation message
