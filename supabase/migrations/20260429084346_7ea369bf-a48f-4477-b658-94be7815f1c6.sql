@@ -1,0 +1,2 @@
+ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS activity_category text;
+ALTER TABLE public.organizations ADD CONSTRAINT organizations_activity_category_length CHECK (activity_category IS NULL OR (char_length(activity_category) >= 2 AND char_length(activity_category) <= 100));

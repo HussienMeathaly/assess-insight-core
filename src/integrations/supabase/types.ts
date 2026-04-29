@@ -417,6 +417,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          activity_category: string | null
           contact_person: string
           created_at: string | null
           email: string
@@ -426,6 +427,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          activity_category?: string | null
           contact_person: string
           created_at?: string | null
           email: string
@@ -435,6 +437,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          activity_category?: string | null
           contact_person?: string
           created_at?: string | null
           email?: string

@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useEvaluation } from '@/hooks/useEvaluation';
 import { RegistrationForm, type RegistrationData } from '@/components/assessment/RegistrationForm';
+import { ActivityCategoryStep } from '@/components/assessment/ActivityCategoryStep';
 import { EvaluationProgress } from '@/components/evaluation/EvaluationProgress';
 import { MobileProgressSummary } from '@/components/evaluation/MobileProgressSummary';
 import { MainElementView } from '@/components/evaluation/MainElementView';
@@ -24,6 +25,10 @@ export default function FreeEvaluation() {
   const [upsellDismissCount, setUpsellDismissCount] = useState(0);
   const [checkingOrg, setCheckingOrg] = useState(true);
   const [needsOrganization, setNeedsOrganization] = useState(false);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [activityCategory, setActivityCategory] = useState<string | null>(null);
+  const [needsActivityCategory, setNeedsActivityCategory] = useState(false);
+  const [savingCategory, setSavingCategory] = useState(false);
   
   const {
     domain,
@@ -60,7 +65,7 @@ export default function FreeEvaluation() {
       setCheckingOrg(true);
       const { data, error } = await supabase
         .from('organizations')
-        .select('id')
+        .select('id, activity_category')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -74,7 +79,18 @@ export default function FreeEvaluation() {
         return;
       }
 
-      setNeedsOrganization(!data);
+      if (!data) {
+        setNeedsOrganization(true);
+        setOrganizationId(null);
+        setActivityCategory(null);
+        setNeedsActivityCategory(false);
+      } else {
+        setNeedsOrganization(false);
+        setOrganizationId(data.id);
+        const cat = (data as { activity_category?: string | null }).activity_category ?? null;
+        setActivityCategory(cat);
+        setNeedsActivityCategory(!cat);
+      }
       setCheckingOrg(false);
     }
 
@@ -89,19 +105,49 @@ export default function FreeEvaluation() {
     if (!user) return;
 
     try {
-      const { error } = await supabase.from('organizations').insert({
-        name: data.organizationName,
-        contact_person: data.contactPerson,
-        phone: data.phone,
-        email: data.email,
-        user_id: user.id,
-      });
+      const { data: inserted, error } = await supabase
+        .from('organizations')
+        .insert({
+          name: data.organizationName,
+          contact_person: data.contactPerson,
+          phone: data.phone,
+          email: data.email,
+          user_id: user.id,
+        })
+        .select('id, activity_category')
+        .single();
 
       if (error) throw error;
 
       setNeedsOrganization(false);
+      setOrganizationId(inserted?.id ?? null);
+      setActivityCategory(null);
+      setNeedsActivityCategory(true);
     } catch {
       toast.error('تعذر حفظ بيانات الجهة. يرجى المحاولة مرة أخرى.');
+    }
+  };
+
+  const handleActivityCategorySubmit = async (category: string) => {
+    if (!organizationId) {
+      toast.error('تعذر العثور على بيانات الجهة. حاول مرة أخرى.');
+      return;
+    }
+    setSavingCategory(true);
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ activity_category: category })
+        .eq('id', organizationId);
+
+      if (error) throw error;
+
+      setActivityCategory(category);
+      setNeedsActivityCategory(false);
+    } catch {
+      toast.error('تعذر حفظ فئة النشاط. يرجى المحاولة مرة أخرى.');
+    } finally {
+      setSavingCategory(false);
     }
   };
 
@@ -167,6 +213,23 @@ export default function FreeEvaluation() {
           <meta name="description" content="أكمل بيانات الجهة للبدء في التقييم المجاني وحفظ التقرير في لوحة التحكم" />
         </Helmet>
         <RegistrationForm onSubmit={handleOrganizationSubmit} onBack={() => navigate('/')} />
+      </div>
+    );
+  }
+
+  if (needsActivityCategory) {
+    return (
+      <div className="min-h-screen" dir="rtl">
+        <Helmet>
+          <title>فئة النشاط | PROFIT</title>
+          <meta name="description" content="حدد فئة نشاط منشأتك قبل بدء التقييم المجاني" />
+        </Helmet>
+        <ActivityCategoryStep
+          initialValue={activityCategory ?? ''}
+          onSubmit={handleActivityCategorySubmit}
+          onBack={() => navigate('/')}
+          submitting={savingCategory}
+        />
       </div>
     );
   }
