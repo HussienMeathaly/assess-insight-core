@@ -82,7 +82,8 @@ export function GenerateReportButton({
             name,
             contact_person,
             email,
-            phone
+            phone,
+            activity_category
           ),
           evaluation_domains (
             name
@@ -212,6 +213,7 @@ export function GenerateReportButton({
         contactPerson: evaluation.organizations?.contact_person || '',
         email: evaluation.organizations?.email || '',
         phone: evaluation.organizations?.phone || '',
+        activityCategory: (evaluation.organizations as { activity_category?: string | null })?.activity_category || '',
         percentage,
         isQualified,
         totalAnswers,
