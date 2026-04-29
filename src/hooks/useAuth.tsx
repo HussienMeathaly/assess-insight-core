@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { markPasswordRecoveryFlow } from '@/lib/authRecovery';
 
 const REMEMBER_ME_KEY = 'auth_remember_me';
 const SESSION_MARKER_KEY = 'auth_session_active';
@@ -91,7 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
-    const redirectUrl = `${window.location.origin}/auth`;
+    markPasswordRecoveryFlow();
+    const redirectUrl = `${window.location.origin}/auth?password-recovery=1`;
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
