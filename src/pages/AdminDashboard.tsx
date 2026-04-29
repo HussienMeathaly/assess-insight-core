@@ -1717,6 +1717,27 @@ export default function AdminDashboard() {
           </DialogContent>
         </Dialog>
       )}
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        onOpenChange={(v) => !v && setPendingDelete(null)}
+        title={
+          pendingDelete?.type === "user"
+            ? "تأكيد حذف المستخدم"
+            : pendingDelete?.type === "assessment"
+            ? "تأكيد حذف التقييم الأولي"
+            : "تأكيد حذف التقييم المجاني"
+        }
+        description={
+          pendingDelete
+            ? `هل أنت متأكد من حذف "${pendingDelete.label}"؟ لا يمكن التراجع عن هذا الإجراء.`
+            : undefined
+        }
+        confirmLabel="نعم، احذف"
+        cancelLabel="إلغاء"
+        loading={isDeleting}
+        onConfirm={confirmPendingDelete}
+      />
     </div>
   );
 }
