@@ -598,6 +598,7 @@ export type Database = {
           is_active: boolean
           is_completed: boolean
           max_score: number
+          org_activity_category: string
           org_contact_person: string
           org_email: string
           org_name: string

@@ -17,7 +17,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Shield
+  Shield,
+  Briefcase
 } from 'lucide-react';
 import profitLogo from '@/assets/profit-logo.png';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,7 @@ interface ReportData {
   org_contact_person: string;
   org_email: string;
   org_phone: string;
+  org_activity_category: string | null;
   total_score: number;
   max_score: number;
   is_completed: boolean;
@@ -319,6 +321,17 @@ export default function EvaluationReport() {
                     <p className="font-medium text-foreground" dir="ltr">{reportData.org_phone}</p>
                   </div>
                 </div>
+                {reportData.org_activity_category && (
+                  <div className="flex items-center gap-3 md:col-span-2">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Briefcase className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">فئة النشاط</p>
+                      <p className="font-medium text-foreground">{reportData.org_activity_category}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

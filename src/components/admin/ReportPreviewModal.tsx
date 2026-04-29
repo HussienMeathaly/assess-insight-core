@@ -44,6 +44,7 @@ interface ReportPreviewModalProps {
     contactPerson: string;
     email: string;
     phone: string;
+    activityCategory?: string;
     percentage: number;
     isQualified: boolean;
     totalAnswers: number;
@@ -130,6 +131,7 @@ export function ReportPreviewModal({
     contactPerson,
     email,
     phone,
+    activityCategory,
     percentage,
     isQualified,
     totalAnswers,
@@ -215,6 +217,12 @@ export function ReportPreviewModal({
                   <p className="text-xs text-muted-foreground">رقم الهاتف</p>
                   <p className="font-semibold text-foreground">{phone || '-'}</p>
                 </div>
+                {activityCategory && (
+                  <div className="space-y-1 sm:col-span-2">
+                    <p className="text-xs text-muted-foreground">فئة النشاط</p>
+                    <p className="font-semibold text-foreground">{activityCategory}</p>
+                  </div>
+                )}
               </div>
             </div>
 
