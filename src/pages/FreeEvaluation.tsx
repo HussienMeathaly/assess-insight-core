@@ -89,7 +89,8 @@ export default function FreeEvaluation() {
         setOrganizationId(data.id);
         const cat = (data as { activity_category?: string | null }).activity_category ?? null;
         setActivityCategory(cat);
-        setNeedsActivityCategory(!cat);
+        // Always prompt for activity category on every evaluation entry
+        setNeedsActivityCategory(true);
       }
       setCheckingOrg(false);
     }
