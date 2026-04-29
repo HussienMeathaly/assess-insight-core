@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { isPasswordRecoveryUrl, markPasswordRecoveryFlow } from '@/lib/authRecovery';
 
 const REMEMBER_ME_KEY = 'auth_remember_me';
 const SESSION_MARKER_KEY = 'auth_session_active';
@@ -41,8 +42,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (isPasswordRecoveryUrl()) {
+      markPasswordRecoveryFlow();
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          markPasswordRecoveryFlow();
+        }
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
